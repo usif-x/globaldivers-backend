@@ -3,7 +3,7 @@ from app.schemas.trip import CreateTrip, TripResponse, UpdateTrip
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
-
+from app.core.exception_handler import db_exception_handler
 
 
 
@@ -14,7 +14,7 @@ class TripServices:
 
 
 
-
+  @db_exception_handler
   def create_trip(self, trip: CreateTrip):
     new_trip = Trip(**trip.model_dump())
     self.db.add(new_trip)
@@ -24,7 +24,7 @@ class TripServices:
   
 
 
-
+  @db_exception_handler
   def get_all_trips(self):
     stmt = select(Trip)
     trips = self.db.execute(stmt).scalars().all()
@@ -32,13 +32,14 @@ class TripServices:
   
 
 
+  @db_exception_handler
   def get_trip_by_id(self, id: int):
     stmt = select(Trip).where(Trip.id == id)
     trip = self.db.execute(stmt).scalars().first()
     return trip
   
 
-
+  @db_exception_handler
   def delete_trip(self, id: int):
     stmt = select(Trip).where(Trip.id == id)
     trip = self.db.execute(stmt).scalars().first()
@@ -49,7 +50,7 @@ class TripServices:
     else:
       raise HTTPException(404, detail="Trip not found")
     
-
+  @db_exception_handler
   def update_trip(self, trip: UpdateTrip, id: int):
     stmt = select(Trip).where(Trip.id == id)
     updated_trip = self.db.execute(stmt).scalars().first()
@@ -67,7 +68,7 @@ class TripServices:
     
 
 
-
+  @db_exception_handler
   def delete_all_trips(self):
     stmt = select(Trip)
     trips = self.db.execute(stmt).scalars().all()
