@@ -1,0 +1,2005 @@
+{
+  "success": true,
+  "data": [
+    {
+      "id": "001f2d2a-0de5-4407-a873-89360d9e045f",
+      "name": "Shaab Abu Ali",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Safaga",
+      "latitude": 27.02090154952977,
+      "longitude": 33.91477346420289,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Safaga, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "0328f4f1-3a7c-49a9-9d99-0e99a5a61101",
+      "name": "Ras Disha",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Safaga",
+      "latitude": 27.04653233685865,
+      "longitude": 33.90880823135377,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Safaga, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "03631a6d-9ef1-421c-965e-b21ea97b136e",
+      "name": "Salem Express Wreck",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Al Qoseir",
+      "latitude": 26.60633258984547,
+      "longitude": 34.07873153686524,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Al Qoseir, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "0561d6ba-6eb0-41d0-92e1-1ca950c3b163",
+      "name": "Hamrawein",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Al Qoseir",
+      "latitude": 26.35003667450789,
+      "longitude": 34.16473388671876,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Al Qoseir, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "05bdd8eb-92cd-4d1a-a438-68c9a41014af",
+      "name": "Small Crack (Small Passage)",
+      "region": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "latitude": 27.72790622044365,
+      "longitude": 34.09461021423341,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Sharm El Sheikh, Sinai",
+      "description": null
+    },
+    {
+      "id": "061a8b55-14c9-4378-a2de-c16f5979b554",
+      "name": "Blind Reef",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada, Shadwan",
+      "latitude": 27.52714929684864,
+      "longitude": 33.8899040222168,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Shadwan, Qesm Hurghada",
+      "description": null
+    },
+    {
+      "id": "06f261c8-9990-4948-9812-7f475fc1dfd7",
+      "name": "El Fanadir",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.29708340888697,
+      "longitude": 33.83074522018433,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "09a7648d-8703-420a-948d-3b26cd3e40f7",
+      "name": "Siyul Ketira",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada, Shadwan",
+      "latitude": 27.5612430623208,
+      "longitude": 33.86381149291993,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Shadwan, Qesm Hurghada",
+      "description": null
+    },
+    {
+      "id": "0a4fd5f2-9d04-446e-9540-e0a33ffd8995",
+      "name": "Shag Rock",
+      "region": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "latitude": 27.78198663854436,
+      "longitude": 33.89925956726075,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Sharm El Sheikh, Sinai",
+      "description": null
+    },
+    {
+      "id": "0b4fbdb5-2a6f-41a5-b480-1d74a1981678",
+      "name": "Carlsson&#039;s Corner",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.15898239265598,
+      "longitude": 33.97976875305176,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "0b98e928-c593-4f6d-9068-62fd00909ca3",
+      "name": "Umm Gamar East",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.35766546920179,
+      "longitude": 33.9100742340088,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "0c67c352-f18d-46db-8bcb-fa1641e41fc8",
+      "name": "Shaab El Erg",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.40240400412041,
+      "longitude": 33.87205123901368,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "0c7065e0-6cd0-4a40-a091-6b338393762a",
+      "name": "Gordon Reef",
+      "region": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "latitude": 27.98502224584962,
+      "longitude": 34.45033013820649,
+      "ocean": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "location": "Sharm El Sheikh, Sinai",
+      "description": null
+    },
+    {
+      "id": "0eab7174-3ef3-449b-a525-ba5ec7683308",
+      "name": "Ras Abdella",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Safaga",
+      "latitude": 27.03206437142954,
+      "longitude": 33.91846418380738,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Safaga, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "1017244d-4c22-4acd-bab3-d7654663fcdf",
+      "name": "Abu Kafan",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Safaga",
+      "latitude": 26.65574351558512,
+      "longitude": 34.11314964294434,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Safaga, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "14b8df7e-ed24-452e-9bd1-4d16886e7603",
+      "name": "Abu Ramada Plateau",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.17944694987707,
+      "longitude": 33.98380279541016,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "152b9884-615a-4295-832c-93b2c5156e5e",
+      "name": "Ben El Gebel",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.22425732559112,
+      "longitude": 33.95075798034669,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "159367b9-a769-470b-83fd-9466467de237",
+      "name": "El Fanadir South",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.27147451198179,
+      "longitude": 33.83625984191895,
+      "ocean": "Red Sea Governorate",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "16e06a3d-6ab6-4b23-8186-cbba1b93892b",
+      "name": "Disha Malag",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Safaga",
+      "latitude": 27.04120023896701,
+      "longitude": 33.90393733978272,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Safaga, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "184e412f-921b-4754-8fec-f53c32ba826b",
+      "name": "Middle Garden",
+      "region": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "latitude": 27.91278483898988,
+      "longitude": 34.35072362422944,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Sharm El Sheikh, Sinai",
+      "description": null
+    },
+    {
+      "id": "1870405c-8466-436e-bf3a-f4b83eb7b364",
+      "name": "Umm Gamar Nord",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.36993797516677,
+      "longitude": 33.90844345092774,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "19c27f0f-5b9f-4997-9d22-f8802c9db949",
+      "name": "Palm Royale House Reef",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Safaga",
+      "latitude": 26.83720672886894,
+      "longitude": 33.95375652238727,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Safaga, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "1bd3310f-ade8-4b7d-8971-698939016ebd",
+      "name": "Tobia Island",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Safaga",
+      "latitude": 26.8216197142647,
+      "longitude": 33.97307395935059,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Safaga, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "1d55590a-ed3b-4beb-a9b5-858315f2bc2d",
+      "name": "Um Magawish",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.1563095056371,
+      "longitude": 33.87316703796387,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "1d5c7fc7-3303-4d71-9164-b1f6cc5b1b54",
+      "name": "Ras Katy",
+      "region": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "latitude": 27.84636195015551,
+      "longitude": 34.30305004119874,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Sharm El Sheikh, Sinai",
+      "description": null
+    },
+    {
+      "id": "205b7f0a-ceed-4dca-9b7e-669b0b9e7e1a",
+      "name": "Rosalie Moller",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada, Jubal Island",
+      "latitude": 27.6366987180244,
+      "longitude": 33.77729415893555,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Jubal Island, Qesm Hurghada",
+      "description": "Dive into a historic WWII shipwreck near Jubal Island in the Red Sea. At depths of 30-50 meters, explore a well-preserved hull teeming with vibrant corals, fish schools, and occasional pelagics. Crystal-clear waters and good visibility make this an exhilarating deep dive for advanced explorers."
+    },
+    {
+      "id": "20f9e986-9c69-4abe-8152-c58f88a1e030",
+      "name": "Coral Beach House Reef",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.08589410568423,
+      "longitude": 33.87177228927613,
+      "ocean": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "2187dd8a-21d6-4edb-8559-b15a17b82296",
+      "name": "Shab El Fanadir",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.30890503744136,
+      "longitude": 33.81729125976563,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": "A stunning reef wall plunges to 40 meters, teeming with colorful soft corals and vibrant anthias. Schools of barracuda and trevally patrol the blue, while eagle rays glide past. The shallow plateau offers easy diving with abundant marine life. Strong currents sometimes sweep the site, attracting pelagics. Visibility often exceeds 30 meters. Ideal for drift diving and photography."
+    },
+    {
+      "id": "22bb969f-6b35-46de-bce9-a952f8fdccc4",
+      "name": "Green Hole",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Al Qoseir",
+      "latitude": 26.56949068021398,
+      "longitude": 34.09727096557618,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Al Qoseir, Red Sea Governorate",
+      "description": "A deep sinkhole plunging over 50 meters, surrounded by vibrant coral walls teeming with reef sharks, barracuda, and schools of anthias. Strong currents attract pelagics, while the dramatic drop-off creates thrilling drift dives. Excellent visibility and warm waters make it ideal for advanced divers. The site's unique topography offers caves and overhangs to explore. Located near Al Quseir, it's a hidden gem in the Red Sea."
+    },
+    {
+      "id": "24b97cda-8d8a-4851-8195-a2e870e150ca",
+      "name": "Thomas Reef",
+      "region": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "latitude": 27.98955087395581,
+      "longitude": 34.46033477783204,
+      "ocean": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "location": "Sharm El Sheikh, Sinai",
+      "description": null
+    },
+    {
+      "id": "25686cc2-2a82-4dcb-b49e-ffb825f74378",
+      "name": "Siyul Kebir",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada, Shadwan",
+      "latitude": 27.55652535960256,
+      "longitude": 33.87702941894532,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Shadwan, Qesm Hurghada",
+      "description": null
+    },
+    {
+      "id": "26e1e419-d502-4ada-a07c-034b09e53e9c",
+      "name": "Shaab Ali",
+      "region": "Africa, Egypt, Sinai, Tur Sina",
+      "latitude": 27.84362981173656,
+      "longitude": 33.86939048767091,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Tur Sina, Sinai",
+      "description": null
+    },
+    {
+      "id": "28bea83c-5d00-40c4-ae68-bf4772b5e52c",
+      "name": "Ras El Arab",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Safaga",
+      "latitude": 26.96790125155597,
+      "longitude": 33.92602801322938,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Safaga, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "2a390a59-fc3a-404c-bcff-0fc59e21be43",
+      "name": "Ras Um Hesiwa",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Safaga",
+      "latitude": 26.89237290126467,
+      "longitude": 33.99813652038575,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Safaga, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "2aaf1e92-aa86-4129-b95c-cfde01423355",
+      "name": "Temple",
+      "region": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "latitude": 27.84621016649328,
+      "longitude": 34.3090581893921,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Sharm El Sheikh, Sinai",
+      "description": null
+    },
+    {
+      "id": "2d5e161c-75b0-42e1-9063-ff0f2f1139f7",
+      "name": "House Reef",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Safaga",
+      "latitude": 26.99542066397194,
+      "longitude": 33.90164136886597,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Safaga, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "2d686be5-aae0-4b3c-855b-6cbeadfa6e3c",
+      "name": "Abu Makadi Middle",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Safaga",
+      "latitude": 26.99478691923475,
+      "longitude": 33.90582561492921,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Safaga, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "3063d9c9-89ef-46cb-84bc-493beba4956a",
+      "name": "Lonely Mushroom",
+      "region": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "latitude": 27.73428789187072,
+      "longitude": 34.16533470153809,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Sharm El Sheikh, Sinai",
+      "description": null
+    },
+    {
+      "id": "30e23aba-60f5-4edf-98b0-6af688e3adf8",
+      "name": "Eldorado",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Safaga",
+      "latitude": 27.02831806858913,
+      "longitude": 33.91571760177613,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Safaga, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "34154208-dbc7-4155-a5c5-821274529dfe",
+      "name": "Abu Nuhas",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada, Shadwan",
+      "latitude": 27.57767734621878,
+      "longitude": 33.9338493347168,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Shadwan, Qesm Hurghada",
+      "description": null
+    },
+    {
+      "id": "38ea72ad-59ad-4c76-a1a0-1f1705e523d5",
+      "name": "Shaab Iris",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.3455235696241,
+      "longitude": 33.84870529174805,
+      "ocean": "Red Sea Governorate",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "3902fed6-d8cf-45b3-931b-fa4b241a1194",
+      "name": "Big Giftun",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.17875976816588,
+      "longitude": 33.95359039306641,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "3a0c2ab4-d82f-495e-b1de-6ff970a6c573",
+      "name": "The Alternatives",
+      "region": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "latitude": 27.729425699914,
+      "longitude": 34.20696258544923,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Sharm El Sheikh, Sinai",
+      "description": null
+    },
+    {
+      "id": "3a82f7a4-d6f5-4dbf-b3d1-6d15370144d6",
+      "name": "Shab Shirap",
+      "region": "Africa, Egypt, Red Sea Governorate",
+      "latitude": 27.34196077603722,
+      "longitude": 33.83299827575684,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Red Sea Governorate, Egypt",
+      "description": null
+    },
+    {
+      "id": "3feccbf1-c312-492e-be0b-a6458fd3a9c3",
+      "name": "Dorla El Fanus East",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.26439577649536,
+      "longitude": 33.88784408569337,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "41319343-811d-4b5a-8570-1a42c1a682c1",
+      "name": "Turtle Bay",
+      "region": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "latitude": 27.86411917212546,
+      "longitude": 34.32315587997437,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Sharm El Sheikh, Sinai",
+      "description": null
+    },
+    {
+      "id": "41b7fb96-8f35-4f43-8059-e43d8e999728",
+      "name": "Abu Hashish Lagoon",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Safaga",
+      "latitude": 27.01761365763693,
+      "longitude": 33.91966581344605,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Safaga, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "43081229-da0e-48ad-8653-312c487fa1fd",
+      "name": "Banana Reef",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.22250189189407,
+      "longitude": 33.95178794860841,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "434ecd2d-35ab-4bdf-8cce-ee97d66216b8",
+      "name": "Sharm El Rashed North",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Safaga",
+      "latitude": 26.94625037233068,
+      "longitude": 33.93638134002686,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Safaga, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "4538a4b1-f553-4ef0-8a43-64a703c18267",
+      "name": "Sachwa Abu Galawa",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.30486294482018,
+      "longitude": 33.81840705871583,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "46ca3ca1-25c8-4258-a30d-05ed87b9ffcb",
+      "name": "El Fanadir Foc",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.3016596725248,
+      "longitude": 33.83057355880738,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "4876e300-0eb2-4482-9aa5-cc8f02096163",
+      "name": "Farus",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.35042329025475,
+      "longitude": 33.82055282592774,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "48cb1fc2-995f-4fe4-a5b7-7d9721dfe8f3",
+      "name": "Abu Saaf",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Al Qoseir",
+      "latitude": 26.45950861170241,
+      "longitude": 34.15512084960938,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Al Qoseir, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "48dbaa0c-e7a4-458a-a1c4-3841d8279a3a",
+      "name": "Shaab Sabrina",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.21990685227,
+      "longitude": 33.96260261535645,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "49d3356c-b66b-408d-ae79-f085d86a3eee",
+      "name": "Erg Somaya",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.22563112396671,
+      "longitude": 33.95496368408204,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "4a29c706-1b65-49bf-bd3c-a7a6dde815dc",
+      "name": "Kingston",
+      "region": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "latitude": 27.77591152683427,
+      "longitude": 33.87290954589844,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Sharm El Sheikh, Sinai",
+      "description": "Dive into Kingston's vibrant Red Sea reefs, where colorful corals burst with life—spot turtles, rays, and schools of fish. With crystal-clear waters and mild currents, this Sinai gem offers thrilling dives for all levels, revealing Egypt's underwater magic."
+    },
+    {
+      "id": "4a3307fa-4d0a-4f68-9330-f09fd7bf06f9",
+      "name": "Shaab Tag",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Safaga",
+      "latitude": 26.9897009342309,
+      "longitude": 33.90816450119019,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Safaga, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "4a7a356b-c3e6-4e6e-8088-edcb598949fb",
+      "name": "Umm Gamar West",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.3617056369059,
+      "longitude": 33.90307903289796,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "4bcc021e-cead-4f95-8fb6-c21ab221327a",
+      "name": "Casus Soraya",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Al Qoseir",
+      "latitude": 26.54430855862742,
+      "longitude": 34.11598205566407,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Al Qoseir, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "4ccdee17-008d-45f6-a573-3725243825ba",
+      "name": "Ras Nasrani",
+      "region": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "latitude": 27.966394131316,
+      "longitude": 34.42028403282166,
+      "ocean": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "location": "Sharm El Sheikh, Sinai",
+      "description": null
+    },
+    {
+      "id": "4cf4781b-e7f2-48eb-97a1-dfa1655e7f13",
+      "name": "Mersa Shouna",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.14175023531847,
+      "longitude": 34.21417236328126,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "5032eac2-fcff-4aac-ac39-effd4502046b",
+      "name": "Ras Burg",
+      "region": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "latitude": 27.75362055533084,
+      "longitude": 34.2525601387024,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Sharm El Sheikh, Sinai",
+      "description": null
+    },
+    {
+      "id": "50434400-8b40-4028-bf59-6fda97ee58b8",
+      "name": "Carnatic Wreck",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada, Shadwan",
+      "latitude": 27.57967440048224,
+      "longitude": 33.92724037170411,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Shadwan, Qesm Hurghada",
+      "description": null
+    },
+    {
+      "id": "50e240a2-ed05-4824-a0a4-73a5215daaca",
+      "name": "Abu Kefan",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Safaga",
+      "latitude": 26.72679971144327,
+      "longitude": 34.11615371704102,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Safaga, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "5133b9d0-fd34-4905-acf4-25feb4224382",
+      "name": "Kormoran",
+      "region": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "latitude": 28.00425339249175,
+      "longitude": 34.49715614318848,
+      "ocean": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "location": "Sharm El Sheikh, Sinai",
+      "description": null
+    },
+    {
+      "id": "555e7b8c-779b-4ec8-939e-31c599e70a8e",
+      "name": "Erg Camel",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.16799336891093,
+      "longitude": 33.98560523986817,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "57743c5f-5316-4f2d-bee5-8d67ada0668a",
+      "name": "Umm Gamar Foc",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.36890896636623,
+      "longitude": 33.90681266784669,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "577afda7-248a-4c1b-9c21-4ef75b8ca219",
+      "name": "Million Hope (Wreck)",
+      "region": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "latitude": 28.05691076522739,
+      "longitude": 34.44838285446168,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Sharm El Sheikh, Sinai",
+      "description": "An intact wreck resting at 30 meters near Sharm El Sheikh, the Million Hope offers an eerie yet fascinating dive. The ship sank in 1996 and now lies on its side, covered in soft corals and surrounded by schools of glassfish. Strong currents sometimes sweep the site, making it ideal for drift diving. Barracuda and trevally patrol the wreck, while moray eels hide in the crevices. The superstructure remains accessible, allowing penetration for advanced divers. Visibility is excellent, often exceeding 30 meters. Best suited for experienced divers due to depth and potential currents."
+    },
+    {
+      "id": "58e7937f-d028-4a5e-95e1-e03abae87f3d",
+      "name": "Ras Mohammed",
+      "region": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "latitude": 27.71825863394113,
+      "longitude": 34.2564868927002,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Sharm El Sheikh, Sinai",
+      "description": null
+    },
+    {
+      "id": "5a1d5776-8487-4467-9aed-be5832142cc2",
+      "name": "El Malek",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.07074337126648,
+      "longitude": 33.89419555664063,
+      "ocean": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "5c0fd0ac-f2e9-4af7-8f25-61fedfcef029",
+      "name": "El Aruk",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.16501524534842,
+      "longitude": 33.9465093612671,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "5c8b834d-89c3-4ff4-9c0a-b35666eb57a2",
+      "name": "The Barge",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada, Jubal Island",
+      "latitude": 27.67708643520531,
+      "longitude": 33.80441665649415,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Jubal Island, Qesm Hurghada",
+      "description": null
+    },
+    {
+      "id": "5f426c33-6fb8-4439-9e03-343e27696ac4",
+      "name": "Stingray Station",
+      "region": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "latitude": 27.73246459530725,
+      "longitude": 34.19657707214356,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Sharm El Sheikh, Sinai",
+      "description": null
+    },
+    {
+      "id": "5f8fb68b-af02-432d-a502-b4845e4635ef",
+      "name": "Yellowfish Reef",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada, Shadwan",
+      "latitude": 27.55759066503282,
+      "longitude": 33.93247604370118,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Shadwan, Qesm Hurghada",
+      "description": null
+    },
+    {
+      "id": "610a40df-b988-4949-84c6-0514686c889c",
+      "name": "Golden Dolphin",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.33761490945199,
+      "longitude": 34.05761718750001,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "6175a7bf-b2e4-4b41-8420-5f476ee4552e",
+      "name": "Shark&#039;s Bay",
+      "region": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "latitude": 27.94467306257741,
+      "longitude": 34.38753962516785,
+      "ocean": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "location": "Sharm El Sheikh, Sinai",
+      "description": null
+    },
+    {
+      "id": "6256d07d-8cc4-4be4-bfb0-8b0ed074d617",
+      "name": "Ulysses",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada, Jubal Island",
+      "latitude": 27.68808831325894,
+      "longitude": 33.79866600036622,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Jubal Island, Qesm Hurghada",
+      "description": null
+    },
+    {
+      "id": "655e0b72-5005-443d-af63-51cb1c6122cd",
+      "name": "Shab Abu Ramada",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.13782665122083,
+      "longitude": 33.95427703857423,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "661c8334-9e14-4c0b-83b8-b1ba047b3e82",
+      "name": "Shabrur Umm Gamar",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.33212515018013,
+      "longitude": 33.91797065734864,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "67057b68-edaa-4bb1-a5ed-d95d7160049c",
+      "name": "Shab Samir Anoor",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.30623574750315,
+      "longitude": 33.81866455078126,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "689ea9d0-bfc4-434e-8bb6-0d5bbcc7b676",
+      "name": "Shab Walter",
+      "region": "Africa, Egypt, Red Sea Governorate",
+      "latitude": 27.36612678356219,
+      "longitude": 33.8265609741211,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Red Sea Governorate, Egypt",
+      "description": null
+    },
+    {
+      "id": "6c06d1f5-9376-47fa-9144-300861924b37",
+      "name": "Umm Dom/stoney Beach",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.25279832006261,
+      "longitude": 33.93590927124024,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": "Just off the coast of Hurghada, this site features a stunning mix of hard and soft corals teeming with colorful reef fish. The gentle slope makes it ideal for beginners, while deeper sections reveal larger marine life. Expect excellent visibility and calm conditions, perfect for relaxed exploration. The vibrant coral gardens attract anthias, butterflyfish, and occasional turtles. A great spot for photography and easy diving."
+    },
+    {
+      "id": "6e3ff907-c209-446a-8004-0146e15666ef",
+      "name": "Tobia Soraya",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Safaga",
+      "latitude": 26.80813790255084,
+      "longitude": 33.97528409957886,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Safaga, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "6f882b63-2eab-444e-9e06-14ef132c5c77",
+      "name": "Shab Quais / El Aruk",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.16638977378703,
+      "longitude": 33.90277862548829,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "70c2fa21-7dc2-468e-9dd2-8a4c8d25a3e5",
+      "name": "Shab Pinky",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.26805787986158,
+      "longitude": 33.91565322875977,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "71af83af-8dca-4373-b1ea-b2d1f32b682c",
+      "name": "El Mina / El Minya",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.22341777379673,
+      "longitude": 33.84508967399598,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "71d2e1af-5bf2-49ee-9e43-fb1017ac20ab",
+      "name": "Shab Umm Gamar",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.33860608700849,
+      "longitude": 33.91393661499024,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "729ff083-4413-4930-90ad-1c70ebbfcbe0",
+      "name": "Cleopatra&#039;s Palace",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Safaga",
+      "latitude": 26.99801812106609,
+      "longitude": 33.90988111495972,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Safaga, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "763e5972-1aec-41a8-ac30-38d19dbf8295",
+      "name": "Shab Heluwa",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.40590915536104,
+      "longitude": 33.85291099548341,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "77196438-9957-4b03-968a-94e88501c72d",
+      "name": "Shaab Talata",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.13370196075597,
+      "longitude": 33.87153625488282,
+      "ocean": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "7bdb00e3-26f1-40e6-a54e-6215b062e43c",
+      "name": "Amphoras",
+      "region": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "latitude": 27.8686718374383,
+      "longitude": 34.3248724937439,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Sharm El Sheikh, Sinai",
+      "description": null
+    },
+    {
+      "id": "7cc934b5-a1f7-4bd3-954c-651fe3ee9ef4",
+      "name": "Turtle Bay",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.27782289900625,
+      "longitude": 33.89488220214844,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "7d6eefce-ed43-4e2b-a1a6-103bff55876c",
+      "name": "Marsa Bareika",
+      "region": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "latitude": 27.75077214659887,
+      "longitude": 34.21200513839722,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Sharm El Sheikh, Sinai",
+      "description": null
+    },
+    {
+      "id": "7da380a3-6234-442d-8376-9021687ea2f2",
+      "name": "Yolanda Reef",
+      "region": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "latitude": 27.72380352007449,
+      "longitude": 34.25588607788087,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Sharm El Sheikh, Sinai",
+      "description": null
+    },
+    {
+      "id": "7eb0e860-6deb-48ad-b35f-128bb43549dc",
+      "name": "Gamul Kebir",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Safaga",
+      "latitude": 26.7837746551621,
+      "longitude": 33.98873805999757,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Safaga, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "7fb4e740-f53e-4d4f-9d79-a27b64cecfc4",
+      "name": "Ras Ghazali",
+      "region": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "latitude": 27.78775768035307,
+      "longitude": 34.26116466522218,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Sharm El Sheikh, Sinai",
+      "description": null
+    },
+    {
+      "id": "7fb67e3f-71e1-4900-9a2e-1034b13034a3",
+      "name": "Shab Abu Gate",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.38861091679486,
+      "longitude": 33.87866020202637,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "808d8c7c-409f-440a-a669-cdfa8b09e627",
+      "name": "Shab Rahma",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Al Qoseir",
+      "latitude": 26.32625109213138,
+      "longitude": 34.1796834988479,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Al Qoseir, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "80ce8837-7d33-4145-a842-bbe486618624",
+      "name": "Shaab Saiman",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Safaga",
+      "latitude": 26.90431387734913,
+      "longitude": 33.99916648864747,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Safaga, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "82dfb897-1d0f-47aa-9e49-e0826198d3f7",
+      "name": "Giftun Ham Ham / Pierre&#039;s Hill",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.19280797523274,
+      "longitude": 33.9884376525879,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "84ec8d09-d2aa-4f5c-be94-3d813daa123c",
+      "name": "Shab Itar",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.31577626210913,
+      "longitude": 33.93951414967888,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "8520ac63-45b1-4f70-acda-aaf7e95e6bff",
+      "name": "Shab Manta",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.26012317010544,
+      "longitude": 33.92698287963868,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "867ecb78-cc44-4569-81cb-cd70f96120d6",
+      "name": "El Makluf",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Al Qoseir",
+      "latitude": 26.49638584298338,
+      "longitude": 34.14070129394532,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Al Qoseir, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "86d9a057-0fae-4411-b79b-b81123c8cf32",
+      "name": "Abu Hashish South Ergs",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Safaga",
+      "latitude": 27.01050230658613,
+      "longitude": 33.92438650131226,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Safaga, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "87130be4-cb0a-46ef-9586-8e2547874f39",
+      "name": "Dunraven",
+      "region": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "latitude": 27.69690421685162,
+      "longitude": 34.12267684936524,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Sharm El Sheikh, Sinai",
+      "description": null
+    },
+    {
+      "id": "87f478b2-3162-4ef6-9530-0b56c98ac7c9",
+      "name": "Shaab Disha",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Safaga",
+      "latitude": 27.03970949962529,
+      "longitude": 33.90273571014405,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Safaga, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "89cf5dc8-4bf4-455e-8a71-fd031564f10c",
+      "name": "Ras Za&#039;atar",
+      "region": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "latitude": 27.75851964404838,
+      "longitude": 34.25406217575074,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Sharm El Sheikh, Sinai",
+      "description": null
+    },
+    {
+      "id": "8c917943-cbe8-44ff-b545-305f967000ff",
+      "name": "Shaab Sabina",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.22105173014523,
+      "longitude": 33.95170211791993,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "8d6a9bff-e6e5-4e20-b324-cd9a2e362e88",
+      "name": "Ras Ghamila",
+      "region": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "latitude": 27.97192794575404,
+      "longitude": 34.42556262016297,
+      "ocean": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "location": "Sharm El Sheikh, Sinai",
+      "description": null
+    },
+    {
+      "id": "8daad85a-4874-40b9-9aab-71d1363b01b8",
+      "name": "Near Garden",
+      "region": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "latitude": 27.90793063414355,
+      "longitude": 34.34642672538758,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Sharm El Sheikh, Sinai",
+      "description": null
+    },
+    {
+      "id": "8dee75b1-de8a-4cb3-ba74-02596ba8a8f6",
+      "name": "Shab Dorfa",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.2299126884793,
+      "longitude": 33.95254325761926,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "8ef7aaeb-7709-4c14-919a-76a9526d817d",
+      "name": "Emperor Frazer",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada, Jubal Island",
+      "latitude": 27.67767551029684,
+      "longitude": 33.8057041168213,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Jubal Island, Qesm Hurghada",
+      "description": null
+    },
+    {
+      "id": "95199ae7-9874-425e-90c4-783f11aa3d3f",
+      "name": "Jackson Reef",
+      "region": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "latitude": 28.01258898089519,
+      "longitude": 34.4712781906128,
+      "ocean": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "location": "Sharm El Sheikh, Sinai",
+      "description": "Jackson Reef offers dramatic walls plunging into the deep, covered in vibrant soft corals. Schools of barracuda and trevally patrol the blue, while reef sharks often cruise by. Strong currents attract pelagics, making it ideal for drift diving. The plateau teems with colorful anthias and clownfish darting through anemones. Visibility often exceeds 30 meters, with crystal-clear waters showcasing the thriving ecosystem. A thrilling dive for experienced divers."
+    },
+    {
+      "id": "96c88fa8-74a0-4383-92b1-949f54c4b3fe",
+      "name": "Erg Soraya",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.2071597505492,
+      "longitude": 33.98097038269044,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "971d4a71-d28a-4f12-9811-b5384ca818a7",
+      "name": "Dorla El Fanus West",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.26698977884137,
+      "longitude": 33.87823104858399,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "989dd924-d77e-4000-a1c0-a12dee7f4d1d",
+      "name": "El Arish El Tor Wreck",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Safaga",
+      "latitude": 26.6704705871007,
+      "longitude": 33.95384788513184,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Safaga, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "98ffa586-aa56-45b3-accd-3531873a1b73",
+      "name": "Abu Ramada Cave",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.1634116074497,
+      "longitude": 33.98517608642579,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "9a5e00cd-5baa-4db4-9fc4-bbaf24a93ffe",
+      "name": "Small Giftun Drift",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.18196657994435,
+      "longitude": 33.99307250976563,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "9b68772d-c4bf-4ba5-a676-2f5b07d30e2f",
+      "name": "Giannis D",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada, Shadwan",
+      "latitude": 27.5772779310033,
+      "longitude": 33.92329216003419,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Shadwan, Qesm Hurghada",
+      "description": null
+    },
+    {
+      "id": "9f15c28d-fc96-4605-88b1-4f7716af9115",
+      "name": "Tobia Arbaa",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Safaga",
+      "latitude": 26.84141821747381,
+      "longitude": 33.98672103881837,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Safaga, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "9fbff40f-ffca-4d9f-b56a-f904254fa3dd",
+      "name": "Sodfa",
+      "region": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "latitude": 27.88756335423466,
+      "longitude": 34.3300223350525,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Sharm El Sheikh, Sinai",
+      "description": null
+    },
+    {
+      "id": "9fd6cb49-9063-4eef-a16a-aceaf90461a1",
+      "name": "Shaab Saiman",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Safaga",
+      "latitude": 27.00805528604293,
+      "longitude": 33.9135503768921,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Safaga, Red Sea Governorate",
+      "description": "Shaab Saiman is a stunning reef in the Red Sea near Safaga, known for its dramatic drop-offs and vibrant coral gardens. The site teems with anthias, barracuda, and occasional reef sharks. Strong currents attract pelagics, making it ideal for drift diving. The plateau at 12 meters offers excellent visibility and colorful soft corals. Perfect for intermediate divers seeking dynamic conditions and rich marine encounters."
+    },
+    {
+      "id": "a1a5d412-de81-46e5-b1fb-2f8395b2c628",
+      "name": "Umm Usk",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada, Jubal Island",
+      "latitude": 27.59471770718607,
+      "longitude": 33.86861801147462,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Jubal Island, Qesm Hurghada",
+      "description": null
+    },
+    {
+      "id": "a1bfe9e3-bd54-4088-8489-25cc259ebf65",
+      "name": "Hassan&#039;s Paradise",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Safaga",
+      "latitude": 27.01784304856551,
+      "longitude": 33.90361547470093,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Safaga, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "a1d5ba34-7601-44bc-9dfb-f2363f34e42a",
+      "name": "Sharm El Arab South",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Safaga",
+      "latitude": 26.9586446710571,
+      "longitude": 33.93024444580079,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Safaga, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "a2e898f4-d3ca-4a2e-b3b0-53d85101b9af",
+      "name": "El Fanadir North",
+      "region": "Africa, Egypt, Red Sea Governorate",
+      "latitude": 27.29901955245499,
+      "longitude": 33.83093833923341,
+      "ocean": "Qesm Hurghada",
+      "location": "Red Sea Governorate, Egypt",
+      "description": null
+    },
+    {
+      "id": "a4c3e836-5d86-4df5-8ee0-acd80386c826",
+      "name": "Shab Abu Galawa",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.30982783463552,
+      "longitude": 33.81434726557928,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "a5328505-76fa-4ccb-a8cf-4c566d746360",
+      "name": "Sharm El Rashed South",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Safaga",
+      "latitude": 26.93263037366474,
+      "longitude": 33.94170284271241,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Safaga, Red Sea Governorate",
+      "description": "This site offers vibrant coral gardens and dramatic drop-offs teeming with life. Expect strong currents that attract pelagics like barracuda and reef sharks. The steep walls are covered in soft corals, with overhangs and swim-throughs to explore. Visibility often exceeds 30 meters, making it ideal for photography. The site suits advanced divers due to occasional surge and depth. Night dives reveal nocturnal creatures like octopus and lobster. Nearby pinnacles host schools of anthias and butterflyfish. The warm, clear waters make it a year-round destination."
+    },
+    {
+      "id": "a6a2d333-24a4-4390-864f-845790bea0b1",
+      "name": "Alkerf",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada, Shadwan",
+      "latitude": 27.45222766131507,
+      "longitude": 34.00817871093751,
+      "ocean": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada, Shadwan",
+      "location": "Shadwan, Qesm Hurghada",
+      "description": null
+    },
+    {
+      "id": "a7237749-a8d2-4b41-99b6-749b7cc4a592",
+      "name": "Anemone City",
+      "region": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "latitude": 27.7284760277273,
+      "longitude": 34.26043510437012,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Sharm El Sheikh, Sinai",
+      "description": null
+    },
+    {
+      "id": "ab367d02-e573-4fb4-a916-a475a0ef07c6",
+      "name": "Shaab Abu Nugar",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.3565064247452,
+      "longitude": 33.83883476257325,
+      "ocean": "Red Sea Governorate",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": "This horseshoe-shaped reef sits in the Red Sea near Hurghada. Strong currents sweep the outer walls, attracting pelagic species like barracuda and reef sharks. Inside, sheltered lagoons host vibrant soft corals and small reef fish. The site drops to 30 meters, offering dramatic wall dives with swim-throughs. Ideal for drift diving, it's best suited for intermediate to advanced divers. Visibility often exceeds 30 meters, showcasing the rich marine ecosystem. The reef top peaks near the surface, allowing deep or shallow exploration. Night dives reveal nocturnal creatures among the coral formations."
+    },
+    {
+      "id": "ab45c66f-8326-4d16-82c8-c9d967dcbbe7",
+      "name": "Gota Abu Ramada",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.13790303294237,
+      "longitude": 33.95207762718201,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "ac75e6c4-e8f2-4b59-a750-c6fa779686fd",
+      "name": "Small Wreck House Reef",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Safaga",
+      "latitude": 26.99532227269987,
+      "longitude": 33.90217781066895,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Safaga, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "ad3947cf-1093-4d34-a182-e65eaaaea948",
+      "name": "El Fanadir Dacht",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.29508123422632,
+      "longitude": 33.8304877281189,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": "El Fanadir Dacht offers a stunning wall dive with vibrant coral gardens teeming with anthias, lionfish, and occasional reef sharks. The site features dramatic drop-offs and swim-throughs, with excellent visibility year-round. Gentle currents attract schools of barracuda and trevally. Ideal for all skill levels, with depths ranging from 10 to 40 meters. The hard and soft coral formations create a colorful underwater landscape, perfect for photographers. Warm water temperatures make it comfortable for extended dives."
+    },
+    {
+      "id": "aea2f7ef-8632-43a4-9c0d-c80aa9ac362f",
+      "name": "Abu Hashish",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Safaga",
+      "latitude": 27.02334829035376,
+      "longitude": 33.92436504364014,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Safaga, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "aebf4434-5ed9-4e98-9477-d395df279fd1",
+      "name": "Ras Henrik Gemil",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Safaga",
+      "latitude": 26.91472292887056,
+      "longitude": 33.96539211273194,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Safaga, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "aec4d573-bc92-4cd1-8529-e8dabe0b6bc0",
+      "name": "Shaab Petra ",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.14279135455761,
+      "longitude": 33.87831687927247,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "b063f0b3-2c55-47f0-baf6-2006b713cea5",
+      "name": "Eel Garden",
+      "region": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "latitude": 27.73884599981285,
+      "longitude": 34.25910472869874,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Sharm El Sheikh, Sinai",
+      "description": null
+    },
+    {
+      "id": "b07f83ce-712d-450f-8d16-9ef6fcdc055a",
+      "name": "Giftun Soraya",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.18407386368076,
+      "longitude": 33.97583770594793,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "b1feb2cd-f401-4710-b694-7463d4140b55",
+      "name": "Pinky Wall",
+      "region": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "latitude": 27.87891463500899,
+      "longitude": 34.32178258895875,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Sharm El Sheikh, Sinai",
+      "description": null
+    },
+    {
+      "id": "b43c956c-3256-442d-b606-80eb8607488d",
+      "name": "Thistlegorm",
+      "region": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "latitude": 27.80719472528181,
+      "longitude": 33.9184856414795,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Sharm El Sheikh, Sinai",
+      "description": "This legendary wreck lies in the Red Sea near Sharm El Sheikh, resting at 30 meters. A WWII cargo ship sunk in 1941, now encrusted with corals and teeming with marine life. Swim through cargo holds filled with trucks, motorcycles, and wartime artifacts. Barracuda, batfish, and lionfish patrol the wreck while moray eels peek from crevices. Strong currents sometimes sweep the site, adding excitement. The shallow deck at 16 meters allows longer bottom time. Perfect for wreck enthusiasts and history buffs."
+    },
+    {
+      "id": "b575a57b-6a46-462d-b832-1be067e3625c",
+      "name": "Shaab Ishta / Shab Estha",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.14901601712196,
+      "longitude": 33.89568686485291,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "b64d8603-9811-4d6f-98dc-1446c49e1ffd",
+      "name": "El Sayej",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.1556049159234,
+      "longitude": 33.88988256454468,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": "This vibrant reef sits near Hurghada, teeming with colorful soft corals and schools of anthias. The sloping wall drops to 30 meters, offering encounters with turtles, reef sharks, and occasional eagle rays. Strong currents attract pelagics, making it ideal for drift diving. Visibility often exceeds 30 meters, with warm water year-round. The site's healthy coral formations and diverse marine life create an unforgettable underwater spectacle."
+    },
+    {
+      "id": "b79fbc76-0cdc-4cf0-a735-637f3782178d",
+      "name": "Shab Tiffany",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.16104428919794,
+      "longitude": 33.90047836408485,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": ""
+    },
+    {
+      "id": "b9fb14a3-368f-4cdb-b6f6-8bee7625d36e",
+      "name": "Ras Bob",
+      "region": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "latitude": 27.96324806918053,
+      "longitude": 34.41814899444581,
+      "ocean": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "location": "Sharm El Sheikh, Sinai",
+      "description": "Ras Bob offers a stunning wall dive with dramatic drop-offs and vibrant coral gardens. The site teems with reef fish, moray eels, and occasional reef sharks. Strong currents attract pelagic species, making it ideal for drift diving. Visibility often exceeds 30 meters, with clear blue waters. The steep wall plunges deep, creating an exhilarating dive for advanced divers. Coral formations are healthy and diverse, hosting anemones and clownfish. Best dived in calm conditions due to occasional surge. A must for those seeking thrilling underwater terrain and abundant marine life."
+    },
+    {
+      "id": "ba6c393b-98f5-4944-8043-e69818d67cdc",
+      "name": "Naama Bay",
+      "region": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "latitude": 27.91045624033245,
+      "longitude": 34.32944297790528,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Sharm El Sheikh, Sinai",
+      "description": "Naama Bay offers easy shore diving with vibrant coral gardens just steps from the beach. Expect clear waters, gentle currents, and abundant marine life like clownfish, moray eels, and occasional reef sharks. The shallow reefs are perfect for beginners, while deeper sections provide more exploration. Coral formations are healthy, with colorful soft and hard corals. Visibility often exceeds 30 meters. Night dives reveal nocturnal creatures like octopus and lionfish. Convenient access from Sharm El Sheikh makes it a popular spot."
+    },
+    {
+      "id": "bbfc6691-78fe-47bf-831b-a7636f42039f",
+      "name": "Chrisoula K. (Marcus) Wreck Of The Tiles",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada, Shadwan",
+      "latitude": 27.58039713497002,
+      "longitude": 33.9285707473755,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Shadwan, Qesm Hurghada",
+      "description": null
+    },
+    {
+      "id": "bc964fc9-fdb1-4434-a0ac-8e793555322c",
+      "name": "Shaab Ruhr",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.41870963274198,
+      "longitude": 33.87823104858399,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "bdbc7cd7-59d0-4ffa-b101-8ea08455bfc8",
+      "name": "Carina",
+      "region": "Africa, Egypt, Sinai, Tur Sina",
+      "latitude": 27.81994839653347,
+      "longitude": 33.84123802185059,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Tur Sina, Sinai",
+      "description": null
+    },
+    {
+      "id": "be4385eb-a202-4e71-b170-936553f32d5d",
+      "name": "Shab Samir",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.30711280699373,
+      "longitude": 33.81750583648682,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "be7d8b62-f0fb-4291-97e7-307eeb0c6f96",
+      "name": "Fanadira",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.21563253756834,
+      "longitude": 33.97590637207032,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "c007c012-6f0f-41c6-8b53-f304a2df73d7",
+      "name": "Turtle Paradise",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Safaga",
+      "latitude": 27.00526408820324,
+      "longitude": 33.91447305679322,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Safaga, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "c2643153-939d-4c29-b36c-059bdeef1494",
+      "name": "Shark Reef",
+      "region": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "latitude": 27.72653867081018,
+      "longitude": 34.25848245620728,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Sharm El Sheikh, Sinai",
+      "description": null
+    },
+    {
+      "id": "c56fe4e9-03a0-476a-9de3-ca2f65a516fb",
+      "name": "Umm Gamar",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.35103317621585,
+      "longitude": 33.90475273132325,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "c70c31a0-bf35-4421-8d7b-8e39556bcde7",
+      "name": "Sharm El Arab",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Safaga",
+      "latitude": 26.97826618859899,
+      "longitude": 33.92170429229737,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Safaga, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "c7bd9595-d105-4e1d-a6cf-693ab1f8e8cb",
+      "name": "Paradise",
+      "region": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "latitude": 27.85903513650088,
+      "longitude": 34.32083845138551,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Sharm El Sheikh, Sinai",
+      "description": null
+    },
+    {
+      "id": "c815bfdb-1252-445f-af3c-1c39960bb198",
+      "name": "Gorgonia",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.16988710779531,
+      "longitude": 33.98641205043532,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "c82e7007-f8be-4c9e-8394-b05cabd88ba0",
+      "name": "Turft El Shahed / Torfet El Shahid",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.20693074736456,
+      "longitude": 33.95281791687012,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": "This dive site features a stunning wall dropping to over 40 meters, covered in vibrant soft corals and sponges. Schools of anthias and fusiliers swirl around the reef, while larger pelagics like barracuda and trevally patrol the blue. The current can be strong, making it ideal for drift diving. Visibility often exceeds 30 meters, revealing the dramatic underwater landscape. The site is known for its rich biodiversity and pristine coral formations."
+    },
+    {
+      "id": "c8963a87-eccd-4f40-a0b8-a7bc299a36fe",
+      "name": "Marsa Kharita",
+      "region": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "latitude": 27.83659005745575,
+      "longitude": 34.27567005157471,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Sharm El Sheikh, Sinai",
+      "description": "This shallow reef near Sharm El Sheikh offers easy diving with vibrant coral gardens and sandy patches. Expect encounters with turtles, moray eels, and schools of colorful reef fish. The gentle slope makes it ideal for beginners, while the clear waters provide excellent visibility. The site often features resting stingrays on the sandy bottom. Night dives reveal nocturnal creatures like octopus and crustaceans. The calm conditions and abundant marine life make it a relaxing yet rewarding dive."
+    },
+    {
+      "id": "c8d015b4-9b34-4edc-b8a9-625e5fdb1343",
+      "name": "Gamul Soraya",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Safaga",
+      "latitude": 26.79557386229882,
+      "longitude": 33.99203181266785,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Safaga, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "ca11fdaa-e34a-46c6-a98e-4c8090bfea55",
+      "name": "Steamship 1926",
+      "region": "Africa, Egypt, Sinai, Tur Sina",
+      "latitude": 27.79383213029828,
+      "longitude": 33.85291099548341,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Tur Sina, Sinai",
+      "description": null
+    },
+    {
+      "id": "cc7f9329-6d7e-4dfd-8c66-a8e313546f45",
+      "name": "Susanna",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.20212157179689,
+      "longitude": 33.85437011718751,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "cf49102c-e26a-4237-8a27-8613db96134f",
+      "name": "Umm Gamar Dacht",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.35377762148423,
+      "longitude": 33.91037464141846,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "d2071042-9f1f-4756-82be-604a31923fe8",
+      "name": "Ras Abu Soma",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Safaga",
+      "latitude": 26.84919115154762,
+      "longitude": 34.01015281677247,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Safaga, Red Sea Governorate",
+      "description": "This dive site off Egypt's Red Sea coast features stunning coral gardens and dramatic drop-offs teeming with life. Schools of barracuda and trevally patrol the blue, while vibrant soft corals cover the reef walls. The site offers excellent visibility year-round, with gentle currents ideal for drift diving. Look for reef sharks in the deeper sections and turtles gliding past the shallower plateaus. The mix of hard and soft corals creates a colorful underwater landscape perfect for photographers. Depths range from 10 to 40 meters, accommodating all experience levels. Night dives reveal a different world of nocturnal creatures emerging from the reef."
+    },
+    {
+      "id": "d2e556d7-3019-4e73-887f-55d1b2741980",
+      "name": "Carless Reef",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.307570400498,
+      "longitude": 33.94397735595704,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "d57aa717-d8d7-4d16-b161-561fbfaa554d",
+      "name": "Tobia Kebir",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Safaga",
+      "latitude": 26.81112548775081,
+      "longitude": 33.97674322128297,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Safaga, Red Sea Governorate",
+      "description": ""
+    },
+    {
+      "id": "d6ea457a-a0be-4388-95e3-066b123a5401",
+      "name": "Marsa Abu Galawa",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.30360452744368,
+      "longitude": 33.81909370422364,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "d786c96e-d9a6-4ea2-ab3d-a2db2c995af6",
+      "name": "Poseidon&#039;s Garden",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.40263260432913,
+      "longitude": 33.88243675231934,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "da082e11-c10b-440f-8dd2-23d47f5c247e",
+      "name": "Abu Ramada",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.15508759312419,
+      "longitude": 33.98466110229493,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "dba974c9-dc39-4bc6-8e3d-e44fc482fb0a",
+      "name": "Abu Haschisch Nordexpress",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Safaga",
+      "latitude": 27.03397570228178,
+      "longitude": 33.92292737960816,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Safaga, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "dccf55da-df01-4e81-bcc2-d62c6795f64e",
+      "name": "Ras Umm Sid",
+      "region": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "latitude": 27.84605838261865,
+      "longitude": 34.31643962860108,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Sharm El Sheikh, Sinai",
+      "description": "A vibrant reef wall plunging into the deep, teeming with colorful soft corals and schools of anthias. Strong currents attract pelagics like barracuda and reef sharks. The plateau at 12 meters offers easy exploration with sandy patches and coral gardens. Excellent visibility year-round, best dived early to avoid boat traffic. Suitable for all levels, with gentle slopes and dramatic drop-offs. Night dives reveal nocturnal critters like octopus and moray eels."
+    },
+    {
+      "id": "df8fac0d-0343-42ee-8de1-811ff92d262e",
+      "name": "Shaab Shehr",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Safaga",
+      "latitude": 26.6339562379738,
+      "longitude": 34.09881591796876,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Safaga, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "dfd63c8d-5bbb-4fa9-babf-6bbf3495ab71",
+      "name": "Gota Abu Makadi",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Safaga",
+      "latitude": 26.99465308047033,
+      "longitude": 33.90932321548463,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Safaga, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "e0053e6f-afc1-4d19-b59a-363ac0ea1646",
+      "name": "Jackfish Alley",
+      "region": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "latitude": 27.74401162496463,
+      "longitude": 34.25670146942139,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Sharm El Sheikh, Sinai",
+      "description": null
+    },
+    {
+      "id": "e2aa54ee-3fe1-49ab-b916-8032a16b65df",
+      "name": "Giftun Stone Beach",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.24150489786033,
+      "longitude": 33.93316268920899,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "e2ddbb35-4bc8-4f89-928b-39cfa38c9db4",
+      "name": "Grand Coral",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Safaga",
+      "latitude": 27.00033152806982,
+      "longitude": 33.91451597213746,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Safaga, Red Sea Governorate",
+      "description": "Dive into a vibrant underwater garden where towering coral formations create a maze of swim-throughs and overhangs. The reef teems with anthias, butterflyfish, and occasional reef sharks patrolling the blue. Strong currents bring nutrient-rich waters, fueling the coral's brilliant colors. Expect excellent visibility and dramatic drop-offs along the reef wall. Night dives reveal nocturnal critters like moray eels and crustaceans. Suitable for all skill levels, with shallow lagoons for beginners and deeper sections for advanced divers. The warm Red Sea waters make this a year-round destination."
+    },
+    {
+      "id": "e3fdca4c-7ec8-4c62-b33e-49890d07e456",
+      "name": "Beacon Reef",
+      "region": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "latitude": 27.70334469629542,
+      "longitude": 34.12799835205079,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Sharm El Sheikh, Sinai",
+      "description": "Beacon Reef sits just off Sharm El Sheikh in the Red Sea, known for its vibrant coral formations and steep walls. The site features a mix of hard and soft corals teeming with reef fish, moray eels, and occasional reef sharks. Currents can be strong, making it ideal for drift diving. The shallow plateau offers excellent for beginners, while deeper sections challenge advanced divers. Visibility often exceeds 30 meters, with warm water year-round. The reef's pinnacle attracts schooling fish, creating dramatic underwater scenes. Night dives reveal nocturnal creatures like octopus and lionfish."
+    },
+    {
+      "id": "e43cfaa8-7d66-4222-9c70-74a8ce0d5cde",
+      "name": "White Knight",
+      "region": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "latitude": 27.95847194414494,
+      "longitude": 34.40021038055421,
+      "ocean": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "location": "Sharm El Sheikh, Sinai",
+      "description": "This dive site near Sharm El Sheikh features dramatic coral formations and steep walls plunging into the blue. Expect abundant reef fish, moray eels, and occasional pelagics like barracuda. The clear water and mild currents suit all experience levels. Vibrant soft corals cover the reef, especially stunning under natural light. Depths range from shallow reefs to over 30 meters, offering diverse exploration. Night dives reveal nocturnal critters like crustaceans and octopuses. Easy access from shore or boat makes it a reliable choice."
+    },
+    {
+      "id": "e4e993b8-3f4f-4984-994c-d76030d2ee7b",
+      "name": "Tablecoral Valley",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Safaga",
+      "latitude": 27.00377287191452,
+      "longitude": 33.9154601097107,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Safaga, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "e5638503-b7df-4523-8dea-1a38b83db80d",
+      "name": "Woodhouse Reef",
+      "region": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "latitude": 28.00182837293748,
+      "longitude": 34.46323156356812,
+      "ocean": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "location": "Sharm El Sheikh, Sinai",
+      "description": null
+    },
+    {
+      "id": "e6db8d48-d8e8-4c6d-807f-3fd9bfbde458",
+      "name": "Jasmine",
+      "region": "Africa, Egypt, Sinai, Tur Sina",
+      "latitude": 27.89370807705128,
+      "longitude": 33.81574630737305,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Tur Sina, Sinai",
+      "description": null
+    },
+    {
+      "id": "e79288b0-0f90-4176-b1ff-00016e9929ee",
+      "name": "Shark Observatory",
+      "region": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "latitude": 27.73140099155792,
+      "longitude": 34.26135778427125,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Sharm El Sheikh, Sinai",
+      "description": null
+    },
+    {
+      "id": "e7c000f3-42d5-4ea0-9923-ddeb271a03e1",
+      "name": "Panorama Reef",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Safaga",
+      "latitude": 26.75296834795026,
+      "longitude": 34.08637046813966,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Safaga, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "e81c498a-4edb-4ba4-add3-9c3e69b1fd74",
+      "name": "Manta Point",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada",
+      "latitude": 27.42876611007653,
+      "longitude": 33.87016296386719,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Hurghada, Red Sea Governorate",
+      "description": ""
+    },
+    {
+      "id": "e8271153-594d-424e-91a0-4d65d9f339bf",
+      "name": "Sudexpress",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Safaga",
+      "latitude": 26.97646864799242,
+      "longitude": 33.92181158065797,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Safaga, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "e8cf40ea-734d-44cd-adb6-aa7a516468e0",
+      "name": "Sadana Amphores",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Safaga",
+      "latitude": 26.90155837953868,
+      "longitude": 33.96964073181153,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Safaga, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "e8e6cfeb-aaaa-4129-b3f7-4ea63eb06e24",
+      "name": "Royal Azur",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Safaga",
+      "latitude": 26.9832953252195,
+      "longitude": 33.9190435409546,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Safaga, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "eabbddc7-a7ab-4d8c-aa50-a11af5add200",
+      "name": "Bluff Point",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Hurghada, Jubal Island",
+      "latitude": 27.67258275614402,
+      "longitude": 33.81437301635743,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Jubal Island, Qesm Hurghada",
+      "description": "This site offers dramatic underwater cliffs and steep drop-offs teeming with marine life. Schools of barracuda and trevally patrol the blue, while reef sharks often cruise the depths. The current can be strong, making it ideal for drift diving. Vibrant soft corals and gorgonians cover the walls, with frequent sightings of turtles and eagle rays. Visibility is typically excellent, often exceeding 30 meters. The site suits experienced divers due to depth and currents."
+    },
+    {
+      "id": "eb8526f7-ee78-43f4-9187-56d1108909c4",
+      "name": "Shark Reef",
+      "region": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "latitude": 27.73124904731783,
+      "longitude": 34.26185131072999,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Sharm El Sheikh, Sinai",
+      "description": null
+    },
+    {
+      "id": "eda14026-747e-43c7-b082-8dc6837ee984",
+      "name": "Ras Abu Soma Garden",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Safaga",
+      "latitude": 26.83816338212942,
+      "longitude": 33.98886680603028,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Safaga, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "ef464657-3c79-4385-b189-dd108fbf556d",
+      "name": "Shaab Quais",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Safaga",
+      "latitude": 26.70574646078104,
+      "longitude": 34.11246299743653,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Safaga, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "f0d6ebc3-c1bd-4dc3-bccb-23c11d2ed23f",
+      "name": "Satellite Reef",
+      "region": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "latitude": 27.72420240049749,
+      "longitude": 34.25740957260133,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Sharm El Sheikh, Sinai",
+      "description": null
+    },
+    {
+      "id": "f0e266e0-3960-454e-babc-0b35e05c599a",
+      "name": "Nabq",
+      "region": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "latitude": 28.04259175688904,
+      "longitude": 34.44754600524903,
+      "ocean": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "location": "Sharm El Sheikh, Sinai",
+      "description": "This shallow reef near Sharm El Sheikh features vibrant coral gardens teeming with colorful fish. The gentle slope makes it ideal for beginners, while the dense marine life keeps advanced divers engaged. Look for moray eels hiding in crevices and schools of anthias dancing above the coral. The calm, clear waters offer excellent visibility year-round, with occasional sightings of turtles and reef sharks. The sandy patches between coral formations host garden eels and stingrays. A relaxed dive with abundant marine diversity."
+    },
+    {
+      "id": "f1150d59-b323-4acb-b06e-600f5630384b",
+      "name": "Tobia Hamra",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Safaga",
+      "latitude": 26.82498991662819,
+      "longitude": 33.98543357849122,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Safaga, Red Sea Governorate",
+      "description": "This dive site near Safaga features dramatic walls plunging into the deep, covered in vibrant soft corals and sponges. Schools of anthias and fusiliers swirl around the reef, while eagle rays and reef sharks occasionally pass by. The current can be strong, making it ideal for drift diving. The steep drop-offs and overhangs create exciting swim-throughs, with macro life like nudibranchs hiding in the cracks. Visibility often exceeds 30 meters, showcasing the stunning underwater landscape."
+    },
+    {
+      "id": "f1255506-a84a-4031-b25b-c3d0dc156968",
+      "name": "Sharm El Naga Housereef",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Safaga",
+      "latitude": 26.89821708311131,
+      "longitude": 33.96393299102784,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Safaga, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "f1baa143-179f-4bad-982e-3fad935670d5",
+      "name": "El Aoui",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Al Qoseir",
+      "latitude": 26.52219286772472,
+      "longitude": 34.12628173828126,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Al Qoseir, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "f24b4fff-34e1-4a63-b854-917d9d374615",
+      "name": "Laguna Reef",
+      "region": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "latitude": 28.01834773789053,
+      "longitude": 34.48694229125977,
+      "ocean": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "location": "Sharm El Sheikh, Sinai",
+      "description": null
+    },
+    {
+      "id": "f33a366f-d7c9-4abb-8a41-ab22cbd854cf",
+      "name": "Torfa Abu Makadi",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Safaga",
+      "latitude": 26.99941381858981,
+      "longitude": 33.91367912292481,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Safaga, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "f5364bc2-bd96-4fb2-96a9-c4af15af8813",
+      "name": "Middle Reef",
+      "region": "Africa, Egypt, Red Sea Governorate, Qesm Safaga",
+      "latitude": 26.70053245415533,
+      "longitude": 34.055814743042,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Qesm Safaga, Red Sea Governorate",
+      "description": null
+    },
+    {
+      "id": "f5fe9854-9551-4541-be94-20fde8674623",
+      "name": "Tower",
+      "region": "Africa, Egypt, Sinai, Sharm El Sheikh",
+      "latitude": 27.88210108561291,
+      "longitude": 34.32676076889039,
+      "ocean": "Indian Ocean, Red Sea",
+      "location": "Sharm El Sheikh, Sinai",
+      "description": null
+    }
+  ]
+}

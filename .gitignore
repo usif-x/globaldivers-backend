@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*.sqlite3
+.env
+*.db
+.venv/
+.env.*
+
+# VSCode
+.vscode/
+.idea/
+
+# Node or frontend
+node_modules/
+dist/
+build/
+
+# Misc
+.DS_Store
+
+migrations/
+
