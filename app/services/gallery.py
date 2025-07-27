@@ -1,9 +1,10 @@
 from app.models.gallery import Gallery, Image
-from app.schemas.gallery import CreateGallery, CreateImage, GalleryResponse, ImageResponse, UpdateGallery, UpdateImage
+from app.schemas.gallery import CreateGallery, CreateImage, GalleryResponse, ImageResponse, UpdateGallery
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from app.core.exception_handler import db_exception_handler
+from app.utils.imgbb import upload_image_to_imgbb
 
 
 
@@ -72,30 +73,25 @@ class GalleryServices:
 
 
   @db_exception_handler
-  def create_image(self, image: CreateImage, gallery_id: int):
-    new_image = Image(**image.model_dump(), gallery_id=gallery_id)
+  async def create_image(self, image: CreateImage, gallery_id: int):
+    file_bytes = await image.file.read()  # ✅ أضف await
+    uploaded = upload_image_to_imgbb(file_bytes)
+    if "data" in uploaded:
+        image_url = uploaded["data"]["url"]
+    else:
+        raise Exception("Failed to upload image to imgbb")
+    new_image = Image(
+        name=image.name,
+        url=image_url,
+        gallery_id=gallery_id
+    )
+
     self.db.add(new_image)
     self.db.commit()
     self.db.refresh(new_image)
     return new_image
-  
 
-  @db_exception_handler
-  def update_image(self, image: UpdateImage, id: int):
-    stmt = select(Image).where(Image.id == id)
-    updated_image = self.db.execute(stmt).scalars().first()
-    if updated_image:
-      data = image.model_dump(exclude_unset=True)
-      for field, value in data.items():
-        setattr(updated_image, field, value)
-      self.db.commit()
-      self.db.refresh(updated_image)
-      return {"success": True, 
-              "message": "Image Updated successfuly", 
-              "image": ImageResponse.model_validate(updated_image,from_attributes=True)}
-    else:
-      raise HTTPException(404, detail="Image not found")
-    
+  
 
   @db_exception_handler
   def get_all_images(self):
