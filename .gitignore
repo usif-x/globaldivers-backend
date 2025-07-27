@@ -19,5 +19,3 @@ build/
 # Misc
 .DS_Store
 
-migrations/
-
