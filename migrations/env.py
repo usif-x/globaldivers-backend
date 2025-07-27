@@ -43,11 +43,11 @@ DB_USERNAME = os.environ.get("DB_USERNAME")
 DB_PASSWORD = os.environ.get("DB_PASSWORD")
 DB_NAME = os.environ.get("DB_NAME")
 DB_URI = f"mysql+pymysql://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}"
-DATABASE_URL = os.environ.get("DB_URI")
+ONLINE_DATABASE_URL = os.environ.get("ONLINE_DB_URI")
 
 
 
-config.set_main_option("sqlalchemy.url", DB_URI)
+config.set_main_option("sqlalchemy.url", ONLINE_DATABASE_URL)
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.
 
