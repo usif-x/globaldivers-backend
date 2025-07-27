@@ -98,10 +98,17 @@ class GalleryServices:
     
 
   @db_exception_handler
-  def get_all_images(self, gallery_id: int):
-    stmt = select(Image).where(Image.gallery_id == gallery_id)
+  def get_all_images(self):
+    stmt = select(Image)
     images = self.db.execute(stmt).scalars().all()
     return images
+  
+  @db_exception_handler
+  def get_image_by_id(self, id: int):
+    stmt = select(Image).where(Image.id == id)
+    image = self.db.execute(stmt).scalars().first()
+    return image
+  
 
   @db_exception_handler
   def delete_image(self, id: int):

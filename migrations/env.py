@@ -47,7 +47,7 @@ ONLINE_DATABASE_URL = os.environ.get("ONLINE_DB_URI")
 
 
 
-config.set_main_option("sqlalchemy.url", ONLINE_DATABASE_URL)
+config.set_main_option("sqlalchemy.url", DB_URI)
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.
 
