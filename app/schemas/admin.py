@@ -13,6 +13,8 @@ class AdminResponse(BaseModel):
     updated_at: datetime
     role: str
     admin_level: int
+    is_active: bool
+    last_login: str
 
     class Config:
         form_attributes = True

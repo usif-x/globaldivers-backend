@@ -1,7 +1,9 @@
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
 
 from pydantic import BaseModel
+
+from .testimonial import TestimonialResponse
 
 
 class UserResponse(BaseModel):
@@ -14,7 +16,7 @@ class UserResponse(BaseModel):
     last_login: Optional[str] = None
     is_active: bool
     is_blocked: bool
-    testimonial: Optional[list] = None
+    testimonial: List[TestimonialResponse]
 
     class Config:
         from_attributes = True

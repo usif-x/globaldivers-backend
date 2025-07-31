@@ -1,24 +1,21 @@
-from typing import List, Optional
+from datetime import datetime
 
 from pydantic import BaseModel
 
 
 class CreateTestimonial(BaseModel):
-    testimonial_owner: str
     description: str
     rating: float
-    is_accepted: Optional[bool] = False
 
 
 class TestimonialResponse(BaseModel):
     id: int
-    user_id: str
-    user: List
+    user_id: int
     description: str
     rating: float
     is_accepted: bool
-    created_at: str
-    updated_at: str
+    created_at: datetime
+    updated_at: datetime
 
     class Config:
         from_attributes = True

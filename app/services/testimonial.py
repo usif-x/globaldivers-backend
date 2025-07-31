@@ -4,7 +4,8 @@ from sqlalchemy.orm import Session
 
 from app.core.exception_handler import db_exception_handler
 from app.models.testimonial import Testimonial
-from app.schemas.testimonial import CreateTestimonial, TestimonialResponse
+from app.models.user import User
+from app.schemas.testimonial import CreateTestimonial
 
 
 class TestimonialServices:
@@ -12,11 +13,9 @@ class TestimonialServices:
         self.db = db
 
     @db_exception_handler
-    def create_testimonial(
-        self, testimonial: CreateTestimonial, testimonial_owner: int
-    ):
+    def create_testimonial(self, testimonial: CreateTestimonial, user: User):
         new_testimonial = Testimonial(
-            testimonial_owner=testimonial_owner,
+            user=user,
             description=testimonial.description,
             rating=testimonial.rating,
         )
@@ -27,7 +26,7 @@ class TestimonialServices:
 
     @db_exception_handler
     def get_all_testimonials(self):
-        stmt = select(Testimonial)
+        stmt = select(Testimonial).where(Testimonial.is_accepted == True)
         testimonials = self.db.execute(stmt).scalars().all()
         return testimonials
 

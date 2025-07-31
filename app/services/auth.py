@@ -84,6 +84,7 @@ class AuthServices:
             password=hash_password(admin.password),
             email=admin.email,
             admin_level=admin.admin_level,
+            last_login=datetime.now(timezone.utc).isoformat(),
         )
         self.db.add(new_admin)
         self.db.commit()
@@ -104,6 +105,10 @@ class AuthServices:
         if not logged_admin:
             raise HTTPException(400, detail="Invalid cerdentials")
         if verify_password(admin.password, logged_admin.password):
+            login_date = datetime.now(timezone.utc)
+            logged_admin.last_login = login_date.isoformat()
+            self.db.commit()
+            self.db.refresh(logged_admin)
             data = {
                 "success": True,
                 "message": "Login Successfully",
