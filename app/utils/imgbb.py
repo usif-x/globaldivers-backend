@@ -1,12 +1,16 @@
-import requests, os, base64
+import base64
+import os
+
+import requests
 from dotenv import load_dotenv
 
 load_dotenv()
 
+
 def upload_image_to_imgbb(image: bytes) -> dict:
     key = os.getenv("IMGBB_KEY")
     url = "https://api.imgbb.com/1/upload"
-    encoded_image = base64.b64encode(image).decode('utf-8')
+    encoded_image = base64.b64encode(image).decode("utf-8")
     payload = {
         "key": key,
         "image": encoded_image,
@@ -17,5 +21,5 @@ def upload_image_to_imgbb(image: bytes) -> dict:
     else:
         return {
             "error": f"Failed to upload. Status code: {response.status_code}",
-            "details": response.text
+            "details": response.text,
         }

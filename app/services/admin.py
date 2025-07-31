@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from app.schemas.admin import AdminResponse, AdminUpdate, AdminUpdatePassword
 from app.schemas.user import UserResponse, UserUpdateStatus, UserUpdate
+from app.models.testimonial import Testimonial
 from sqlalchemy import select
 from typing import List, Optional
 from fastapi import HTTPException
@@ -158,3 +159,92 @@ class AdminServices:
               "user": UserResponse.model_validate(user,from_attributes=True)}
     else:
       raise HTTPException(404, detail="User not found")
+    
+
+  @db_exception_handler
+  def get_user_testminals(self, id: int):
+    stmt = select(User).where(User.id == id)
+    user = self.db.execute(stmt).scalars().first()
+    if user:
+      return user.testimonial
+    else:
+      raise HTTPException(404, detail="User not found")
+    
+
+  @db_exception_handler
+  def get_all_testimonials(self):
+    stmt = select(Testimonial)
+    testimonials = self.db.execute(stmt).scalars().all()
+    return testimonials
+  
+  @db_exception_handler
+  def get_accepted_testimonials(self):
+    
+    stmt = select(Testimonial).where(Testimonial.is_accepted == True)
+    testimonials = self.db.execute(stmt).scalars().all()
+    return testimonials
+  
+
+  @db_exception_handler
+  def get_unaccepted_testimonials(self):
+    stmt = select(Testimonial).where(Testimonial.is_accepted == False)
+    testimonials = self.db.execute(stmt).scalars().all()
+    return testimonials
+
+  @db_exception_handler
+  def get_testimonial_by_id(self, id: int):
+    stmt = select(Testimonial).where(Testimonial.id == id)
+    testimonial = self.db.execute(stmt).scalars().first()
+    return testimonial
+  
+  @db_exception_handler
+  def get_user_testimonials(self, user_id: int):
+    stmt = select(Testimonial).where(Testimonial.testimonial_owner == user_id)
+    testimonials = self.db.execute(stmt).scalars().all()
+    return testimonials
+  
+
+  @db_exception_handler
+  def delete_testimonial(self, id: int):
+    stmt = select(Testimonial).where(Testimonial.id == id)
+    testimonial = self.db.execute(stmt).scalars().first()
+    if testimonial:
+      self.db.delete(testimonial)
+      self.db.commit()
+      return {"success": True, "message": "Testimonial deleted successfully"}
+    else:
+      raise HTTPException(404, detail="Testimonial not found")
+    
+  @db_exception_handler
+  def accept_testimonial(self, id: int):
+    stmt = select(Testimonial).where(Testimonial.id == id)
+    testimonial = self.db.execute(stmt).scalars().first()
+    if testimonial:
+      testimonial.is_accepted = True
+      self.db.commit()
+      self.db.refresh(testimonial)
+      return {"success": True, "message": "Testimonial accepted successfully"}
+    else:
+      raise HTTPException(404, detail="Testimonial not found")
+    
+
+  @db_exception_handler
+  def unaccept_testimonial(self, id: int):
+    stmt = select(Testimonial).where(Testimonial.id == id)
+    testimonial = self.db.execute(stmt).scalars().first()
+    if testimonial:
+      testimonial.is_accepted = False
+      self.db.commit()
+      self.db.refresh(testimonial)
+      return {"success": True, "message": "Testimonial unaccepted successfully"}
+    else:
+      raise HTTPException(404, detail="Testimonial not found")
+
+  @db_exception_handler
+  def delete_all_testimonials(self):
+    stmt = select(Testimonial)
+    testimonials = self.db.execute(stmt).scalars().all()
+    for testimonial in testimonials:
+      self.db.delete(testimonial)
+    self.db.commit()
+    return {"success": True, "message": "All testimonials deleted successfully"}

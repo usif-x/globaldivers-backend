@@ -1,10 +1,12 @@
+import logging
 from functools import wraps
-from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+
 from fastapi import HTTPException
 from pydantic import ValidationError
-import logging
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 logger = logging.getLogger(__name__)
+
 
 def db_exception_handler(func):
     @wraps(func)

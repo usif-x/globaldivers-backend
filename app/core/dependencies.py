@@ -1,11 +1,15 @@
-from .database import get_db
-from fastapi import Request, Depends, HTTPException
-from sqlalchemy import select
-from app.models.user import User
-from app.models.admin import Admin
-from app.core.security import verify_user_token, verify_admin_token
-from sqlalchemy.orm import Session
 from datetime import datetime, timezone
+
+from fastapi import Depends, HTTPException, Request
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+from app.core.security import verify_admin_token, verify_user_token
+from app.models.admin import Admin
+from app.models.user import User
+
+from .database import get_db
+
 
 def get_current_user(request: Request, db: Session = Depends(get_db)):
     auth_header = request.headers.get("Authorization")
@@ -38,8 +42,6 @@ def get_current_admin(request: Request, db: Session = Depends(get_db)):
     return admin
 
 
-
-
 def get_current_super_admin(request: Request, db: Session = Depends(get_db)):
     auth_header = request.headers.get("Authorization")
     if not auth_header or not auth_header.startswith("Bearer "):
@@ -53,9 +55,8 @@ def get_current_super_admin(request: Request, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Admin not found")
     if int(admin.admin_level) >= 2:
         return admin
-    else: 
+    else:
         raise HTTPException(status_code=403, detail="Unauthorized")
-    
 
 
 def unix_to_iso(unix_ts: int) -> str:
