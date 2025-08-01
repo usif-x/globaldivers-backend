@@ -32,6 +32,3 @@ class Testimonial(Base):
         default=datetime.now(timezone.utc),
         onupdate=datetime.now(timezone.utc),
     )
-
-
-Base.metadata.create_all(bind=engine)
