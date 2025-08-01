@@ -4,7 +4,17 @@ from fastapi.responses import RedirectResponse
 
 from app.core.init_superadmin import create_super_admin
 from app.db.conn import Base, engine
+from app.models.admin import Admin
+from app.models.course import Course
+from app.models.invoice import Invoice
+from app.models.package import Package
+from app.models.testimonial import Testimonial
+from app.models.trip import Trip
+from app.models.user import User
 from app.routes.all import routes
+
+Base.metadata.create_all(bind=engine)
+
 
 app = FastAPI(
     title="global divers app backend",
@@ -12,7 +22,6 @@ app = FastAPI(
     version="1.0.0",
 )
 
-Base.metadata.create_all(bind=engine)
 
 for route in routes:
     app.include_router(route)

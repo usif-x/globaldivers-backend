@@ -11,6 +11,7 @@ class PaymentService:
     def __init__(self, db: Session):
         self.db = db
 
+    @db_exception_handler
     def get_payment_methods(self):
         try:
             return fawaterk.get_payment_methods()
