@@ -114,7 +114,7 @@ async def accept_testimonial(id: int, db: Session = Depends(get_db)):
 
 @admin_routes.put("/reject-testimonial/{id}", dependencies=[Depends(get_current_admin)])
 async def reject_testimonial(id: int, db: Session = Depends(get_db)):
-    return AdminServices(db).unaccept_testimonial(id)
+    return AdminServices(db).reject_testimonial(id)
 
 
 @admin_routes.get("/get-all-testimonials", dependencies=[Depends(get_current_admin)])

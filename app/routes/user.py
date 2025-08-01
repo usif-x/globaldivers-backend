@@ -42,3 +42,10 @@ async def delete_user(
     db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
 ):
     return UserServices(db).delete_my_account(current_user.id)
+
+
+@user_routes.get("/me/testimonials")
+async def get_my_testimonials(
+    db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
+):
+    return UserServices(db).get_my_testimonials(current_user.id)

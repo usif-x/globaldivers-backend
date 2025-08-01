@@ -5,6 +5,7 @@ from .course import course_routes
 from .divesites import divesites_routes
 from .gallery import gallery_routes
 from .package import package_routes
+from .payment import payment_routes
 from .testimonial import testimonial_routes
 from .trip import trip_routes
 from .user import user_routes
@@ -20,4 +21,5 @@ routes = [
     divesites_routes,
     analytics_routes,
     gallery_routes,
+    payment_routes,
 ]

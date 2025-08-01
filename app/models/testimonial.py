@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from sqlalchemy import Boolean, DateTime, Float, ForeignKey, String, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.db.conn import Base, engine
+from app.db.conn import Base
 
 from .user import User
 
@@ -18,6 +18,9 @@ class Testimonial(Base):
         Float, nullable=False, server_default=text("0")
     )
     is_accepted: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default=text("0")
+    )
+    is_rejected: Mapped[bool] = mapped_column(
         Boolean, nullable=False, server_default=text("0")
     )
     created_at: Mapped[datetime] = mapped_column(

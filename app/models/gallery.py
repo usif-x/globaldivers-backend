@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from sqlalchemy import DateTime, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.db.conn import Base, engine
+from app.db.conn import Base
 
 
 class Gallery(Base):
@@ -39,6 +39,3 @@ class Image(Base):
         default=datetime.now(timezone.utc),
         onupdate=datetime.now(timezone.utc),
     )
-
-
-Base.metadata.create_all(bind=engine)

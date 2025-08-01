@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.core.exception_handler import db_exception_handler
 from app.models.testimonial import Testimonial
@@ -31,6 +31,30 @@ class TestimonialServices:
         return testimonials
 
     @db_exception_handler
+    def get_all_with_users(self):
+        stmt = (
+            select(Testimonial)
+            .options(joinedload(Testimonial.user))
+            .where(Testimonial.is_accepted == True)
+        )
+        testimonials = self.db.execute(stmt).scalars().all()
+
+        result = []
+        for testimonial in testimonials:
+            result.append(
+                {
+                    "id": testimonial.id,
+                    "description": testimonial.description,
+                    "rating": testimonial.rating,
+                    "created_at": testimonial.created_at,
+                    "user": {
+                        "full_name": testimonial.user.full_name,
+                    },
+                }
+            )
+        return result
+
+    @db_exception_handler
     def get_accepted_testimonials(self):
 
         stmt = select(Testimonial).where(Testimonial.is_accepted == True)
@@ -51,9 +75,12 @@ class TestimonialServices:
 
     @db_exception_handler
     def get_user_testimonials(self, user_id: int):
-        stmt = select(Testimonial).where(Testimonial.testimonial_owner == user_id)
-        testimonials = self.db.execute(stmt).scalars().all()
-        return testimonials
+        stmt = select(User).where(User.id == user_id)
+        user = self.db.execute(stmt).scalars().first()
+        if user:
+            return user.testimonial
+        else:
+            raise HTTPException(404, detail="User not found")
 
     @db_exception_handler
     def delete_testimonial(self, id: int):

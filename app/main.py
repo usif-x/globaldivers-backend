@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 
 from app.core.init_superadmin import create_super_admin
+from app.db.conn import Base, engine
 from app.routes.all import routes
 
 app = FastAPI(
@@ -11,6 +12,10 @@ app = FastAPI(
     version="1.0.0",
 )
 
+Base.metadata.create_all(bind=engine)
+
+for route in routes:
+    app.include_router(route)
 
 app.add_middleware(
     CORSMiddleware,
@@ -41,8 +46,167 @@ async def health():
     return {"status": "ok"}
 
 
-for router in routes:
-    app.include_router(router)
+@app.get("/invoices/1")
+async def invoice():
+    return {
+        "id": "inv_123",
+        "invoice_number": "INV-001",
+        "status": "paid",
+        "total_amount": 1250.00,
+        "currency": "USD",
+        "customer_name": "John Doe",
+        "customer_email": "john@example.com",
+        "created_at": "2024-01-15",
+        "due_date": "2024-02-15",
+        "items": [{"name": "Web Development", "quantity": 1, "rate": 1000.00}],
+    }
+
+
+@app.get("/users/me/invoices")
+async def invoices():
+    return [
+        {
+            "id": "INV-2023-001",
+            "issue_date": "2023-10-26T10:00:00Z",
+            "amount": 149.99,
+            "status": "paid",
+            "download_url": "/mock/invoice-001.pdf",
+        },
+        {
+            "id": "INV-2023-002",
+            "issue_date": "2023-09-15T14:30:00Z",
+            "amount": 49.50,
+            "status": "paid",
+            "download_url": "/mock/invoice-002.pdf",
+        },
+        {
+            "id": "INV-2023-003",
+            "issue_date": "2023-10-28T09:00:00Z",
+            "amount": 299.00,
+            "status": "pending",
+            "download_url": "/mock/invoice-003.pdf",
+        },
+        {
+            "id": "INV-2023-004",
+            "issue_date": "2023-08-01T11:00:00Z",
+            "amount": 75.00,
+            "status": "paid",
+            "download_url": "/mock/invoice-004.pdf",
+        },
+        {
+            "id": "INV-2023-005",
+            "issue_date": "2023-10-20T18:00:00Z",
+            "amount": 1200.00,
+            "status": "overdue",
+            "download_url": "/mock/invoice-005.pdf",
+        },
+        {
+            "id": "INV-2023-006",
+            "issue_date": "2023-07-25T12:00:00Z",
+            "amount": 35.00,
+            "status": "paid",
+            "download_url": "/mock/invoice-006.pdf",
+        },
+        {
+            "id": "INV-2023-007",
+            "issue_date": "2023-06-10T16:45:00Z",
+            "amount": 89.99,
+            "status": "paid",
+            "download_url": "/mock/invoice-007.pdf",
+        },
+    ]
+
+
+@app.get("/users/me/courses")
+async def courses():
+    return [
+        {
+            "id": "course-101",
+            "title": "Advanced React Patterns",
+            "slug": "advanced-react-patterns",
+            "description": "Deep dive into hooks, context, performance optimization, and state management strategies for large-scale React applications.",
+            "thumbnail_url": "https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=800",
+            "progress": 75,
+        },
+        {
+            "id": "course-102",
+            "title": "Next.js 14: The Full Course",
+            "slug": "nextjs-14-full-course",
+            "description": "Master the app router, server components, data fetching, and deployment with the latest version of Next.js.",
+            "thumbnail_url": "https://images.unsplash.com/photo-1607703703578-2ebe383b9878?q=80&w=800",
+            "progress": 20,
+        },
+        {
+            "id": "course-103",
+            "title": "Tailwind CSS from Scratch",
+            "slug": "tailwind-css-from-scratch",
+            "description": "Learn how to build beautiful, custom designs without leaving your HTML. Covers utility-first fundamentals, responsive design, and customization.",
+            "thumbnail_url": "https://images.unsplash.com/photo-1617042375876-a13e36732a04?q=80&w=800",
+            "progress": 100,
+        },
+        {
+            "id": "course-104",
+            "title": "Introduction to TypeScript",
+            "slug": "intro-to-typescript",
+            "description": "Add static types to your JavaScript to eliminate bugs and build more robust, maintainable applications.",
+            "thumbnail_url": "https://images.unsplash.com/photo-1596328607689-92b519b5a325?q=80&w=800",
+            "progress": 0,
+        },
+    ]
+
+
+@app.get("/users/me/notifications")
+async def notifications():
+    return [
+        {
+            "id": "uuid-notif-1",
+            "type": "new_invoice",
+            "message": "Your invoice #INV-2023-003 for the 'Next.js 14' course is ready.",
+            "link": "/profile?tab=invoices",
+            "is_read": False,
+            "created_at": "2023-10-28T09:01:00Z",
+        },
+        {
+            "id": "uuid-notif-2",
+            "type": "course_update",
+            "message": "A new module, 'Advanced Caching Strategies', has been added to 'Next.js 14: The Full Course'.",
+            "link": "/courses/nextjs-14-full-course",
+            "is_read": False,
+            "created_at": "2023-10-27T15:30:00Z",
+        },
+        {
+            "id": "uuid-notif-3",
+            "type": "payment_success",
+            "message": "Your payment of $149.99 for 'Advanced React Patterns' was successful.",
+            "link": "/payment/success?order_id=ORD-12345",
+            "is_read": True,
+            "created_at": "2023-10-26T10:05:00Z",
+        },
+        {
+            "id": "uuid-notif-4",
+            "type": "new_message",
+            "message": "You have a new message from your instructor, Jane Doe.",
+            "link": "/messages/jane-doe",
+            "is_read": False,
+            "created_at": "2023-10-28T11:20:00Z",
+        },
+        {
+            "id": "uuid-notif-5",
+            "type": "default",
+            "message": "Welcome to our platform! We're glad to have you here.",
+            "link": "/dashboard",
+            "is_read": True,
+            "created_at": "2023-10-25T08:00:00Z",
+        },
+        {
+            "id": "uuid-notif-6",
+            "type": "course_update",
+            "message": "You've completed 'Tailwind CSS from Scratch'! Congratulations!",
+            "link": "/profile?tab=courses",
+            "is_read": True,
+            "created_at": "2023-10-20T12:00:00Z",
+        },
+    ]
 
 
 create_super_admin()

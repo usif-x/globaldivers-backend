@@ -4,7 +4,7 @@ from sqlalchemy import Boolean, DateTime, Float, Integer, String, text
 from sqlalchemy.dialects.mysql import JSON
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.db.conn import Base, engine
+from app.db.conn import Base
 
 
 class Course(Base):
@@ -30,6 +30,3 @@ class Course(Base):
         default=datetime.now(timezone.utc),
         onupdate=datetime.now(timezone.utc),
     )
-
-
-Base.metadata.create_all(bind=engine)

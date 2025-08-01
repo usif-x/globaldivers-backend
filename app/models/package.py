@@ -5,7 +5,7 @@ from sqlalchemy import Boolean, DateTime, ForeignKey, String, text
 from sqlalchemy.dialects.mysql import JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.db.conn import Base, engine
+from app.db.conn import Base
 
 if TYPE_CHECKING:
     from .trip import Trip
@@ -30,6 +30,3 @@ class Package(Base):
         onupdate=datetime.now(timezone.utc),
     )
     trips: Mapped[List["Trip"]] = relationship(back_populates="package")
-
-
-Base.metadata.create_all(bind=engine)

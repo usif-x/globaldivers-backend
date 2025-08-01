@@ -14,6 +14,7 @@ class TestimonialResponse(BaseModel):
     description: str
     rating: float
     is_accepted: bool
+    is_rejected: bool
     created_at: datetime
     updated_at: datetime
 

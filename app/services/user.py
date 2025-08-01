@@ -68,3 +68,12 @@ class UserServices:
             return {"success": True, "message": "Account deleted successfully"}
         else:
             raise HTTPException(404, detail="An error occured")
+
+    @db_exception_handler
+    def get_my_testimonials(self, id: int):
+        stmt = select(User).where(User.id == id)
+        user = self.db.execute(stmt).scalars().first()
+        if user:
+            return user.testimonial
+        else:
+            raise HTTPException(404, detail="User not found")

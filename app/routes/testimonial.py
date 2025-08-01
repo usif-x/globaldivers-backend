@@ -19,9 +19,9 @@ async def create_testimonial(
     return TestimonialServices(db).create_testimonial(testimonial, user)
 
 
-@testimonial_routes.get("/all", response_model=list[TestimonialResponse])
+@testimonial_routes.get("/all-with-users")
 async def get_all_testimonials(db: Session = Depends(get_db)):
-    return TestimonialServices(db).get_all_testimonials()
+    return TestimonialServices(db).get_all_with_users()
 
 
 @testimonial_routes.get("/{id}")

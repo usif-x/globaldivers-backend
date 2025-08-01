@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from sqlalchemy import DateTime, String, text
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.db.conn import Base, engine
+from app.db.conn import Base
 
 
 class Admin(Base):
@@ -37,6 +37,3 @@ class Admin(Base):
 
     def __repr__(self):
         return f"Admin(id={self.id}, full_name={self.full_name}, username={self.username}, email={self.email}, role={self.role}, admin_level={self.admin_level})"
-
-
-Base.metadata.create_all(bind=engine)
