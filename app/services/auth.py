@@ -26,6 +26,8 @@ class AuthServices:
             password=hash_password(user.password),
             email=user.email,
             last_login=creation_date.isoformat(),
+            created_at=creation_date,
+            updated_at=creation_date,
         )
         self.db.add(new_user)
         self.db.commit()
@@ -52,6 +54,7 @@ class AuthServices:
         if verify_password(user.password, logged_user.password):
             login_date = datetime.now(timezone.utc)
             logged_user.last_login = login_date.isoformat()
+            logged_user.updated_at = login_date
 
             self.db.commit()
             self.db.refresh(logged_user)

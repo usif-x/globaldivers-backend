@@ -29,6 +29,15 @@ async def get_all_users(
 
 
 @admin_routes.get(
+    "/get-users",
+)
+async def get_all_users(
+    db: Session = Depends(get_db),
+):
+    return AdminServices(db).get_users()
+
+
+@admin_routes.get(
     "/get-all-admins",
     response_model=list[AdminResponse],
     dependencies=[Depends(get_current_super_admin)],

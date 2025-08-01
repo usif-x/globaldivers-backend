@@ -17,6 +17,11 @@ class AdminServices:
     def __init__(self, db: Session):
         self.db = db
 
+    def get_users(self):
+        stmt = select(User)
+        users = self.db.execute(stmt).scalars().all()
+        return users
+
     def get_all_users(
         self,
         page: int = 1,

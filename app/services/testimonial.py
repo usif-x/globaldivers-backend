@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
@@ -18,6 +20,8 @@ class TestimonialServices:
             user=user,
             description=testimonial.description,
             rating=testimonial.rating,
+            created_at=datetime.now(timezone.utc),
+            updated_at=datetime.now(timezone.utc),
         )
         self.db.add(new_testimonial)
         self.db.commit()
