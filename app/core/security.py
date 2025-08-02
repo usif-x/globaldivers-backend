@@ -88,7 +88,7 @@ def verify_admin_token(token: str):
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         admin_id: int = payload.get("id")
         admin_role = payload.get("role")
-        admin_level = int(payload.get("admin_level"), 0)
+        admin_level = int(str(payload.get("admin_level")))
         if (
             admin_id is None
             or payload.get("admin_level") is None

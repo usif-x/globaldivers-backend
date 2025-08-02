@@ -1,7 +1,8 @@
+import math
 from typing import List, Optional
 
 from fastapi import HTTPException
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.core.exception_handler import db_exception_handler
@@ -9,7 +10,12 @@ from app.core.hashing import hash_password, verify_password
 from app.models.admin import Admin
 from app.models.testimonial import Testimonial
 from app.models.user import User
-from app.schemas.admin import AdminResponse, AdminUpdate, AdminUpdatePassword
+from app.schemas.admin import (
+    AdminResponse,
+    AdminUpdate,
+    AdminUpdatePassword,
+    PaginatedUsersResponse,
+)
 from app.schemas.user import UserResponse, UserUpdate, UserUpdateStatus
 
 
@@ -28,21 +34,48 @@ class AdminServices:
         page_size: int = 20,
         name: Optional[str] = None,
         email: Optional[str] = None,
-    ) -> List[UserResponse]:
+    ) -> PaginatedUsersResponse:
         offset = (page - 1) * page_size
-        stmt = select(User)
-        if name:
-            stmt = stmt.where(User.full_name.ilike(f"%{name}%"))
-        if email:
-            stmt = stmt.where(User.email.ilike(f"%{email}%"))
-        stmt = stmt.offset(offset).limit(page_size)
-        users = self.db.execute(stmt).scalars().all()
-        if not users:
-            raise HTTPException(status_code=404, detail="Users not found")
 
-        return [
-            UserResponse.model_validate(user, from_attributes=True) for user in users
-        ]
+        # Base query for filtering
+        base_stmt = select(User)
+        if name:
+            base_stmt = base_stmt.where(User.full_name.ilike(f"%{name}%"))
+        if email:
+            base_stmt = base_stmt.where(User.email.ilike(f"%{email}%"))
+
+        # Get total count
+        count_stmt = select(func.count()).select_from(base_stmt.subquery())
+        total = self.db.execute(count_stmt).scalar()
+
+        if total == 0:
+            raise HTTPException(status_code=404, detail="No users found")
+
+        # Get paginated users
+        stmt = base_stmt.offset(offset).limit(page_size)
+        users = self.db.execute(stmt).scalars().all()
+
+        # Calculate pagination metadata
+        total_pages = math.ceil(total / page_size)
+        has_next = page < total_pages
+        has_previous = page > 1
+        next_page = page + 1 if has_next else None
+        previous_page = page - 1 if has_previous else None
+
+        return PaginatedUsersResponse(
+            users=[
+                UserResponse.model_validate(user, from_attributes=True)
+                for user in users
+            ],
+            total=total,
+            page=page,
+            page_size=page_size,
+            total_pages=total_pages,
+            has_next=has_next,
+            has_previous=has_previous,
+            next_page=next_page,
+            previous_page=previous_page,
+        )
 
     @db_exception_handler
     def get_all_admins(self) -> List[AdminResponse]:
@@ -159,13 +192,12 @@ class AdminServices:
             raise HTTPException(404, detail="User not found")
 
     @db_exception_handler
-    def edit_user_information(self, id: int, user: UserUpdate):
+    def edit_user_information(self, id: int, updated_user: UserUpdate):
         stmt = select(User).where(User.id == id)
         user = self.db.execute(stmt).scalars().first()
         if user:
-            data = user.model_dump(exclude_unset=True)
-            for field, value in data.items():
-                setattr(user, field, value)
+            user.full_name = updated_user.full_name
+            user.email = updated_user.email
             self.db.commit()
             self.db.refresh(user)
             return {
@@ -177,11 +209,26 @@ class AdminServices:
             raise HTTPException(404, detail="User not found")
 
     @db_exception_handler
+    def edit_user_password(self, id: int, new_password: str):
+        stmt = select(User).where(User.id == id)
+        user = self.db.execute(stmt).scalars().first()
+        if user:
+            user.password = hash_password(new_password)
+            self.db.commit()
+            self.db.refresh(user)
+            return {
+                "success": True,
+                "message": "User Password Updated successfuly",
+            }
+        else:
+            raise HTTPException(404, detail="User not found")
+
+    @db_exception_handler
     def get_user_testminals(self, id: int):
         stmt = select(User).where(User.id == id)
         user = self.db.execute(stmt).scalars().first()
         if user:
-            return user.testimonial
+            return user.testimonials
         else:
             raise HTTPException(404, detail="User not found")
 

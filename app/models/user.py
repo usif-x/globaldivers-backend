@@ -29,12 +29,12 @@ class User(Base):
     is_blocked: Mapped[bool] = mapped_column(
         Boolean, nullable=False, server_default=text("'0'")
     )
-    last_login: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_login: Mapped[str] = mapped_column(String(50), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False
+        DateTime(), server_default=func.now(), nullable=False
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
+        DateTime(),
         server_default=func.now(),
         onupdate=func.now(),
         nullable=False,

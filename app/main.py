@@ -1,8 +1,13 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import RedirectResponse
+from fastapi.responses import JSONResponse, RedirectResponse
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
+from slowapi.util import get_remote_address
+from starlette.status import HTTP_429_TOO_MANY_REQUESTS
 
 from app.core.init_superadmin import create_super_admin
+from app.core.limiter import limiter
 from app.db.conn import Base, engine
 from app.models.admin import Admin
 from app.models.course import Course
@@ -23,21 +28,35 @@ app = FastAPI(
 )
 
 
+app.state.limiter = limiter
+app.add_middleware(SlowAPIMiddleware)
+
+
+@app.exception_handler(RateLimitExceeded)
+async def rate_limit_exceeded_handler(request: Request, exc: RateLimitExceeded):
+    return JSONResponse(
+        status_code=HTTP_429_TOO_MANY_REQUESTS,
+        content={
+            "detail": f"Rate limit exceeded, please wait one minute and try again"
+        },
+    )
+
+
 for route in routes:
     app.include_router(route)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # or ["*"] for all
+    allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["*"],  # Allows POST, GET, OPTIONS, etc.
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 
 
 @app.get("/", include_in_schema=False)
 async def root():
-    return RedirectResponse(url="https://globaldivers.vercel.app/")  # Add Frontend URL
+    return RedirectResponse(url="https://globaldivers.vercel.app/")  # Frontend URL
 
 
 @app.get("/document", include_in_schema=False)

@@ -74,6 +74,6 @@ class UserServices:
         stmt = select(User).where(User.id == id)
         user = self.db.execute(stmt).scalars().first()
         if user:
-            return user.testimonial
+            return user.testimonials
         else:
             raise HTTPException(404, detail="User not found")

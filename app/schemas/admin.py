@@ -1,7 +1,9 @@
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
 
 from pydantic import BaseModel
+
+from app.schemas.user import UserResponse
 
 
 class AdminResponse(BaseModel):
@@ -31,3 +33,15 @@ class AdminUpdate(BaseModel):
 class AdminUpdatePassword(BaseModel):
     old_password: str
     new_password: str
+
+
+class PaginatedUsersResponse(BaseModel):
+    users: List[UserResponse]
+    total: int
+    page: int
+    page_size: int
+    total_pages: int
+    has_next: bool
+    has_previous: bool
+    next_page: Optional[int] = None
+    previous_page: Optional[int] = None

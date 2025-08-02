@@ -1,41 +1,24 @@
+import random
+import string
+import time
+
 import requests
+from faker import Faker
 
-# 🔑 مفتاح Firebase الخاص بـ fitroom.app
-FIREBASE_API_KEY = "AIzaSyBEIsqlZ5eFfCvjNTKRCpa2iddE2t24mDY"
+fake = Faker()
+url = "http://0.0.0.0:8000/auth/register"
 
-# 📧 بريد المستخدم
-email = "yousseifmuhammed@gmail.com"
+while True:
+    full_name = fake.name()
+    email = fake.unique.email()
+    password = "".join(random.choices(string.ascii_letters + string.digits, k=10))
 
-# 1️⃣ إرسال رابط تسجيل الدخول إلى الإيميل
-send_link_url = f"https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key={FIREBASE_API_KEY}"
-payload = {
-    "requestType": "EMAIL_SIGNIN",
-    "email": email,
-    "continueUrl": "https://fitroom.app"
-}
+    data = {"full_name": full_name, "email": email, "password": password}
 
-resp = requests.post(send_link_url, json=payload)
-if resp.status_code == 200:
-    print("✅ تم إرسال رابط تسجيل الدخول إلى الإيميل.")
-else:
-    print("❌ فشل في إرسال الرابط:", resp.text)
-    exit()
+    try:
+        response = requests.post(url, json=data)
+        print(response.status_code, response.json())
+    except Exception as e:
+        print("Error:", e)
 
-# 2️⃣ انتظار المستخدم لفتح الإيميل ولصق الرابط هنا
-link = input("📥 الصق هنا رابط تسجيل الدخول الذي وصلك على الإيميل:\n")
-
-# 3️⃣ تسجيل الدخول باستخدام الرابط
-signin_url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithEmailLink?key={FIREBASE_API_KEY}"
-signin_payload = {
-    "email": email,
-    "oobCode": link.split("oobCode=")[1].split("&")[0]
-}
-
-signin_resp = requests.post(signin_url, json=signin_payload)
-
-if signin_resp.status_code == 200:
-    id_token = signin_resp.json()["idToken"]
-    print("\n✅ تم تسجيل الدخول بنجاح!")
-    print("🪪 ID Token:", id_token)
-else:
-    print("❌ فشل في تسجيل الدخول:", signin_resp.text)
+    time.sleep(1)

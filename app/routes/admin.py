@@ -4,7 +4,12 @@ from sqlalchemy.orm import Session
 from app.core.dependencies import get_current_admin, get_current_super_admin, get_db
 from app.models.admin import Admin
 from app.schemas import *
-from app.schemas.admin import AdminResponse, AdminUpdate, AdminUpdatePassword
+from app.schemas.admin import (
+    AdminResponse,
+    AdminUpdate,
+    AdminUpdatePassword,
+    PaginatedUsersResponse,
+)
 from app.schemas.user import UserResponse, UserUpdate
 from app.services.admin import AdminServices
 
@@ -13,14 +18,20 @@ admin_routes = APIRouter(prefix="/admins", tags=["Admin Endpoints"])
 
 @admin_routes.get(
     "/get-all-users",
-    response_model=list[UserResponse],
+    response_model=PaginatedUsersResponse,
     dependencies=[Depends(get_current_admin)],
+    summary="Get all users with pagination",
+    description="Retrieve a paginated list of users with optional filtering by name and email",
 )
 async def get_all_users(
-    page: int = Query(1, ge=1),
-    page_size: int = Query(20, ge=1, le=100),
-    name: str = Query(None),
-    email: str = Query(None),
+    page: int = Query(1, ge=1, description="Page number (starts from 1)"),
+    page_size: int = Query(20, ge=1, le=100, description="Number of users per page"),
+    name: str = Query(
+        None, description="Filter by user full name (case-insensitive partial match)"
+    ),
+    email: str = Query(
+        None, description="Filter by email (case-insensitive partial match)"
+    ),
     db: Session = Depends(get_db),
 ):
     return AdminServices(db).get_all_users(
@@ -102,11 +113,18 @@ async def unblock_user(id: int, db: Session = Depends(get_db)):
     return AdminServices(db).unblock_user(id)
 
 
-@admin_routes.put("/edit-user/{id}", dependencies=[Depends(get_current_admin)])
+@admin_routes.put("/update-user/{id}", dependencies=[Depends(get_current_admin)])
 async def edit_user_information(
     id: int, user: UserUpdate, db: Session = Depends(get_db)
 ):
     return AdminServices(db).edit_user_information(id, user)
+
+
+@admin_routes.put(
+    "/update-user-password/{id}", dependencies=[Depends(get_current_admin)]
+)
+async def edit_user_password(id: int, password: str, db: Session = Depends(get_db)):
+    return AdminServices(db).edit_user_password(id, password)
 
 
 @admin_routes.get(
