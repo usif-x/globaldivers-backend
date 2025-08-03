@@ -7,6 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.conn import Base
 
 if TYPE_CHECKING:
+    from .course import Course
     from .invoice import Invoice
     from .testimonial import Testimonial
 
@@ -46,6 +47,11 @@ class User(Base):
 
     invoices: Mapped[List["Invoice"]] = relationship(
         "Invoice", back_populates="user", cascade="all, delete-orphan"
+    )
+    subscribed_courses: Mapped[List["Course"]] = relationship(
+        "Course",
+        secondary="user_course_subscriptions",  # Use the name of the association table
+        back_populates="subscribers",
     )
 
     def __repr__(self) -> str:

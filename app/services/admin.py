@@ -15,6 +15,7 @@ from app.schemas.admin import (
     AdminUpdate,
     AdminUpdatePassword,
     PaginatedUsersResponse,
+    PasswordUpdate,
 )
 from app.schemas.user import UserResponse, UserUpdate, UserUpdateStatus
 
@@ -209,11 +210,11 @@ class AdminServices:
             raise HTTPException(404, detail="User not found")
 
     @db_exception_handler
-    def edit_user_password(self, id: int, new_password: str):
+    def edit_user_password(self, id: int, new_password: PasswordUpdate):
         stmt = select(User).where(User.id == id)
         user = self.db.execute(stmt).scalars().first()
         if user:
-            user.password = hash_password(new_password)
+            user.password = hash_password(new_password.password)
             self.db.commit()
             self.db.refresh(user)
             return {

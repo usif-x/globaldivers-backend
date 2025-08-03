@@ -2,8 +2,15 @@ from fastapi import APIRouter, Depends, Path
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.core.dependencies import get_current_admin
-from app.schemas.course import CourseResponse, CreateCourse, UpdateCourse
+from app.core.dependencies import get_current_admin, get_current_user
+from app.models.user import User
+from app.schemas.course import (
+    CourseResponse,
+    CreateCourse,
+    EnrollCourse,
+    SubscribedCourseResponse,
+    UpdateCourse,
+)
 from app.services.course import CourseServices
 
 course_routes = APIRouter(prefix="/courses", tags=["Course Endpoints"])
@@ -14,9 +21,27 @@ async def get_all_courses(db: Session = Depends(get_db)):
     return CourseServices(db).get_all_courses()
 
 
+@course_routes.get(
+    "/content",
+    response_model=list[SubscribedCourseResponse],
+)
+async def get_all_courses_with_contents(db: Session = Depends(get_db)):
+    return CourseServices(db).get_all_courses_with_contents()
+
+
 @course_routes.get("/{id}", response_model=CourseResponse)
 async def get_course_by_id(id: int = Path(..., ge=1), db: Session = Depends(get_db)):
     return CourseServices(db).get_course_by_id(id)
+
+
+@course_routes.get(
+    "/{id}/content",
+    response_model=SubscribedCourseResponse,
+)
+async def get_course_content_by_id(
+    id: int = Path(..., ge=1), db: Session = Depends(get_db)
+):
+    return CourseServices(db).get_course_with_contents_by_id(id)
 
 
 @course_routes.post(
@@ -41,3 +66,23 @@ async def delete_course(id: int, db: Session = Depends(get_db)):
 @course_routes.delete("/delete-all", dependencies=[Depends(get_current_admin)])
 async def delete_all_courses(db: Session = Depends(get_db)):
     return CourseServices(db).delete_all_courses()
+
+
+@course_routes.put("/{course_id}/content", dependencies=[Depends(get_current_admin)])
+async def add_contents_to_course(
+    course_id: int, contents: list, db: Session = Depends(get_db)
+):
+    return CourseServices(db).add_contents_to_course(course_id, contents)
+
+
+@course_routes.post("/enroll")
+async def enroll_in_course(
+    data: EnrollCourse,
+    db: Session = Depends(get_db),
+):
+    """
+    Enrolls the current authenticated user in a course.
+    """
+    return CourseServices(db).enroll_user_in_course(
+        user_id=data.user_id, course_id=data.course_id
+    )

@@ -5,13 +5,16 @@ from app.core.dependencies import get_current_admin, get_current_super_admin, ge
 from app.models.admin import Admin
 from app.schemas import *
 from app.schemas.admin import (
+    AdminEnrollmentRequest,
     AdminResponse,
     AdminUpdate,
     AdminUpdatePassword,
     PaginatedUsersResponse,
+    PasswordUpdate,
 )
 from app.schemas.user import UserResponse, UserUpdate
 from app.services.admin import AdminServices
+from app.services.course import CourseServices
 
 admin_routes = APIRouter(prefix="/admins", tags=["Admin Endpoints"])
 
@@ -123,7 +126,9 @@ async def edit_user_information(
 @admin_routes.put(
     "/update-user-password/{id}", dependencies=[Depends(get_current_admin)]
 )
-async def edit_user_password(id: int, password: str, db: Session = Depends(get_db)):
+async def edit_user_password(
+    id: int, password: PasswordUpdate, db: Session = Depends(get_db)
+):
     return AdminServices(db).edit_user_password(id, password)
 
 
@@ -175,3 +180,12 @@ async def get_unaccepted_testimonials(db: Session = Depends(get_db)):
 )
 async def delete_testimonial(id: int, db: Session = Depends(get_db)):
     return AdminServices(db).delete_testimonial(id)
+
+
+@admin_routes.post("/enroll-user", dependencies=[Depends(get_current_admin)])
+async def enroll_user_to_course_by_admin(
+    enrollment_data: AdminEnrollmentRequest, db: Session = Depends(get_db)
+):
+    return CourseServices(db).enroll_user_in_course(
+        user_id=enrollment_data.user_id, course_id=enrollment_data.course_id
+    )

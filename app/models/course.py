@@ -1,10 +1,15 @@
 from datetime import datetime, timezone
+from typing import TYPE_CHECKING, List  # Import List
 
 from sqlalchemy import Boolean, DateTime, Float, Integer, String, text
 from sqlalchemy.dialects.mysql import JSON
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.conn import Base
+
+if TYPE_CHECKING:
+    from .course_content import CourseContent
+    from .user import User  # Import User for type hinting
 
 
 class Course(Base):
@@ -21,6 +26,23 @@ class Course(Base):
     )
     course_level: Mapped[str] = mapped_column(String(100), nullable=False)
     course_duration: Mapped[int] = mapped_column(Integer, nullable=False)
+    course_type: Mapped[str] = mapped_column(String(100), nullable=False)
+    has_certificate: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default=text("1")
+    )
+    certificate_type: Mapped[str] = mapped_column(String(100), nullable=False)
+    has_online_content: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default=text("1")
+    )
+    contents: Mapped[List["CourseContent"]] = relationship(
+        "CourseContent", back_populates="course", cascade="all, delete"
+    )
+    subscribers: Mapped[List["User"]] = relationship(
+        "User",
+        secondary="user_course_subscriptions",
+        back_populates="subscribed_courses",
+    )
+
     created_at: Mapped[datetime] = mapped_column(
         DateTime(), nullable=False, default=datetime.now(timezone.utc)
     )
@@ -30,3 +52,10 @@ class Course(Base):
         default=datetime.now(timezone.utc),
         onupdate=datetime.now(timezone.utc),
     )
+
+
+from app.models.course_content import CourseContent
+
+Course.contents = relationship(
+    "CourseContent", back_populates="course", cascade="all, delete"
+)

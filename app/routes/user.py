@@ -49,3 +49,10 @@ async def get_my_testimonials(
     db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
 ):
     return UserServices(db).get_my_testimonials(current_user.id)
+
+
+@user_routes.get("/me/courses")
+async def get_my_subscribed_courses(
+    db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
+):
+    return UserServices(db).get_my_subscribed_courses(current_user)

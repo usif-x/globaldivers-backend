@@ -45,3 +45,12 @@ class PaginatedUsersResponse(BaseModel):
     has_previous: bool
     next_page: Optional[int] = None
     previous_page: Optional[int] = None
+
+
+class PasswordUpdate(BaseModel):
+    password: str
+
+
+class AdminEnrollmentRequest(BaseModel):
+    user_id: int
+    course_id: int

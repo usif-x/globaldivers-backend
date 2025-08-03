@@ -145,44 +145,6 @@ async def invoices():
     ]
 
 
-@app.get("/users/me/courses")
-async def courses():
-    return [
-        {
-            "id": "course-101",
-            "title": "Advanced React Patterns",
-            "slug": "advanced-react-patterns",
-            "description": "Deep dive into hooks, context, performance optimization, and state management strategies for large-scale React applications.",
-            "thumbnail_url": "https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=800",
-            "progress": 75,
-        },
-        {
-            "id": "course-102",
-            "title": "Next.js 14: The Full Course",
-            "slug": "nextjs-14-full-course",
-            "description": "Master the app router, server components, data fetching, and deployment with the latest version of Next.js.",
-            "thumbnail_url": "https://images.unsplash.com/photo-1607703703578-2ebe383b9878?q=80&w=800",
-            "progress": 20,
-        },
-        {
-            "id": "course-103",
-            "title": "Tailwind CSS from Scratch",
-            "slug": "tailwind-css-from-scratch",
-            "description": "Learn how to build beautiful, custom designs without leaving your HTML. Covers utility-first fundamentals, responsive design, and customization.",
-            "thumbnail_url": "https://images.unsplash.com/photo-1617042375876-a13e36732a04?q=80&w=800",
-            "progress": 100,
-        },
-        {
-            "id": "course-104",
-            "title": "Introduction to TypeScript",
-            "slug": "intro-to-typescript",
-            "description": "Add static types to your JavaScript to eliminate bugs and build more robust, maintainable applications.",
-            "thumbnail_url": "https://images.unsplash.com/photo-1596328607689-92b519b5a325?q=80&w=800",
-            "progress": 0,
-        },
-    ]
-
-
 @app.get("/users/me/notifications")
 async def notifications():
     return [
