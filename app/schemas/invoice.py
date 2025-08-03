@@ -4,8 +4,6 @@ from typing import List, Optional
 
 from pydantic import BaseModel, Field, validator
 
-from app.models.user import User
-
 
 class InvoiceStatus(str, Enum):
     PENDING = "pending"
@@ -27,6 +25,18 @@ class InvoiceFor(str, Enum):
     TRIP = "trip"
     SERVICE = "service"
     OTHER = "other"
+
+
+# Simple User schema for invoice response
+class UserResponse(BaseModel):
+    """Simple user schema for invoice responses"""
+
+    id: int
+    email: str
+    full_name: Optional[str] = None
+
+    class Config:
+        from_attributes = True
 
 
 class InvoiceCreate(BaseModel):
@@ -51,11 +61,25 @@ class InvoiceCreate(BaseModel):
     @validator("amount")
     def validate_amount_matches_items(cls, v, values):
         if "items" in values:
-            total_from_items = sum(item.total_price for item in values["items"])
+            # Handle case where items might have different structures
+            total_from_items = 0
+            for item in values["items"]:
+                if isinstance(item, dict):
+                    # Try different possible field names for price
+                    price = (
+                        item.get("total_price")
+                        or item.get("price")
+                        or item.get("amount", 0)
+                    )
+                    total_from_items += float(price)
+                else:
+                    # If items have total_price attribute
+                    total_from_items += getattr(item, "total_price", 0)
+
             if (
                 abs(v - total_from_items) > 0.01
             ):  # Allow for small floating point differences
-                raise ValueError("amount must equal the sum of all item total_prices")
+                raise ValueError("amount must equal the sum of all item prices")
         return v
 
 
@@ -77,9 +101,20 @@ class InvoiceUpdate(BaseModel):
     @validator("amount")
     def validate_amount_matches_items(cls, v, values):
         if v is not None and "items" in values and values["items"] is not None:
-            total_from_items = sum(item.total_price for item in values["items"])
+            total_from_items = 0
+            for item in values["items"]:
+                if isinstance(item, dict):
+                    price = (
+                        item.get("total_price")
+                        or item.get("price")
+                        or item.get("amount", 0)
+                    )
+                    total_from_items += float(price)
+                else:
+                    total_from_items += getattr(item, "total_price", 0)
+
             if abs(v - total_from_items) > 0.01:
-                raise ValueError("amount must equal the sum of all item total_prices")
+                raise ValueError("amount must equal the sum of all item prices")
         return v
 
 
@@ -93,12 +128,10 @@ class InvoiceResponse(BaseModel):
     pay_url: str
     pay_method: str
     invoice_for: str
-    items: List[
-        dict
-    ]  # Using dict instead of InvoiceItem for flexibility with existing data
+    items: List[dict]  # Using dict for flexibility with existing data
     created_at: datetime
     updated_at: datetime
-    user: Optional[User] = None  # Include user details if needed
+    user: Optional[UserResponse] = None  # Use UserResponse instead of User model
 
     class Config:
         from_attributes = True

@@ -56,3 +56,19 @@ async def get_my_subscribed_courses(
     db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
 ):
     return UserServices(db).get_my_subscribed_courses(current_user)
+
+
+@user_routes.get("/me/invoices")
+async def get_my_invoices(
+    db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
+):
+    return UserServices(db).get_my_invoices(current_user)
+
+
+@user_routes.get("/me/invoices/{id}")
+async def get_my_invoice_by_id(
+    id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    return UserServices(db).get_my_invoice_by_id(id, current_user)

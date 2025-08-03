@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.core.exception_handler import db_exception_handler
 from app.core.hashing import hash_password, verify_password
+from app.models.invoice import Invoice
 from app.models.user import User
 from app.schemas.user import UserResponse, UserUpdate, UserUpdatePassword
 
@@ -86,3 +87,21 @@ class UserServices:
             return user.subscribed_courses
         else:
             raise HTTPException(404, detail="User not found")
+
+    @db_exception_handler
+    def get_my_invoices(self, user: User):
+        stmt = select(User).where(User.id == user.id)
+        user = self.db.execute(stmt).scalars().first()
+        if user:
+            return user.invoices
+        else:
+            raise HTTPException(404, detail="User not found")
+
+    @db_exception_handler
+    def get_my_invoice_by_id(self, id: int, user: User):
+        invoice = next((inv for inv in user.invoices if inv.id == id), None)
+        if not invoice:
+            raise HTTPException(
+                status_code=404, detail="Invoice not found for this user."
+            )
+        return invoice
