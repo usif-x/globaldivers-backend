@@ -4,11 +4,14 @@ from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, 
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.dependencies import get_current_admin
 from app.schemas.gallery import ImageListResponse, ImageResponse, ImageUpdate
 from app.services.gallery import ImageService
 
 # Create router
-gallery_routes = APIRouter(prefix="/gallery", tags=["Gallery"])
+gallery_routes = APIRouter(
+    prefix="/gallery", tags=["Gallery"], dependencies=[Depends(get_current_admin)]
+)
 
 # Initialize service
 image_service = ImageService()
