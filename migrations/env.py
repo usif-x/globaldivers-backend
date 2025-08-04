@@ -7,6 +7,7 @@ from app.models.admin import Admin
 from app.models.course import Course
 from app.models.invoice import Invoice
 from app.models.package import Package
+from app.models.setting import WebsiteSettings
 from app.models.testimonial import Testimonial
 from app.models.trip import Trip
 

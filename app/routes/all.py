@@ -7,6 +7,7 @@ from .gallery import gallery_routes
 from .invoice import invoice_routes
 from .package import package_routes
 from .payment import payment_routes
+from .setting import setting_routes
 from .testimonial import testimonial_routes
 from .trip import trip_routes
 from .user import user_routes
@@ -24,4 +25,5 @@ routes = [
     gallery_routes,
     payment_routes,
     invoice_routes,
+    setting_routes,
 ]
