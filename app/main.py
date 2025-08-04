@@ -1,6 +1,10 @@
+import os
+from pathlib import Path
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.staticfiles import StaticFiles
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 from slowapi.util import get_remote_address
@@ -11,12 +15,16 @@ from app.core.limiter import limiter
 from app.db.conn import Base, engine
 from app.models.admin import Admin
 from app.models.course import Course
+from app.models.gallery import Gallery
 from app.models.invoice import Invoice
 from app.models.package import Package
 from app.models.testimonial import Testimonial
 from app.models.trip import Trip
 from app.models.user import User
 from app.routes.all import routes
+
+# Get project root directory (parent of 'app' folder)
+
 
 Base.metadata.create_all(bind=engine)
 
@@ -52,6 +60,43 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+PROJECT_ROOT = Path(__file__).parent.parent
+STORAGE_DIR = PROJECT_ROOT / "storage"
+
+print(f"📁 Current working directory: {os.getcwd()}")
+print(f"📁 Main.py location: {Path(__file__).absolute()}")
+print(f"📁 Project root: {PROJECT_ROOT.absolute()}")
+print(f"📁 Storage directory: {STORAGE_DIR.absolute()}")
+print(f"📁 Storage exists: {STORAGE_DIR.exists()}")
+print(f"📁 Storage is directory: {STORAGE_DIR.is_dir()}")
+
+# List files in storage (if it exists)
+if STORAGE_DIR.exists():
+    files = list(STORAGE_DIR.iterdir())
+    print(f"📁 Files in storage: {[f.name for f in files]}")
+else:
+    print("❌ Storage directory doesn't exist!")
+
+# Ensure storage directory exists
+STORAGE_DIR.mkdir(exist_ok=True)
+
+# Mount with absolute path
+app.mount("/storage", StaticFiles(directory=str(STORAGE_DIR)), name="storage")
+
+
+# Add a test endpoint to check storage mounting
+@app.get("/test-storage")
+async def test_storage():
+    return {
+        "storage_path": str(STORAGE_DIR.absolute()),
+        "storage_exists": STORAGE_DIR.exists(),
+        "files_count": len(list(STORAGE_DIR.iterdir())) if STORAGE_DIR.exists() else 0,
+        "files": (
+            [f.name for f in STORAGE_DIR.iterdir()] if STORAGE_DIR.exists() else []
+        ),
+    }
 
 
 @app.get("/", include_in_schema=False)

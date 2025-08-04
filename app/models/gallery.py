@@ -1,41 +1,18 @@
-from datetime import datetime, timezone
-
-from sqlalchemy import DateTime, ForeignKey, String
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import Column, DateTime, Integer, String, Text
+from sqlalchemy.sql import func
 
 from app.db.conn import Base
 
 
 class Gallery(Base):
-    __tablename__ = "galleries"
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    name: Mapped[str] = mapped_column(String(100), nullable=False)
-    images: Mapped[list["Image"]] = relationship(back_populates="gallery")
-    description: Mapped[str] = mapped_column(String(500), nullable=True)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(), nullable=False, default=datetime.now(timezone.utc)
-    )
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime(),
-        nullable=False,
-        default=datetime.now(timezone.utc),
-        onupdate=datetime.now(timezone.utc),
-    )
+    """Gallery model for storing image metadata"""
 
+    __tablename__ = "gallery"
 
-class Image(Base):
-    __tablename__ = "images"
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    name: Mapped[str] = mapped_column(String(100), nullable=False)
-    url: Mapped[str] = mapped_column(String(100), nullable=False)
-    gallery: Mapped[list["Gallery"]] = relationship(back_populates="images")
-    gallery_id: Mapped[int] = mapped_column(ForeignKey("galleries.id"), nullable=False)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(), nullable=False, default=datetime.now(timezone.utc)
-    )
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime(),
-        nullable=False,
-        default=datetime.now(timezone.utc),
-        onupdate=datetime.now(timezone.utc),
-    )
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    name = Column(String(255), nullable=False, index=True)
+    url = Column(Text, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    def __repr__(self):
+        return f"<Gallery(id={self.id}, name='{self.name}', url='{self.url}')>"

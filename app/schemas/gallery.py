@@ -1,46 +1,43 @@
 from datetime import datetime
 from typing import Optional
 
-from fastapi import UploadFile
 from pydantic import BaseModel
 
 
-class ImageResponse(BaseModel):
-    id: int
+class ImageBase(BaseModel):
+    """Base schema for image"""
+
     name: str
     url: str
-    created_at: datetime
-    updated_at: datetime
-
-    class Config:
-        from_attributes = True
 
 
-class GalleryResponse(BaseModel):
+class ImageCreate(ImageBase):
+    """Schema for creating image"""
+
+    pass
+
+
+class ImageUpdate(BaseModel):
+    """Schema for updating image"""
+
+    name: Optional[str] = None
+
+
+class ImageResponse(ImageBase):
+    """Schema for image response"""
+
     id: int
-    name: str
-    images: list[ImageResponse]
-    description: Optional[str] = None
+    url: str
     created_at: datetime
-    updated_at: datetime
 
     class Config:
         from_attributes = True
 
 
-class CreateGallery(BaseModel):
-    name: str
-    description: Optional[str]
+class ImageListResponse(BaseModel):
+    """Schema for paginated image list response"""
 
-
-class UpdateGallery(BaseModel):
-    name: Optional[str]
-    description: Optional[str]
-
-
-class CreateImage(BaseModel):
-    name: str
-    file: UploadFile
-
-    class Config:
-        arbitrary_types_allowed = True
+    images: list[ImageResponse]
+    total: int
+    skip: int
+    limit: int

@@ -1,108 +1,172 @@
-from fastapi import HTTPException
-from sqlalchemy import select
+import os
+import uuid
+from datetime import datetime
+from typing import List, Optional, Tuple
+
+import aiofiles
+from fastapi import HTTPException, UploadFile, status
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from app.core.exception_handler import db_exception_handler
-from app.models.gallery import Gallery, Image
-from app.schemas.gallery import (
-    CreateGallery,
-    CreateImage,
-    GalleryResponse,
-    ImageResponse,
-    UpdateGallery,
-)
-from app.utils.imgbb import upload_image_to_imgbb
+from app.models.gallery import Gallery
+from app.schemas.gallery import ImageCreate, ImageUpdate
 
 
-class GalleryServices:
-    def __init__(self, db: Session):
-        self.db = db
+class ImageService:
+    """Service class for handling image operations"""
 
-    @db_exception_handler
-    def create_gallery(self, gallery: CreateGallery):
-        new_gallery = Gallery(**gallery.model_dump())
-        self.db.add(new_gallery)
-        self.db.commit()
-        self.db.refresh(new_gallery)
-        return new_gallery
+    def __init__(self, storage_dir: str = "storage"):
+        self.storage_dir = storage_dir
+        self.allowed_extensions = {".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp"}
+        os.makedirs(storage_dir, exist_ok=True)
 
-    @db_exception_handler
-    def get_all_galleries(self):
-        stmt = select(Gallery)
-        galleries = self.db.execute(stmt).scalars().all()
-        return galleries
+    def _validate_image_file(self, file: UploadFile) -> None:
+        """Validate uploaded file"""
+        if not file.content_type or not file.content_type.startswith("image/"):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="File must be an image"
+            )
 
-    @db_exception_handler
-    def get_gallery_by_id(self, id: int):
-        stmt = select(Gallery).where(Gallery.id == id)
-        gallery = self.db.execute(stmt).scalars().first()
-        return gallery
+        file_extension = os.path.splitext(file.filename or "")[1].lower()
+        if file_extension not in self.allowed_extensions:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"File extension {file_extension} not allowed. Allowed: {', '.join(self.allowed_extensions)}",
+            )
 
-    @db_exception_handler
-    def update_gallery(self, gallery: UpdateGallery, id: int):
-        stmt = select(Gallery).where(Gallery.id == id)
-        updated_gallery = self.db.execute(stmt).scalars().first()
-        if updated_gallery:
-            data = gallery.model_dump(exclude_unset=True)
-            for field, value in data.items():
-                setattr(updated_gallery, field, value)
-            self.db.commit()
-            self.db.refresh(updated_gallery)
-            return {
-                "success": True,
-                "message": "Gallery Updated successfuly",
-                "gallery": GalleryResponse.model_validate(
-                    updated_gallery, from_attributes=True
-                ),
-            }
-        else:
-            raise HTTPException(404, detail="Gallery not found")
+    def _generate_unique_filename(self, original_filename: str) -> str:
+        """Generate unique filename while preserving extension"""
+        file_extension = os.path.splitext(original_filename)[1]
+        unique_filename = f"{uuid.uuid4()}{file_extension}"
+        return unique_filename
 
-    @db_exception_handler
-    def delete_gallery(self, id: int):
-        stmt = select(Gallery).where(Gallery.id == id)
-        gallery = self.db.execute(stmt).scalars().first()
-        if gallery:
-            self.db.delete(gallery)
-            self.db.commit()
-            return {"success": True, "message": "Gallery deleted successfully"}
-        else:
-            raise HTTPException(404, detail="Gallery not found")
+    async def create_image(self, db: Session, file: UploadFile) -> Gallery:
+        """Upload image to storage and create database record"""
+        # Validate file
+        self._validate_image_file(file)
 
-    @db_exception_handler
-    async def create_image(self, image: CreateImage, gallery_id: int):
-        file_bytes = await image.file.read()  # ✅ أضف await
-        uploaded = upload_image_to_imgbb(file_bytes)
-        if "data" in uploaded:
-            image_url = uploaded["data"]["url"]
-        else:
-            raise Exception("Failed to upload image to imgbb")
-        new_image = Image(name=image.name, url=image_url, gallery_id=gallery_id)
+        # Generate unique filename
+        unique_filename = self._generate_unique_filename(file.filename or "image")
+        file_path = os.path.join(self.storage_dir, unique_filename)
 
-        self.db.add(new_image)
-        self.db.commit()
-        self.db.refresh(new_image)
-        return new_image
+        try:
+            # Save file to storage
+            async with aiofiles.open(file_path, "wb") as f:
+                content = await file.read()
+                await f.write(content)
 
-    @db_exception_handler
-    def get_all_images(self):
-        stmt = select(Image)
-        images = self.db.execute(stmt).scalars().all()
-        return images
+            # Create database record
+            image_url = f"/storage/{unique_filename}"
+            db_image = Gallery(name=file.filename or unique_filename, url=image_url)
 
-    @db_exception_handler
-    def get_image_by_id(self, id: int):
-        stmt = select(Image).where(Image.id == id)
-        image = self.db.execute(stmt).scalars().first()
-        return image
+            db.add(db_image)
+            db.commit()
+            db.refresh(db_image)
 
-    @db_exception_handler
-    def delete_image(self, id: int):
-        stmt = select(Image).where(Image.id == id)
-        image = self.db.execute(stmt).scalars().first()
-        if image:
-            self.db.delete(image)
-            self.db.commit()
-            return {"success": True, "message": "Image deleted successfully"}
-        else:
-            raise HTTPException(404, detail="Image not found")
+            return db_image
+
+        except Exception as e:
+            db.rollback()
+            # Clean up file if database operation failed
+            if os.path.exists(file_path):
+                os.remove(file_path)
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Failed to upload image: {str(e)}",
+            )
+
+    def get_images(
+        self, db: Session, skip: int = 0, limit: int = 100
+    ) -> Tuple[List[Gallery], int]:
+        """Get all images with pagination and total count"""
+        total = db.query(func.count(Gallery.id)).scalar()
+        images = (
+            db.query(Gallery)
+            .order_by(Gallery.created_at.desc())
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
+        return images, total
+
+    def get_image(self, db: Session, image_id: int) -> Optional[Gallery]:
+        """Get specific image by ID"""
+        return db.query(Gallery).filter(Gallery.id == image_id).first()
+
+    def update_image(
+        self, db: Session, image_id: int, image_update: ImageUpdate
+    ) -> Optional[Gallery]:
+        """Update image metadata"""
+        db_image = db.query(Gallery).filter(Gallery.id == image_id).first()
+        if not db_image:
+            return None
+
+        try:
+            if image_update.name is not None:
+                db_image.name = image_update.name
+
+            db.commit()
+            db.refresh(db_image)
+            return db_image
+
+        except Exception as e:
+            db.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Failed to update image: {str(e)}",
+            )
+
+    def delete_image(self, db: Session, image_id: int) -> bool:
+        """Delete image from storage and database"""
+        db_image = db.query(Gallery).filter(Gallery.id == image_id).first()
+        if not db_image:
+            return False
+
+        try:
+            # Extract filename from URL
+            filename = db_image.url.split("/")[-1]
+            file_path = os.path.join(self.storage_dir, filename)
+
+            # Delete from database
+            db.delete(db_image)
+            db.commit()
+
+            # Delete file from storage
+            if os.path.exists(file_path):
+                os.remove(file_path)
+
+            return True
+
+        except Exception as e:
+            db.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Failed to delete image: {str(e)}",
+            )
+
+    def delete_all_images(self, db: Session) -> int:
+        """Delete all images from storage and database"""
+        try:
+            # Get all images
+            images = db.query(Gallery).all()
+            deleted_count = len(images)
+
+            # Delete files from storage
+            for image in images:
+                filename = image.url.split("/")[-1]
+                file_path = os.path.join(self.storage_dir, filename)
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+
+            # Delete all records from database
+            db.query(Gallery).delete()
+            db.commit()
+
+            return deleted_count
+
+        except Exception as e:
+            db.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Failed to delete all images: {str(e)}",
+            )

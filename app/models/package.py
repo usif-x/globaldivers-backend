@@ -29,4 +29,6 @@ class Package(Base):
         default=datetime.now(timezone.utc),
         onupdate=datetime.now(timezone.utc),
     )
-    trips: Mapped[List["Trip"]] = relationship(back_populates="package")
+    trips: Mapped[List["Trip"]] = relationship(
+        back_populates="package", cascade="all, delete"
+    )

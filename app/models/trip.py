@@ -12,7 +12,7 @@ class Trip(Base):
     __tablename__ = "trips"
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
-    description: Mapped[str] = mapped_column(String(500), nullable=True)
+    description: Mapped[str] = mapped_column(String(10000), nullable=True)
     images: Mapped[list[str]] = mapped_column(JSON, nullable=False)
     is_image_list: Mapped[bool] = mapped_column(
         Boolean, nullable=False, server_default=text("0")
@@ -27,8 +27,13 @@ class Trip(Base):
     duration: Mapped[int] = mapped_column(
         Integer, nullable=False, server_default=text("8")
     )
-    package_id: Mapped[int] = mapped_column(ForeignKey("packages.id"), nullable=False)
-    package: Mapped["Package"] = relationship(back_populates="trips")
+    package_id: Mapped[int] = mapped_column(
+        ForeignKey("packages.id"),
+        nullable=False,
+    )
+    package: Mapped["Package"] = relationship(
+        back_populates="trips", passive_deletes=True
+    )
     included: Mapped[list[str]] = mapped_column(JSON, nullable=False)
     not_included: Mapped[list[str]] = mapped_column(JSON, nullable=False)
     terms_and_conditions: Mapped[list[str]] = mapped_column(JSON, nullable=False)
