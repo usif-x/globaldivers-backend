@@ -29,7 +29,6 @@ admin_routes = APIRouter(prefix="/admins", tags=["Admin Endpoints"])
     summary="Get all users with pagination",
     description="Retrieve a paginated list of users with optional filtering by name and email",
 )
-@cache(expire=600)
 async def get_all_users(
     page: int = Query(1, ge=1, description="Page number (starts from 1)"),
     page_size: int = Query(20, ge=1, le=100, description="Number of users per page"),
@@ -49,7 +48,6 @@ async def get_all_users(
 @admin_routes.get(
     "/get-users",
 )
-@cache(expire=600)
 async def get_all_users(
     db: Session = Depends(get_db),
 ):
@@ -57,7 +55,6 @@ async def get_all_users(
 
 
 @admin_routes.get("/get-recent-users", response_model=List[UserResponse])
-@cache(expire=600)
 async def get_all_users(
     db: Session = Depends(get_db),
 ):
@@ -70,7 +67,6 @@ async def get_all_users(
     response_model=list[AdminResponse],
     dependencies=[Depends(get_current_super_admin)],
 )
-@cache(expire=600)
 async def get_all_admins(db: Session = Depends(get_db)):
     return AdminServices(db).get_all_admins()
 
@@ -165,7 +161,6 @@ async def reject_testimonial(id: int, db: Session = Depends(get_db)):
 
 
 @admin_routes.get("/get-all-testimonials", dependencies=[Depends(get_current_admin)])
-@cache(expire=600)
 async def get_all_testimonials(db: Session = Depends(get_db)):
     return AdminServices(db).get_all_testimonials()
 
@@ -180,7 +175,6 @@ async def delete_all_testimonials(db: Session = Depends(get_db)):
 @admin_routes.get(
     "/get-accepted-testimonials", dependencies=[Depends(get_current_admin)]
 )
-@cache(expire=600)
 async def get_accepted_testimonials(db: Session = Depends(get_db)):
     return AdminServices(db).get_accepted_testimonials()
 
@@ -188,7 +182,6 @@ async def get_accepted_testimonials(db: Session = Depends(get_db)):
 @admin_routes.get(
     "/get-unaccepted-testimonials", dependencies=[Depends(get_current_admin)]
 )
-@cache(expire=600)
 async def get_unaccepted_testimonials(db: Session = Depends(get_db)):
     return AdminServices(db).get_unaccepted_testimonials()
 
