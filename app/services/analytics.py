@@ -3,6 +3,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models.course import Course
+from app.models.invoice import Invoice
 from app.models.package import Package
 from app.models.testimonial import Testimonial
 from app.models.trip import Trip
@@ -50,6 +51,24 @@ class AnalyticsServices:
     def get_courses_count(self):
         return self.db.query(Course).count()
 
+    def get_invoices_count(self):
+        return self.db.query(Invoice).count()
+
+    def get_pending_invoices_count(self):
+        return self.db.query(Invoice).filter(Invoice.status == "pending").count()
+
+    def get_expired_invoices_count(self):
+        return self.db.query(Invoice).filter(Invoice.status == "expired").count()
+
+    def get_paid_invoices_count(self):
+        return self.db.query(Invoice).filter(Invoice.status == "paid").count()
+
+    def get_unpaid_invoices_count(self):
+        return self.db.query(Invoice).filter(Invoice.status == "unpaid").count()
+
+    def get_cancelled_invoices_count(self):
+        return self.db.query(Invoice).filter(Invoice.status == "cancelled").count()
+
     def get_all(self):
         return {
             "users_count": self.get_users_count(),
@@ -63,4 +82,10 @@ class AnalyticsServices:
             "accepted_testimonials_count": self.get_accepted_testimonials_count(),
             "unaccepted_testimonials_count": self.get_unaccepted_testimonials_count(),
             "courses_count": self.get_courses_count(),
+            "invoices_count": self.get_invoices_count(),
+            "pending_invoices_count": self.get_pending_invoices_count(),
+            "expired_invoices_count": self.get_expired_invoices_count(),
+            "paid_invoices_count": self.get_paid_invoices_count(),
+            "unpaid_invoices_count": self.get_unpaid_invoices_count(),
+            "cancelled_invoices_count": self.get_cancelled_invoices_count(),
         }
