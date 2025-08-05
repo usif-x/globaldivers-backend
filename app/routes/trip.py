@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, Path
+from fastapi_cache.decorator import cache
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -10,6 +11,7 @@ trip_routes = APIRouter(prefix="/trips", tags=["Trip Endpoints"])
 
 
 @trip_routes.get("/", response_model=list[TripResponse])
+@cache(expire=600)
 async def get_all_trips(db: Session = Depends(get_db)):
     return TripServices(db).get_all_trips()
 

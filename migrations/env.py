@@ -5,6 +5,7 @@ from sqlalchemy import engine_from_config, pool
 
 from app.models.admin import Admin
 from app.models.course import Course
+from app.models.gallery import Gallery
 from app.models.invoice import Invoice
 from app.models.package import Package
 from app.models.setting import WebsiteSettings

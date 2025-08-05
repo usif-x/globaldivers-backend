@@ -1,4 +1,5 @@
 import os
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, Request
@@ -10,6 +11,7 @@ from slowapi.middleware import SlowAPIMiddleware
 from slowapi.util import get_remote_address
 from starlette.status import HTTP_429_TOO_MANY_REQUESTS
 
+from app.core.cache import init_cache
 from app.core.init_superadmin import create_super_admin
 from app.core.limiter import limiter
 from app.db.conn import Base, engine
@@ -26,10 +28,17 @@ from app.routes.all import routes
 # Get project root directory (parent of 'app' folder)
 
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await init_cache()
+    yield
+
+
 Base.metadata.create_all(bind=engine)
 
 
 app = FastAPI(
+    lifespan=lifespan,
     title="global divers app backend",
     description="global divers app backend server using ( fastapi, sqlalchemy, alembic, mysql )",
     version="1.0.0",
