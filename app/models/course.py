@@ -16,7 +16,7 @@ class Course(Base):
     __tablename__ = "courses"
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
-    description: Mapped[str] = mapped_column(String(500), nullable=True)
+    description: Mapped[str] = mapped_column(String(10000), nullable=True)
     price: Mapped[float] = mapped_column(
         Float, nullable=False, server_default=text("0")
     )
@@ -31,6 +31,9 @@ class Course(Base):
         Boolean, nullable=False, server_default=text("1")
     )
     certificate_type: Mapped[str] = mapped_column(String(100), nullable=False)
+    provider: Mapped[str] = mapped_column(
+        String(100), nullable=False, server_default=text("Padi")
+    )
     has_online_content: Mapped[bool] = mapped_column(
         Boolean, nullable=False, server_default=text("1")
     )

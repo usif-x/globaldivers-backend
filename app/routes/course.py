@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, Path
+from fastapi_cache.decorator import cache
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -17,6 +18,7 @@ course_routes = APIRouter(prefix="/courses", tags=["Course Endpoints"])
 
 
 @course_routes.get("/", response_model=list[CourseResponse])
+@cache(expire=600)
 async def get_all_courses(db: Session = Depends(get_db)):
     return CourseServices(db).get_all_courses()
 

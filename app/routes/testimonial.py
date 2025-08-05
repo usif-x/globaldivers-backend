@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, Path
+from fastapi_cache.decorator import cache
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -20,6 +21,7 @@ async def create_testimonial(
 
 
 @testimonial_routes.get("/all-with-users")
+@cache(expire=600)
 async def get_all_testimonials(db: Session = Depends(get_db)):
     return TestimonialServices(db).get_all_with_users()
 

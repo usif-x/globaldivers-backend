@@ -115,3 +115,14 @@ def iso_to_unix(iso_str: str) -> int:
     """
     dt = datetime.fromisoformat(iso_str)
     return int(dt.timestamp())
+
+
+def verify_token(token: str):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        return {
+            "valid": True,
+            "role": payload.get("role"),
+        }
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Unauthorized")

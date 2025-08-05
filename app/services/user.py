@@ -80,8 +80,8 @@ class UserServices:
             raise HTTPException(404, detail="User not found")
 
     @db_exception_handler
-    def get_my_subscribed_courses(self, user: User):
-        stmt = select(User).where(User.id == user.id)
+    def get_my_subscribed_courses(self, id: int):
+        stmt = select(User).where(User.id == id)
         user = self.db.execute(stmt).scalars().first()
         if user:
             return user.subscribed_courses

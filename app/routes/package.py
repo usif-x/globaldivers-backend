@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, Path
+from fastapi_cache.decorator import cache
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -18,6 +19,7 @@ async def create_package(package: CreatePackage, db: Session = Depends(get_db)):
 
 
 @package_routes.get("/", response_model=list[PackageResponse])
+@cache(expire=600)
 async def get_all_packages(db: Session = Depends(get_db)):
     return PackageServices(db).get_all_packages()
 
@@ -40,6 +42,7 @@ async def update_package(
 
 
 @package_routes.get("/{id}/trips", response_model=list[TripResponse])
+@cache(expire=600)
 async def get_trip_by_package_id(
     id: int = Path(..., ge=1), db: Session = Depends(get_db)
 ):

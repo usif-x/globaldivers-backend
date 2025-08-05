@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from sqlalchemy import select
+from sqlalchemy import and_, select
 from sqlalchemy.orm import Session, joinedload
 
 from app.core.exception_handler import db_exception_handler
@@ -56,6 +56,35 @@ class CourseServices:
         course = self.db.execute(stmt).scalars().first()
         if not course:
             raise HTTPException(404, detail="Course not found")
+        return course
+
+    @db_exception_handler
+    def get_course_with_content_by_id_for_user(self, id: int, user: User):
+        # أولاً نتأكد إن اليوزر موجود
+        user_stmt = select(User).where(User.id == User.id)
+        user = self.db.execute(user_stmt).scalars().first()
+        if not user:
+            raise HTTPException(404, detail="User not found")
+
+        # نجلب الكورس مع المحتوى ولكن فقط إذا اليوزر مشترك فيه
+        course_stmt = (
+            select(Course)
+            .join(Course.subscribers)  # يربط عن طريق العلاقة subscribers
+            .where(
+                and_(
+                    Course.id == id,
+                    User.id == User.id,  # شرط إن اليوزر موجود ضمن المشتركين
+                )
+            )
+            .options(joinedload(Course.contents))
+        )
+        course = self.db.execute(course_stmt).scalars().first()
+        if not course:
+            # يا إما الكورس مش موجود، يا إما اليوزر مش مشترك فيه
+            raise HTTPException(
+                403, detail="You not subscribed to this course or course not found"
+            )
+
         return course
 
     @db_exception_handler

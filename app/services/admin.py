@@ -2,7 +2,7 @@ import math
 from typing import List, Optional
 
 from fastapi import HTTPException
-from sqlalchemy import func, select
+from sqlalchemy import desc, func, select
 from sqlalchemy.orm import Session
 
 from app.core.exception_handler import db_exception_handler
@@ -41,7 +41,10 @@ class AdminServices:
         # Base query for filtering
         base_stmt = select(User)
         if name:
-            base_stmt = base_stmt.where(User.full_name.ilike(f"%{name}%"))
+            if "@" in name:
+                base_stmt = base_stmt.where(User.email.ilike(f"%{name}%"))
+            else:
+                base_stmt = base_stmt.where(User.full_name.ilike(f"%{name}%"))
         if email:
             base_stmt = base_stmt.where(User.email.ilike(f"%{email}%"))
 
@@ -109,6 +112,14 @@ class AdminServices:
             }
         else:
             raise HTTPException(404, detail="Admin not found")
+
+    @db_exception_handler
+    def get_recent_users(self, limit: int = 10):
+        if hasattr(User, "created_at"):
+            stmt = select(User).order_by(desc(User.created_at)).limit(limit)
+        else:
+            stmt = select(User).order_by(desc(User.id)).limit(limit)
+        return self.db.execute(stmt).scalars().all()
 
     @db_exception_handler
     def update_admin_password(self, user: AdminUpdatePassword, id: int):

@@ -14,6 +14,7 @@ auth_routes = APIRouter(
 
 
 @auth_routes.post("/register", status_code=status.HTTP_201_CREATED)
+@limiter.limit("3/minute")
 async def create_new_user(
     request: Request, user: UserCreate, db: Session = Depends(get_db)
 ):
@@ -40,6 +41,7 @@ async def user_logout(
     status_code=status.HTTP_201_CREATED,
     dependencies=[Depends(get_current_super_admin)],
 )
+@limiter.limit("3/minute")
 async def create_new_admin(
     request: Request, admin: AdminCreate, db: Session = Depends(get_db)
 ):
@@ -47,7 +49,13 @@ async def create_new_admin(
 
 
 @auth_routes.post("/admin/login")
+@limiter.limit("3/minute")
 async def admin_login(
     request: Request, admin: AdminLogin, db: Session = Depends(get_db)
 ):
     return AuthServices(db).admin_login(admin)
+
+
+@auth_routes.get("/verify")
+async def verify_token(request: Request, token: str, db: Session = Depends(get_db)):
+    return AuthServices(db).verify_token(token)

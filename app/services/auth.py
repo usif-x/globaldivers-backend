@@ -6,7 +6,11 @@ from sqlalchemy.orm import Session
 
 from app.core.exception_handler import db_exception_handler
 from app.core.hashing import hash_password, verify_password
-from app.core.security import create_admin_access_token, create_user_access_token
+from app.core.security import (
+    create_admin_access_token,
+    create_user_access_token,
+    verify_token,
+)
 from app.models.admin import Admin
 from app.models.user import User
 from app.schemas.admin import AdminResponse
@@ -69,6 +73,7 @@ class AuthServices:
 
         raise HTTPException(400, detail="Invalid credentials")
 
+    @db_exception_handler
     def user_logout(self, user_id: int):
         stmt = select(User).where(User.id == user_id)
         logged_user = self.db.execute(stmt).scalars().first()
@@ -98,6 +103,7 @@ class AuthServices:
         }
         return data
 
+    @db_exception_handler
     def admin_login(self, admin: AdminLogin):
         if "@" in admin.username_or_email:
             stmt = select(Admin).where(Admin.email == admin.username_or_email)
@@ -123,3 +129,6 @@ class AuthServices:
             return data
         else:
             raise HTTPException(400, detail="Invalid cerdentials")
+
+    def verify_token(self, token: str):
+        return verify_token(token)

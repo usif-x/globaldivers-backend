@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 
 from fastapi import Depends, HTTPException, Request
+from fastapi.concurrency import run_in_threadpool
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -11,19 +12,29 @@ from app.models.user import User
 from .database import get_db
 
 
-def get_current_user(request: Request, db: Session = Depends(get_db)):
+async def get_current_user(request: Request, db: Session = Depends(get_db)):
     auth_header = request.headers.get("Authorization")
     if not auth_header or not auth_header.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Invalid authorization header")
 
     token = auth_header.split(" ")[1]
+
+    # Assuming verify_user_token is a synchronous function
     payload = verify_user_token(token, db)
     user_id = payload.get("id")
 
-    stmt = select(User).where(User.id == user_id)
-    user = db.execute(stmt).scalars().first()
+    # This is a synchronous/blocking database call
+    def get_user_from_db():
+        stmt = select(User).where(User.id == user_id)
+        return db.execute(stmt).scalars().first()
+
+    # Run the blocking call in a thread pool and await the result,
+    # making the whole dependency non-blocking for FastAPI.
+    user = await run_in_threadpool(get_user_from_db)
+
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
+
     return user
 
 
