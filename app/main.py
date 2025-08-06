@@ -16,7 +16,9 @@ from app.core.init_superadmin import create_super_admin
 from app.core.limiter import limiter
 from app.db.conn import Base, engine
 from app.models.admin import Admin
+from app.models.best_selling import BestSelling
 from app.models.course import Course
+from app.models.dive_center import DiveCenter
 from app.models.gallery import Gallery
 from app.models.invoice import Invoice
 from app.models.package import Package
@@ -24,8 +26,6 @@ from app.models.testimonial import Testimonial
 from app.models.trip import Trip
 from app.models.user import User
 from app.routes.all import routes
-
-# Get project root directory (parent of 'app' folder)
 
 
 @asynccontextmanager

@@ -1,7 +1,9 @@
 from .admin import admin_routes
 from .analytics import analytics_routes
 from .auth import auth_routes
+from .best_selling import best_selling_routes
 from .course import course_routes
+from .dive_center import dive_center_routes
 from .divesites import divesites_routes
 from .gallery import gallery_routes
 from .invoice import invoice_routes
@@ -26,4 +28,6 @@ routes = [
     payment_routes,
     invoice_routes,
     setting_routes,
+    best_selling_routes,
+    dive_center_routes,
 ]
