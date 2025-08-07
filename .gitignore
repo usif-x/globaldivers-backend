@@ -10,6 +10,7 @@ __pycache__/
 # VSCode
 .vscode/
 .idea/
+.ropeproject/
 
 # Node or frontend
 node_modules/
