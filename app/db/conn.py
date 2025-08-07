@@ -20,7 +20,7 @@ DB_URI = f"mysql+pymysql://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}"
 ONLINE_DATABASE_URL = os.environ.get("ONLINE_DB_URI")
 
 
-engine = create_engine(ONLINE_DATABASE_URL, echo=True)
+engine = create_engine(DB_URI, echo=True)
 
 
 SessionLocal = sessionmaker(bind=engine)
