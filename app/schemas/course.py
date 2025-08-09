@@ -49,6 +49,7 @@ class UpdateCourse(BaseModel):
     course_type: Optional[str] = None
     has_certificate: Optional[bool] = None
     certificate_type: Optional[str] = None
+    provider: Optional[str] = None
     has_online_content: Optional[bool] = None
     contents: Optional[List[CourseContentCreate]] = None
 
@@ -70,6 +71,7 @@ class CourseResponse(BaseModel):
     course_type: str
     has_certificate: bool
     certificate_type: str
+    provider: str
     has_online_content: bool
     created_at: datetime
     updated_at: datetime

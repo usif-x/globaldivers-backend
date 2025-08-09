@@ -3,7 +3,8 @@ from sqlalchemy import and_, select
 from sqlalchemy.orm import Session, joinedload
 
 from app.core.exception_handler import db_exception_handler
-from app.models.course import Course, CourseContent
+from app.models.course import Course
+from app.models.course_content import CourseContent
 from app.models.user import User
 from app.schemas.course import CourseResponse, CreateCourse, UpdateCourse
 
@@ -61,9 +62,9 @@ class CourseServices:
     @db_exception_handler
     def get_course_with_content_by_id_for_user(self, id: int, user: User):
         # أولاً نتأكد إن اليوزر موجود
-        user_stmt = select(User).where(User.id == User.id)
-        user = self.db.execute(user_stmt).scalars().first()
-        if not user:
+        user_stmt = select(User).where(User.id == user.id)
+        user_db = self.db.execute(user_stmt).scalars().first()
+        if not user_db:
             raise HTTPException(404, detail="User not found")
 
         # نجلب الكورس مع المحتوى ولكن فقط إذا اليوزر مشترك فيه
@@ -73,7 +74,7 @@ class CourseServices:
             .where(
                 and_(
                     Course.id == id,
-                    User.id == User.id,  # شرط إن اليوزر موجود ضمن المشتركين
+                    User.id == user.id,  # شرط إن اليوزر موجود ضمن المشتركين
                 )
             )
             .options(joinedload(Course.contents))

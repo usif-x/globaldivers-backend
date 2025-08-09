@@ -11,6 +11,9 @@ from app.models.package import Package
 from app.models.setting import WebsiteSettings
 from app.models.testimonial import Testimonial
 from app.models.trip import Trip
+from app.models.notification import Notification
+from app.models.best_selling import BestSelling
+from app.models.dive_center import DiveCenter
 
 # Models
 from app.models.user import User

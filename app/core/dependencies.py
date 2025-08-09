@@ -13,29 +13,38 @@ from .database import get_db
 
 
 async def get_current_user(request: Request, db: Session = Depends(get_db)):
-    auth_header = request.headers.get("Authorization")
-    if not auth_header or not auth_header.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Invalid authorization header")
+    try:
+        auth_header = request.headers.get("Authorization")
+        if not auth_header or not auth_header.startswith("Bearer "):
+            raise HTTPException(status_code=401, detail="Invalid authorization header")
 
-    token = auth_header.split(" ")[1]
+        token = auth_header.split(" ")[1]
 
-    # Assuming verify_user_token is a synchronous function
-    payload = verify_user_token(token, db)
-    user_id = payload.get("id")
+        # Get the payload from the JWT token
+        payload = verify_user_token(token, db)
+        user_id = payload.get("id")
 
-    # This is a synchronous/blocking database call
-    def get_user_from_db():
-        stmt = select(User).where(User.id == user_id)
-        return db.execute(stmt).scalars().first()
+        if not user_id:
+            raise HTTPException(status_code=401, detail="Invalid token payload")
 
-    # Run the blocking call in a thread pool and await the result,
-    # making the whole dependency non-blocking for FastAPI.
-    user = await run_in_threadpool(get_user_from_db)
+        # Define the database query function
+        def get_user_from_db():
+            stmt = select(User).where(User.id == user_id)
+            user = db.execute(stmt).scalars().first()
+            return user
 
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        # Run the blocking call in a thread pool
+        user = await run_in_threadpool(get_user_from_db)
 
-    return user
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        return user  # This is the User model instance, not the payload
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=401, detail="Authentication failed")
 
 
 def get_current_admin(request: Request, db: Session = Depends(get_db)):

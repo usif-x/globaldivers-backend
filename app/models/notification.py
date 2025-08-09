@@ -1,12 +1,11 @@
-# app/models/invoice.py
+# app/models/notification.py
 from datetime import datetime
-from typing import List
-from sqlalchemy import JSON, DateTime, Float, ForeignKey, Integer, String, func
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, func, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.conn import Base
 
-class Invoice(Base):
-    __tablename__ = "invoices"
+class Notification(Base):
+    __tablename__ = "notifications"
 
     # Primary key
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -16,13 +15,15 @@ class Invoice(Base):
         ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
 
-    # Invoice data
-    amount: Mapped[float] = mapped_column(Float, nullable=False)
-    status: Mapped[str] = mapped_column(String(50), nullable=False)
-    pay_url: Mapped[str] = mapped_column(String(255), nullable=False)
-    pay_method: Mapped[str] = mapped_column(String(100), nullable=False)
-    invoice_for: Mapped[str] = mapped_column(String(100), nullable=False)
-    items: Mapped[List[dict]] = mapped_column(JSON, nullable=False)
+    # Notification content
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    message: Mapped[str] = mapped_column(String(500), nullable=True)
+    type: Mapped[str] = mapped_column(String(50), nullable=False)
+
+    # Status
+    is_read: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default=text("'0'")
+    )
 
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(
@@ -38,9 +39,9 @@ class Invoice(Base):
     # Relationships
     user: Mapped["User"] = relationship(
         "User",
-        back_populates="invoices",
+        back_populates="notifications",
         lazy="joined"
     )
 
     def __repr__(self) -> str:
-        return f"<Invoice(id={self.id}, user_id={self.user_id}, amount={self.amount}, status='{self.status}')>"
+        return f"<Notification(id={self.id}, user_id={self.user_id}, title='{self.title}')>"

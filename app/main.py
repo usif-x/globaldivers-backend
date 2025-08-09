@@ -110,7 +110,7 @@ async def test_storage():
 
 @app.get("/", include_in_schema=False)
 async def root():
-    return RedirectResponse(url="https://globaldivers.vercel.app/")  # Frontend URL
+    return RedirectResponse(url="https://global-frontend-lac.vercel.app/")  # Frontend URL
 
 
 @app.get("/document", include_in_schema=False)
@@ -127,59 +127,6 @@ async def docs():
 async def health():
     return {"status": "ok"}
 
-
-@app.get("/users/me/notifications")
-async def notifications():
-    return [
-        {
-            "id": "uuid-notif-1",
-            "type": "new_invoice",
-            "message": "Your invoice #INV-2023-003 for the 'Next.js 14' course is ready.",
-            "link": "/profile?tab=invoices",
-            "is_read": False,
-            "created_at": "2023-10-28T09:01:00Z",
-        },
-        {
-            "id": "uuid-notif-2",
-            "type": "course_update",
-            "message": "A new module, 'Advanced Caching Strategies', has been added to 'Next.js 14: The Full Course'.",
-            "link": "/courses/nextjs-14-full-course",
-            "is_read": False,
-            "created_at": "2023-10-27T15:30:00Z",
-        },
-        {
-            "id": "uuid-notif-3",
-            "type": "payment_success",
-            "message": "Your payment of $149.99 for 'Advanced React Patterns' was successful.",
-            "link": "/payment/success?order_id=ORD-12345",
-            "is_read": True,
-            "created_at": "2023-10-26T10:05:00Z",
-        },
-        {
-            "id": "uuid-notif-4",
-            "type": "new_message",
-            "message": "You have a new message from your instructor, Jane Doe.",
-            "link": "/messages/jane-doe",
-            "is_read": False,
-            "created_at": "2023-10-28T11:20:00Z",
-        },
-        {
-            "id": "uuid-notif-5",
-            "type": "default",
-            "message": "Welcome to our platform! We're glad to have you here.",
-            "link": "/dashboard",
-            "is_read": True,
-            "created_at": "2023-10-25T08:00:00Z",
-        },
-        {
-            "id": "uuid-notif-6",
-            "type": "course_update",
-            "message": "You've completed 'Tailwind CSS from Scratch'! Congratulations!",
-            "link": "/profile?tab=courses",
-            "is_read": True,
-            "created_at": "2023-10-20T12:00:00Z",
-        },
-    ]
 
 
 create_super_admin()
