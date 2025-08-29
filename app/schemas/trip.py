@@ -8,8 +8,12 @@ class CreateTrip(BaseModel):
     description: str
     images: List[str]
     is_image_list: bool = False
-    adult_price: float
-    child_price: float
+    egp_adult_price: float
+    egp_child_price: float
+    usd_adult_price: float
+    usd_child_price: float
+    eur_adult_price: float
+    eur_child_price: float
     maxim_person: int
     has_discount: bool
     discount_percentage: float
@@ -26,8 +30,12 @@ class TripResponse(BaseModel):
     description: Optional[str] = None
     images: List[str]
     is_image_list: bool = False
-    adult_price: float
-    child_price: float
+    egp_adult_price: float
+    egp_child_price: float
+    usd_adult_price: float
+    usd_child_price: float
+    eur_adult_price: float
+    eur_child_price: float
     maxim_person: int
     package_id: int
     has_discount: bool = False
@@ -46,8 +54,12 @@ class UpdateTrip(BaseModel):
     description: Optional[str] = None
     images: Optional[List[str]] = None
     is_image_list: Optional[bool] = None
-    adult_price: Optional[float] = None
-    child_price: Optional[float] = None
+    egp_adult_price: Optional[float] = None
+    egp_child_price: Optional[float] = None
+    usd_adult_price: Optional[float] = None
+    usd_child_price: Optional[float] = None
+    eur_adult_price: Optional[float] = None
+    eur_child_price: Optional[float] = None
     maxim_person: Optional[int] = None
     has_discount: Optional[bool] = None
     discount_percentage: Optional[int] = None

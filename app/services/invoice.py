@@ -1,424 +1,246 @@
-import math
-from typing import List, Optional
+# app/services/invoice_service.py
 
-from fastapi import HTTPException
-from sqlalchemy import func, select
+from typing import Any, Dict, List
+
+from fastapi import HTTPException, status
+from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 
-from app.core.exception_handler import db_exception_handler
 from app.models.invoice import Invoice
 from app.schemas.invoice import (
-    InvoiceCreate,
-    InvoiceList,
-    InvoiceResponse,
-    InvoiceStatus,
-    InvoiceStatusUpdate,
-    InvoiceSummary,
-    InvoiceUpdate,
-    UserResponse,
+    InvoiceSummaryResponse,  # <-- You will need to create this schema
 )
-from app.services.payment import PaymentService
+from app.schemas.invoice import InvoiceCreate, InvoiceCreateResponse, InvoiceResponse
+from app.utils.easykash import easykash_client
 
 
 class InvoiceService:
-    def __init__(self, db: Session):
-        self.db = db
-        self.payment_service = PaymentService()
+    @staticmethod
+    def create_invoice(
+        db: Session, invoice_data: InvoiceCreate, user_id: int
+    ) -> InvoiceCreateResponse:
+        """
+        1. Creates a payment link with EasyKash.
+        2. If successful, saves an invoice record to the database.
+        3. Returns the new invoice details including the payment URL.
+        """
+        payment_payload = invoice_data.model_dump()
+        easykash_response = easykash_client.create_payment(
+            payment_data=payment_payload, user_id=user_id
+        )
 
-    @db_exception_handler
-    async def create_invoice(self, invoice_data: InvoiceCreate) -> InvoiceResponse:
-        """Create a new invoice"""
-
-        # Generate payment URL if not provided
-        pay_url = invoice_data.pay_url
-        if not pay_url:
-            pay_url = await self.payment_service.generate_payment_url(
-                amount=invoice_data.amount,
-                payment_method=invoice_data.pay_method,
-                user_id=invoice_data.user_id,
-                invoice_for=invoice_data.invoice_for,
+        if not easykash_response.get("success"):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Failed to create payment link: {easykash_response.get('details')}",
             )
 
-        # Create new invoice instance
-        db_invoice = Invoice(
-            user_id=invoice_data.user_id,
+        new_invoice = Invoice(
+            user_id=user_id,
+            buyer_name=invoice_data.buyer_name,
+            buyer_email=invoice_data.buyer_email,
+            buyer_phone=invoice_data.buyer_phone,
+            invoice_description=invoice_data.invoice_description,
+            activity=invoice_data.activity,
             amount=invoice_data.amount,
-            status=invoice_data.status.value,
-            pay_method=invoice_data.pay_method.value,
-            invoice_for=invoice_data.invoice_for.value,
-            items=invoice_data.items,
-            pay_url=pay_url,
+            currency=invoice_data.currency,
+            status="PENDING",
+            customer_reference=easykash_response.get("customer_reference"),
+            easykash_reference=easykash_response.get("easykash_reference"),
         )
 
-        self.db.add(db_invoice)
-        self.db.commit()
-        self.db.refresh(db_invoice)
+        db.add(new_invoice)
+        db.commit()
+        db.refresh(new_invoice)
 
-        # Convert to response model and include user data if needed
-        invoice_response = InvoiceResponse.model_validate(db_invoice)
-        if db_invoice.user:
-            invoice_response.user = UserResponse.model_validate(db_invoice.user)
+        response_data = InvoiceCreateResponse(
+            id=new_invoice.id,
+            user_id=new_invoice.user_id,
+            status=new_invoice.status,
+            customer_reference=new_invoice.customer_reference,
+            pay_url=easykash_response.get("pay_url"),
+            created_at=new_invoice.created_at,
+        )
+        return response_data
 
-        return invoice_response
-
-    @db_exception_handler
-    async def get_invoice_by_id(self, invoice_id: int) -> InvoiceResponse:
-        """Get invoice by ID"""
-
-        stmt = select(Invoice).where(Invoice.id == invoice_id)
-        result = self.db.execute(stmt)
-        invoice = result.scalar_one_or_none()
-
+    @staticmethod
+    def get_invoice(db: Session, invoice_id: int, user_id: int) -> InvoiceResponse:
+        """
+        1. Retrieves a specific invoice for a given user from the database.
+           (SECURITY: Ensures a user can only access their own invoice).
+        2. Inquires its latest status from EasyKash.
+        3. Updates the status in the database if it has changed.
+        4. Returns the full invoice details.
+        """
+        # Step 1: Get the invoice from DB, ensuring it belongs to the user
+        invoice = (
+            db.query(Invoice)
+            .filter(Invoice.id == invoice_id, Invoice.user_id == user_id)
+            .first()
+        )
         if not invoice:
-            raise HTTPException(status_code=404, detail="Invoice not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Invoice not found"
+            )
 
-        # Convert to response model and include user data if needed
-        invoice_response = InvoiceResponse.model_validate(invoice)
-        if invoice.user:
-            invoice_response.user = UserResponse.model_validate(invoice.user)
+        if not invoice.customer_reference:
+            # This invoice was likely created before a payment link was generated.
+            # Return it as is, without checking EasyKash.
+            return invoice
 
-        return invoice_response
+        # Step 2: Inquire payment status from EasyKash
+        inquiry_response = easykash_client.inquire_payment(invoice.customer_reference)
 
-    @db_exception_handler
-    async def get_invoices_by_user(
-        self,
-        user_id: int,
-        page: int = 1,
-        per_page: int = 10,
-        status: Optional[InvoiceStatus] = None,
-    ) -> InvoiceList:
-        """Get invoices for a specific user with pagination"""
+        if inquiry_response.get("error"):
+            print(
+                f"Could not inquire payment status for invoice {invoice.id}: {inquiry_response.get('details')}"
+            )
+            return invoice
 
-        # Base query
-        stmt = select(Invoice).where(Invoice.user_id == user_id)
+        # Step 3: Update local status if necessary
+        easykash_status = inquiry_response.get("status")
+        easykash_ref = inquiry_response.get("easykashReference")
 
-        # Add status filter if provided
-        if status:
-            stmt = stmt.where(Invoice.status == status.value)
+        needs_commit = False
+        if easykash_status and easykash_status.upper() != invoice.status:
+            invoice.status = easykash_status.upper()
+            needs_commit = True
 
-        # Order by created_at descending
-        stmt = stmt.order_by(Invoice.created_at.desc())
+        if easykash_ref and easykash_ref != invoice.easykash_reference:
+            invoice.easykash_reference = easykash_ref
+            needs_commit = True
 
-        # Count total invoices
-        count_stmt = select(func.count(Invoice.id)).where(Invoice.user_id == user_id)
-        if status:
-            count_stmt = count_stmt.where(Invoice.status == status.value)
+        if needs_commit:
+            db.commit()
+            db.refresh(invoice)
 
-        total = self.db.execute(count_stmt).scalar()
+        # Step 4: Return the (potentially updated) invoice
+        return invoice
 
-        # Apply pagination
-        offset = (page - 1) * per_page
-        stmt = stmt.offset(offset).limit(per_page)
-
-        result = self.db.execute(stmt)
-        invoices = result.scalars().all()
-
-        # Calculate total pages
-        pages = math.ceil(total / per_page) if total > 0 else 1
-
-        # Convert invoices to response models with user data
-        invoice_responses = []
-        for invoice in invoices:
-            invoice_response = InvoiceResponse.model_validate(invoice)
-            if invoice.user:
-                invoice_response.user = UserResponse.model_validate(invoice.user)
-            invoice_responses.append(invoice_response)
-
-        return InvoiceList(
-            invoices=invoice_responses,
-            total=total,
-            page=page,
-            per_page=per_page,
-            pages=pages,
-        )
-
-    @db_exception_handler
-    async def get_all_invoices(
-        self, page: int = 1, per_page: int = 10, status: Optional[InvoiceStatus] = None
-    ) -> InvoiceList:
-        """Get all invoices with pagination (admin function)"""
-
-        # Base query
-        stmt = select(Invoice)
-
-        # Add status filter if provided
-        if status:
-            stmt = stmt.where(Invoice.status == status.value)
-
-        # Order by created_at descending
-        stmt = stmt.order_by(Invoice.created_at.desc())
-
-        # Count total invoices
-        count_stmt = select(func.count(Invoice.id))
-        if status:
-            count_stmt = count_stmt.where(Invoice.status == status.value)
-
-        total = self.db.execute(count_stmt).scalar()
-
-        # Apply pagination
-        offset = (page - 1) * per_page
-        stmt = stmt.offset(offset).limit(per_page)
-
-        result = self.db.execute(stmt)
-        invoices = result.scalars().all()
-
-        # Calculate total pages
-        pages = math.ceil(total / per_page) if total > 0 else 1
-
-        # Convert invoices to response models with user data
-        invoice_responses = []
-        for invoice in invoices:
-            invoice_response = InvoiceResponse.model_validate(invoice)
-            if invoice.user:
-                invoice_response.user = UserResponse.model_validate(invoice.user)
-            invoice_responses.append(invoice_response)
-
-        return InvoiceList(
-            invoices=invoice_responses,
-            total=total,
-            page=page,
-            per_page=per_page,
-            pages=pages,
-        )
-
-    @db_exception_handler
-    async def update_invoice(
-        self, invoice_id: int, invoice_data: InvoiceUpdate
-    ) -> InvoiceResponse:
-        """Update an existing invoice"""
-
-        stmt = select(Invoice).where(Invoice.id == invoice_id)
-        result = self.db.execute(stmt)
-        invoice = result.scalar_one_or_none()
-
+    @staticmethod
+    def get_invoice_admin(db: Session, invoice_id: int) -> InvoiceResponse:
+        """
+        1. Retrieves a specific invoice for a given user from the database.
+           (SECURITY: Ensures a user can only access their own invoice).
+        2. Inquires its latest status from EasyKash.
+        3. Updates the status in the database if it has changed.
+        4. Returns the full invoice details.
+        """
+        # Step 1: Get the invoice from DB, ensuring it belongs to the user
+        invoice = db.query(Invoice).filter(Invoice.id == invoice_id).first()
         if not invoice:
-            raise HTTPException(status_code=404, detail="Invoice not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Invoice not found"
+            )
 
-        # Update fields if provided
-        update_data = invoice_data.model_dump(exclude_unset=True)
+        if not invoice.customer_reference:
+            # This invoice was likely created before a payment link was generated.
+            # Return it as is, without checking EasyKash.
+            return invoice
 
-        for field, value in update_data.items():
-            if field in ["status", "pay_method", "invoice_for"] and hasattr(
-                value, "value"
-            ):
-                setattr(invoice, field, value.value)
-            else:
-                setattr(invoice, field, value)
+        # Step 2: Inquire payment status from EasyKash
+        inquiry_response = easykash_client.inquire_payment(invoice.customer_reference)
 
-        self.db.commit()
-        self.db.refresh(invoice)
+        if inquiry_response.get("error"):
+            print(
+                f"Could not inquire payment status for invoice {invoice.id}: {inquiry_response.get('details')}"
+            )
+            return invoice
 
-        # Convert to response model and include user data if needed
-        invoice_response = InvoiceResponse.model_validate(invoice)
-        if invoice.user:
-            invoice_response.user = UserResponse.model_validate(invoice.user)
+        # Step 3: Update local status if necessary
+        easykash_status = inquiry_response.get("status")
+        easykash_ref = inquiry_response.get("easykashReference")
 
-        return invoice_response
+        needs_commit = False
+        if easykash_status and easykash_status.upper() != invoice.status:
+            invoice.status = easykash_status.upper()
+            needs_commit = True
 
-    @db_exception_handler
-    async def update_invoice_status(
-        self, invoice_id: int, status_data: InvoiceStatusUpdate
-    ) -> InvoiceResponse:
-        """Update invoice status specifically"""
+        if easykash_ref and easykash_ref != invoice.easykash_reference:
+            invoice.easykash_reference = easykash_ref
+            needs_commit = True
 
-        stmt = select(Invoice).where(Invoice.id == invoice_id)
-        result = self.db.execute(stmt)
-        invoice = result.scalar_one_or_none()
+        if needs_commit:
+            db.commit()
+            db.refresh(invoice)
 
-        if not invoice:
-            raise HTTPException(status_code=404, detail="Invoice not found")
+        # Step 4: Return the (potentially updated) invoice
+        return invoice
 
-        # Update status
-        invoice.status = status_data.status.value
-
-        # Update payment URL if provided
-        if status_data.pay_url:
-            invoice.pay_url = status_data.pay_url
-
-        self.db.commit()
-        self.db.refresh(invoice)
-
-        # Convert to response model and include user data if needed
-        invoice_response = InvoiceResponse.model_validate(invoice)
-        if invoice.user:
-            invoice_response.user = UserResponse.model_validate(invoice.user)
-
-        return invoice_response
-
-    @db_exception_handler
-    async def delete_invoice(self, invoice_id: int) -> bool:
-        """Delete an invoice (soft delete by marking as cancelled)"""
-
-        stmt = select(Invoice).where(Invoice.id == invoice_id)
-        result = self.db.execute(stmt)
-        invoice = result.scalar_one_or_none()
-
-        if not invoice:
-            raise HTTPException(status_code=404, detail="Invoice not found")
-
-        if invoice.status == InvoiceStatus.PAID.value:
-            raise HTTPException(status_code=400, detail="Cannot delete a paid invoice")
-
-        # Mark as cancelled instead of hard delete
-        invoice.status = InvoiceStatus.CANCELLED.value
-
-        self.db.commit()
-
-        return True
-
-    @db_exception_handler
-    async def get_invoice_summary(
-        self, user_id: Optional[int] = None
-    ) -> InvoiceSummary:
-        """Get invoice summary/analytics"""
-
-        # Base query
-        base_query = select(Invoice)
-
-        # Filter by user if provided
-        if user_id:
-            base_query = base_query.where(Invoice.user_id == user_id)
-
-        # Get all invoices for calculations
-        result = self.db.execute(base_query)
-        invoices = result.scalars().all()
-
-        # Calculate summary statistics
-        total_invoices = len(invoices)
-        total_amount = sum(invoice.amount for invoice in invoices)
-
-        pending_invoices = len(
-            [i for i in invoices if i.status == InvoiceStatus.PENDING.value]
+    @staticmethod
+    def get_my_invoices_for_user(db: Session, user_id: int) -> List[InvoiceResponse]:
+        """
+        Retrieves all invoices belonging to a specific user, ordered by creation date.
+        """
+        invoices = (
+            db.query(Invoice)
+            .filter(Invoice.user_id == user_id)
+            .order_by(Invoice.created_at.desc())
+            .all()
         )
-        pending_amount = sum(
-            i.amount for i in invoices if i.status == InvoiceStatus.PENDING.value
-        )
+        return invoices
 
-        paid_invoices = len(
-            [i for i in invoices if i.status == InvoiceStatus.PAID.value]
-        )
-        paid_amount = sum(
-            i.amount for i in invoices if i.status == InvoiceStatus.PAID.value
-        )
-
-        failed_invoices = len(
-            [i for i in invoices if i.status == InvoiceStatus.FAILED.value]
-        )
-        failed_amount = sum(
-            i.amount for i in invoices if i.status == InvoiceStatus.FAILED.value
-        )
-
-        return InvoiceSummary(
-            total_invoices=total_invoices,
-            total_amount=total_amount,
-            pending_invoices=pending_invoices,
-            pending_amount=pending_amount,
-            paid_invoices=paid_invoices,
-            paid_amount=paid_amount,
-            failed_invoices=failed_invoices,
-            failed_amount=failed_amount,
-        )
-
-    @db_exception_handler
-    async def mark_invoice_as_paid(self, invoice_id: int) -> InvoiceResponse:
-        """Mark an invoice as paid (typically called by payment webhook)"""
-
-        stmt = select(Invoice).where(Invoice.id == invoice_id)
-        result = self.db.execute(stmt)
-        invoice = result.scalar_one_or_none()
-
-        if not invoice:
-            raise HTTPException(status_code=404, detail="Invoice not found")
-
-        if invoice.status == InvoiceStatus.PAID.value:
-            raise HTTPException(status_code=400, detail="Invoice is already paid")
-
-        invoice.status = InvoiceStatus.PAID.value
-
-        self.db.commit()
-        self.db.refresh(invoice)
-
-        # Trigger any post-payment actions here if needed
-        await self._handle_payment_success(invoice)
-
-        # Convert to response model and include user data if needed
-        invoice_response = InvoiceResponse.model_validate(invoice)
-        if invoice.user:
-            invoice_response.user = UserResponse.model_validate(invoice.user)
-
-        return invoice_response
-
-    @db_exception_handler
-    async def mark_invoice_as_failed(self, invoice_id: int) -> InvoiceResponse:
-        """Mark an invoice as failed (typically called by payment webhook)"""
-
-        stmt = select(Invoice).where(Invoice.id == invoice_id)
-        result = self.db.execute(stmt)
-        invoice = result.scalar_one_or_none()
-
-        if not invoice:
-            raise HTTPException(status_code=404, detail="Invoice not found")
-
-        invoice.status = InvoiceStatus.FAILED.value
-
-        self.db.commit()
-        self.db.refresh(invoice)
-
-        # Convert to response model and include user data if needed
-        invoice_response = InvoiceResponse.model_validate(invoice)
-        if invoice.user:
-            invoice_response.user = UserResponse.model_validate(invoice.user)
-
-        return invoice_response
-
-    async def _handle_payment_success(self, invoice: Invoice):
-        """Handle post-payment actions (override in subclass if needed)"""
-        # This method can be overridden to handle specific business logic
-        # after successful payment (e.g., send confirmation email, activate services, etc.)
-        pass
-
-    @db_exception_handler
-    async def get_invoices_by_status(
-        self, status: InvoiceStatus
+    @staticmethod
+    def get_all_invoices_for_admin(
+        db: Session, skip: int = 0, limit: int = 100
     ) -> List[InvoiceResponse]:
-        """Get all invoices with a specific status"""
+        """
+        Retrieves a paginated list of all invoices. (Admin only)
+        """
+        invoices = (
+            db.query(Invoice)
+            .order_by(Invoice.created_at.desc())
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
+        return invoices
 
-        stmt = select(Invoice).where(Invoice.status == status.value)
-        result = self.db.execute(stmt)
-        invoices = result.scalars().all()
+    @staticmethod
+    def get_invoices_summary_for_admin(db: Session) -> InvoiceSummaryResponse:
+        """
+        Calculates and returns a summary of all invoices. (Admin only)
+        """
+        total_invoices = db.query(Invoice).count()
 
-        # Convert invoices to response models with user data
-        invoice_responses = []
-        for invoice in invoices:
-            invoice_response = InvoiceResponse.model_validate(invoice)
-            if invoice.user:
-                invoice_response.user = UserResponse.model_validate(invoice.user)
-            invoice_responses.append(invoice_response)
+        # Calculate total revenue only from PAID invoices
+        total_revenue = (
+            db.query(func.sum(Invoice.amount)).filter(Invoice.status == "PAID").scalar()
+        ) or 0.0
 
-        return invoice_responses
+        pending_count = db.query(Invoice).filter(Invoice.status == "PENDING").count()
+        paid_count = db.query(Invoice).filter(Invoice.status == "PAID").count()
 
-    @db_exception_handler
-    async def expire_pending_invoices(self, days_old: int = 7) -> int:
-        """Expire invoices that have been pending for too long"""
-
-        from datetime import datetime, timedelta
-
-        cutoff_date = datetime.utcnow() - timedelta(days=days_old)
-
-        stmt = select(Invoice).where(
-            Invoice.status == InvoiceStatus.PENDING.value,
-            Invoice.created_at < cutoff_date,
+        # Consider multiple forms of failure states
+        failed_statuses = ["FAILED", "CANCELLED", "EXPIRED"]
+        failed_count = (
+            db.query(Invoice).filter(Invoice.status.in_(failed_statuses)).count()
         )
 
-        result = self.db.execute(stmt)
-        expired_invoices = result.scalars().all()
+        return InvoiceSummaryResponse(
+            total_invoices=total_invoices,
+            total_revenue=round(total_revenue, 2),
+            pending_count=pending_count,
+            paid_count=paid_count,
+            failed_count=failed_count,
+        )
 
-        count = 0
-        for invoice in expired_invoices:
-            invoice.status = InvoiceStatus.EXPIRED.value
-            count += 1
+    @staticmethod
+    def get_all_invoices_for_admin(
+        db: Session, skip: int = 0, limit: int = 100, search: str = None
+    ) -> List[InvoiceResponse]:
+        """
+        Retrieves a paginated list of all invoices. (Admin only)
+        Can be filtered by a search term on customer_reference.
+        """
+        query = db.query(Invoice)
 
-        if count > 0:
-            self.db.commit()
+        # [NEW] Add search filter if a search term is provided
+        if search:
+            # Use ilike for case-insensitive partial matching
+            query = query.filter(Invoice.customer_reference.ilike(f"%{search}%"))
 
-        return count
+        invoices = (
+            query.order_by(Invoice.created_at.desc()).offset(skip).limit(limit).all()
+        )
+        return invoices

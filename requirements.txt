@@ -44,7 +44,10 @@ starlette==0.47.1
 typing-inspection==0.4.1
 typing_extensions==4.14.1
 tzdata==2025.2
+ua-parser==1.0.1
+ua-parser-builtins==0.18.0.post1
 urllib3==2.5.0
+user-agents==2.2.0
 uvicorn==0.35.0
+websockets==15.0.1
 wrapt==1.17.2
-mangum

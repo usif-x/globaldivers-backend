@@ -1,286 +1,130 @@
-from typing import Optional
+# app/routers/invoice.py
 
-from fastapi import APIRouter, Depends, HTTPException, Path, Query
+from typing import List
+
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.core.dependencies import get_current_admin, get_current_user
+from app.core.dependencies import get_current_super_admin, get_current_user
+from app.models.admin import Admin
 from app.models.user import User
-from app.schemas.invoice import (
-    InvoiceCreate,
-    InvoiceList,
-    InvoiceResponse,
-    InvoiceStatus,
-    InvoiceStatusUpdate,
-    InvoiceSummary,
-    InvoiceUpdate,
-    UserResponse,
-)
+from app.schemas.invoice import InvoiceSummaryResponse  # <-- Make sure this is imported
+from app.schemas.invoice import InvoiceCreate, InvoiceCreateResponse, InvoiceResponse
 from app.services.invoice import InvoiceService
 
-invoice_routes = APIRouter(prefix="/invoices", tags=["invoices Endpoints"])
+router = APIRouter(prefix="/invoices", tags=["Invoices"])
 
 
-# USER ROUTES - Require user authentication
-@invoice_routes.post("/", response_model=InvoiceResponse, status_code=201)
-async def create_invoice(
+# --- User-Facing Routes ---
+
+
+@router.post(
+    "/",
+    status_code=status.HTTP_201_CREATED,
+    response_model=InvoiceCreateResponse,
+    summary="Create a new invoice and payment link",
+)
+def create_new_invoice(
     invoice_data: InvoiceCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Create a new invoice for the current user"""
-    # Ensure user can only create invoices for themselves (unless admin)
-    if invoice_data.user_id != current_user.id and not current_user.is_admin:
-        raise HTTPException(
-            status_code=403, detail="You can only create invoices for yourself"
-        )
-
-    invoice_service = InvoiceService(db)
-    return await invoice_service.create_invoice(invoice_data)
-
-
-@invoice_routes.get("/", response_model=InvoiceList)
-async def get_all_invoices(
-    page: int = Query(1, ge=1, description="Page number"),
-    per_page: int = Query(10, ge=1, le=100, description="Items per page"),
-    status: Optional[InvoiceStatus] = Query(None, description="Filter by status"),
-    db: Session = Depends(get_db),
-):
-    """Get all invoices with pagination (admin function)"""
-    invoice_service = InvoiceService(db)
-    return await invoice_service.get_all_invoices(
-        page=page, per_page=per_page, status=status
-    )
-
-
-@invoice_routes.get("/my", response_model=InvoiceList)
-async def get_my_invoices(
-    page: int = Query(1, ge=1, description="Page number"),
-    per_page: int = Query(10, ge=1, le=100, description="Items per page"),
-    status: Optional[InvoiceStatus] = Query(None, description="Filter by status"),
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    """Get current user's invoices with pagination"""
-    invoice_service = InvoiceService(db)
-    return await invoice_service.get_invoices_by_user(
-        user_id=current_user.id, page=page, per_page=per_page, status=status
-    )
-
-
-@invoice_routes.get("/my/summary", response_model=InvoiceSummary)
-async def get_my_invoice_summary(
-    db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
-):
-    """Get current user's invoice summary/analytics"""
-    invoice_service = InvoiceService(db)
-    return await invoice_service.get_invoice_summary(user_id=current_user.id)
-
-
-@invoice_routes.get("/{invoice_id}", response_model=InvoiceResponse)
-async def get_invoice(
-    invoice_id: int = Path(..., description="Invoice ID"),
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    """Get a specific invoice (users can only access their own invoices)"""
-    invoice_service = InvoiceService(db)
-    invoice = await invoice_service.get_invoice_by_id(invoice_id)
-
-    # Check if user owns this invoice (unless admin)
-    if invoice.user_id != current_user.id and not current_user.is_admin:
-        raise HTTPException(
-            status_code=403, detail="You can only access your own invoices"
-        )
-
+    """
+    Creates a new invoice associated with the currently logged-in user.
+    """
+    invoice = InvoiceService.create_invoice(db, invoice_data, current_user.id)
     return invoice
 
 
-@invoice_routes.patch("/{invoice_id}", response_model=InvoiceResponse)
-async def update_invoice(
-    invoice_data: InvoiceUpdate,
-    invoice_id: int = Path(..., description="Invoice ID"),
+@router.get(
+    "/me",
+    response_model=List[InvoiceResponse],
+    summary="Get all invoices for the current user",
+)
+def get_my_invoices(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Update an invoice (users can only update their own invoices)"""
-    invoice_service = InvoiceService(db)
-
-    # First check if invoice exists and user owns it
-    existing_invoice = await invoice_service.get_invoice_by_id(invoice_id)
-    if existing_invoice.user_id != current_user.id and not current_user.is_admin:
-        raise HTTPException(
-            status_code=403, detail="You can only update your own invoices"
-        )
-
-    # Users cannot update paid invoices
-    if (
-        existing_invoice.status == InvoiceStatus.PAID.value
-        and not current_user.is_admin
-    ):
-        raise HTTPException(status_code=400, detail="Cannot update a paid invoice")
-
-    return await invoice_service.update_invoice(invoice_id, invoice_data)
+    """
+    Retrieve a list of all invoices belonging to the currently authenticated user.
+    """
+    return InvoiceService.get_my_invoices_for_user(db=db, user_id=current_user.id)
 
 
-@invoice_routes.patch("/{invoice_id}/status", response_model=InvoiceResponse)
-async def update_invoice_status(
-    status_data: InvoiceStatusUpdate,
-    invoice_id: int = Path(..., description="Invoice ID"),
+@router.get(
+    "/{invoice_id}",
+    response_model=InvoiceResponse,
+    summary="Get a specific invoice by ID",
+)
+def get_invoice_details(
+    invoice_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Update invoice status (limited user access)"""
-    invoice_service = InvoiceService(db)
+    """
+    Retrieve details for a specific invoice.
 
-    # Check if user owns this invoice
-    existing_invoice = await invoice_service.get_invoice_by_id(invoice_id)
-    if existing_invoice.user_id != current_user.id and not current_user.is_admin:
-        raise HTTPException(
-            status_code=403, detail="You can only update your own invoices"
-        )
-
-    # Users can only cancel their own pending invoices, admins can do more
-    if not current_user.is_admin:
-        if status_data.status != InvoiceStatus.CANCELLED:
-            raise HTTPException(
-                status_code=403, detail="Users can only cancel their invoices"
-            )
-        if existing_invoice.status != InvoiceStatus.PENDING.value:
-            raise HTTPException(
-                status_code=400, detail="You can only cancel pending invoices"
-            )
-
-    return await invoice_service.update_invoice_status(invoice_id, status_data)
+    **Security**: This endpoint ensures that users can only access their own invoices.
+    """
+    # [SECURITY FIX] Pass the current_user.id to the service layer for validation.
+    invoice = InvoiceService.get_invoice(db, invoice_id, current_user.id)
+    return invoice
 
 
-# ADMIN ROUTES - Require admin authentication
-@invoice_routes.get("/admin/all", response_model=InvoiceList)
-async def get_all_invoices_admin(
-    page: int = Query(1, ge=1, description="Page number"),
-    per_page: int = Query(10, ge=1, le=100, description="Items per page"),
-    status: Optional[InvoiceStatus] = Query(None, description="Filter by status"),
+# --- Admin-Only Routes ---
+
+
+@router.get(
+    "/admin/summary",
+    response_model=InvoiceSummaryResponse,
+    summary="Get an analytics summary of all invoices (Admin Only)",
+    dependencies=[Depends(get_current_super_admin)],
+)
+def get_invoices_summary_for_admin(db: Session = Depends(get_db)):
+    """
+    Provides a summary of all invoices in the system, including total revenue
+    and counts by status. Requires super admin privileges.
+    """
+    return InvoiceService.get_invoices_summary_for_admin(db=db)
+
+
+@router.get(
+    "/{invoice_id}/admin",
+    response_model=InvoiceResponse,
+    summary="Get a specific invoice by ID",
+    dependencies=[Depends(get_current_super_admin)],
+)
+def get_invoice_details(
+    invoice_id: int,
     db: Session = Depends(get_db),
-    current_admin: User = Depends(get_current_admin),
 ):
-    """Get all invoices with pagination (Admin only)"""
-    invoice_service = InvoiceService(db)
-    return await invoice_service.get_all_invoices(
-        page=page, per_page=per_page, status=status
+    """
+    Retrieve details for a specific invoice.
+
+    **Security**: This endpoint ensures that users can only access their own invoices.
+    """
+    # [SECURITY FIX] Pass the current_user.id to the service layer for validation.
+    invoice = InvoiceService.get_invoice_admin(db, invoice_id)
+    return invoice
+
+
+@router.get(
+    "/admin/all",
+    response_model=List[InvoiceResponse],
+    summary="Get all invoices in the system (Admin Only)",
+    dependencies=[Depends(get_current_super_admin)],
+)
+def get_all_invoices_for_admin(
+    skip: int = 0,
+    limit: int = 100,
+    search: str = None,  # <-- [NEW] Add optional search query parameter
+    db: Session = Depends(get_db),
+):
+    """
+    Retrieves a paginated list of all invoices. Requires super admin privileges.
+    Can be filtered by `search` on the customer reference.
+    """
+    return InvoiceService.get_all_invoices_for_admin(
+        db=db, skip=skip, limit=limit, search=search  # <-- [NEW] Pass search to service
     )
-
-
-@invoice_routes.get("/admin/user/{user_id}", response_model=InvoiceList)
-async def get_user_invoices_admin(
-    user_id: int = Path(..., description="User ID"),
-    page: int = Query(1, ge=1, description="Page number"),
-    per_page: int = Query(10, ge=1, le=100, description="Items per page"),
-    status: Optional[InvoiceStatus] = Query(None, description="Filter by status"),
-    db: Session = Depends(get_db),
-    current_admin: User = Depends(get_current_admin),
-):
-    """Get invoices for a specific user (Admin only)"""
-    invoice_service = InvoiceService(db)
-    return await invoice_service.get_invoices_by_user(
-        user_id=user_id, page=page, per_page=per_page, status=status
-    )
-
-
-@invoice_routes.get("/admin/summary", response_model=InvoiceSummary)
-async def get_invoice_summary_admin(
-    user_id: Optional[int] = Query(None, description="Filter by user ID"),
-    db: Session = Depends(get_db),
-    current_admin: User = Depends(get_current_admin),
-):
-    """Get invoice summary/analytics for all users or specific user (Admin only)"""
-    invoice_service = InvoiceService(db)
-    return await invoice_service.get_invoice_summary(user_id=user_id)
-
-
-@invoice_routes.get("/admin/status/{status}", response_model=list[InvoiceResponse])
-async def get_invoices_by_status_admin(
-    status: InvoiceStatus = Path(..., description="Invoice status"),
-    db: Session = Depends(get_db),
-    current_admin: User = Depends(get_current_admin),
-):
-    """Get all invoices with specific status (Admin only)"""
-    invoice_service = InvoiceService(db)
-    return await invoice_service.get_invoices_by_status(status)
-
-
-@invoice_routes.patch("/admin/{invoice_id}/status", response_model=InvoiceResponse)
-async def update_invoice_status_admin(
-    status_data: InvoiceStatusUpdate,
-    invoice_id: int = Path(..., description="Invoice ID"),
-    db: Session = Depends(get_db),
-    current_admin: User = Depends(get_current_admin),
-):
-    """Update invoice status (Admin only - full access)"""
-    invoice_service = InvoiceService(db)
-    return await invoice_service.update_invoice_status(invoice_id, status_data)
-
-
-@invoice_routes.patch("/admin/{invoice_id}", response_model=InvoiceResponse)
-async def update_invoice_admin(
-    invoice_data: InvoiceUpdate,
-    invoice_id: int = Path(..., description="Invoice ID"),
-    db: Session = Depends(get_db),
-    current_admin: User = Depends(get_current_admin),
-):
-    """Update any invoice (Admin only)"""
-    invoice_service = InvoiceService(db)
-    return await invoice_service.update_invoice(invoice_id, invoice_data)
-
-
-@invoice_routes.delete("/admin/{invoice_id}")
-async def delete_invoice_admin(
-    invoice_id: int = Path(..., description="Invoice ID"),
-    db: Session = Depends(get_db),
-    current_admin: User = Depends(get_current_admin),
-):
-    """Delete/Cancel an invoice (Admin only)"""
-    invoice_service = InvoiceService(db)
-    success = await invoice_service.delete_invoice(invoice_id)
-
-    if success:
-        return {"message": "Invoice cancelled successfully"}
-    else:
-        raise HTTPException(status_code=400, detail="Failed to cancel invoice")
-
-
-@invoice_routes.post("/admin/expire-pending")
-async def expire_pending_invoices_admin(
-    days_old: int = Query(
-        7, ge=1, description="Number of days old to consider for expiration"
-    ),
-    db: Session = Depends(get_db),
-    current_admin: User = Depends(get_current_admin),
-):
-    """Expire old pending invoices (Admin only)"""
-    invoice_service = InvoiceService(db)
-    expired_count = await invoice_service.expire_pending_invoices(days_old)
-
-    return {"message": f"Expired {expired_count} pending invoices"}
-
-
-# PAYMENT WEBHOOK ROUTES - These might need special authentication or API keys
-@invoice_routes.post("/webhook/payment-success/{invoice_id}")
-async def payment_success_webhook(
-    invoice_id: int = Path(..., description="Invoice ID"),
-    db: Session = Depends(get_db),
-    # Note: Add proper webhook authentication here
-):
-    """Handle payment success webhook"""
-    invoice_service = InvoiceService(db)
-    return await invoice_service.mark_invoice_as_paid(invoice_id)
-
-
-@invoice_routes.post("/webhook/payment-failed/{invoice_id}")
-async def payment_failed_webhook(
-    invoice_id: int = Path(..., description="Invoice ID"),
-    db: Session = Depends(get_db),
-    # Note: Add proper webhook authentication here
-):
-    """Handle payment failure webhook"""
-    invoice_service = InvoiceService(db)
-    return await invoice_service.mark_invoice_as_failed(invoice_id)

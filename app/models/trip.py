@@ -17,8 +17,12 @@ class Trip(Base):
     is_image_list: Mapped[bool] = mapped_column(
         Boolean, nullable=False, server_default=text("0")
     )
-    adult_price: Mapped[float] = mapped_column(Float, nullable=False)
-    child_price: Mapped[float] = mapped_column(Float, nullable=False)
+    egp_adult_price: Mapped[float] = mapped_column(Float, nullable=False)
+    egp_child_price: Mapped[float] = mapped_column(Float, nullable=False)
+    usd_adult_price: Mapped[float] = mapped_column(Float, nullable=False)
+    usd_child_price: Mapped[float] = mapped_column(Float, nullable=False)
+    eur_adult_price: Mapped[float] = mapped_column(Float, nullable=False)
+    eur_child_price: Mapped[float] = mapped_column(Float, nullable=False)
     maxim_person: Mapped[int] = mapped_column(Integer, nullable=False)
     has_discount: Mapped[bool] = mapped_column(
         Boolean, nullable=True, server_default=text("0")
