@@ -19,6 +19,7 @@ class Invoice(Base):
     buyer_phone: Mapped[str] = mapped_column(String(100), nullable=False)
     invoice_description: Mapped[str] = mapped_column(Text, nullable=False)
     activity: Mapped[str] = mapped_column(String(100), nullable=False)
+    picked_up: Mapped[bool] = mapped_column(Boolean, default=False, nullable=True)
     amount: Mapped[float] = mapped_column(Float, nullable=False)
     currency: Mapped[str] = mapped_column(String(50), nullable=False)
     payment_method: Mapped[str] = mapped_column(
@@ -30,12 +31,19 @@ class Invoice(Base):
     customer_reference: Mapped[str] = mapped_column(
         String(50), nullable=True, unique=True
     )
+    pay_url: Mapped[str] = mapped_column(String(100), nullable=True)
     easykash_reference: Mapped[str] = mapped_column(
         String(50), nullable=True, unique=True
     )
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=False,
     )
     user: Mapped["User"] = relationship(
         "User", back_populates="invoices", lazy="joined"

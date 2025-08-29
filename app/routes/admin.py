@@ -25,7 +25,6 @@ admin_routes = APIRouter(prefix="/admins", tags=["Admin Endpoints"])
 @admin_routes.get(
     "/get-all-users",
     response_model=PaginatedUsersResponse,
-    dependencies=[Depends(get_current_admin)],
     summary="Get all users with pagination",
     description="Retrieve a paginated list of users with optional filtering by name and email",
 )

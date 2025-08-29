@@ -1,5 +1,7 @@
 # app/utils/easykash_utils.py
 
+import hashlib  # <-- NEW IMPORT
+import hmac  # <-- NEW IMPORT
 import os
 import random
 
@@ -41,7 +43,7 @@ class EasyKash:
             "name": payment_data["buyer_name"],
             "email": payment_data["buyer_email"],
             "mobile": payment_data["buyer_phone"],
-            "redirectUrl": "https://topdivers.online/payment-callback",  # Your callback URL
+            "redirectUrl": "http://localhost:3000/pay",
             "customerReference": customer_ref,
         }
 
@@ -82,6 +84,52 @@ class EasyKash:
                 "error": f"Failed to inquire payment. Status code: {response.status_code}",
                 "details": response.text,
             }
+
+    def verify_callback(self, payload: dict) -> bool:
+        """
+        Verifies the integrity and authenticity of an incoming callback from EasyKash.
+        """
+        if not self.secret_key:
+            print("ERROR: EASYKASH_SECRET_KEY is not set. Cannot verify callback.")
+            return False
+
+        try:
+            # 1. Extract the signature hash from the payload
+            received_signature = payload.get("signatureHash")
+            if not received_signature:
+                return False
+
+            # 2. Get the values to be concatenated IN THE SPECIFIED ORDER
+            data_to_secure = [
+                payload["ProductCode"],
+                payload["Amount"],
+                payload["ProductType"],
+                payload["PaymentMethod"],
+                payload["status"],
+                payload["easykashRef"],
+                payload["customerReference"],
+            ]
+
+            # 3. Concatenate the values into a single string
+            concatenated_string = "".join(str(v) for v in data_to_secure)
+
+            # 4. Calculate the HMAC-SHA512 hash
+            calculated_signature = hmac.new(
+                self.secret_key.encode("utf-8"),
+                concatenated_string.encode("utf-8"),
+                hashlib.sha512,
+            ).hexdigest()
+
+            # 5. Compare the calculated hash with the received hash in a secure way
+            return hmac.compare_digest(calculated_signature, received_signature)
+
+        except KeyError as e:
+            # A key was missing from the payload, so it's invalid.
+            print(f"Callback verification failed due to missing key: {e}")
+            return False
+        except Exception as e:
+            print(f"An unexpected error occurred during callback verification: {e}")
+            return False
 
 
 # Create a single instance to be used throughout the app
