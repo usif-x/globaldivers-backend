@@ -22,5 +22,4 @@ build/
 
 storage/
 test/
-migrations/
 .vercel
