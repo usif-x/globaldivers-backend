@@ -18,6 +18,7 @@ class CreateTrip(BaseModel):
     discount_min_people: int
     discount_percentage: float
     duration: int
+    duration_unit: str
     package_id: int
     included: List[str]
     not_included: List[str]
@@ -42,6 +43,7 @@ class TripResponse(BaseModel):
     discount_min_people: Optional[int] = None
     included: Optional[List[str]] = None
     duration: Optional[int] = None
+    duration_unit: Optional[str]
     not_included: Optional[List[str]] = None
     terms_and_conditions: Optional[List[str]]
 
@@ -64,6 +66,7 @@ class UpdateTrip(BaseModel):
     discount_percentage: Optional[int] = None
     discount_min_people: Optional[int] = None
     duration: Optional[int] = None
+    duration_unit: Optional[str]
     package_id: Optional[int] = None
     included: Optional[List[str]] = None
     not_included: Optional[List[str]] = None

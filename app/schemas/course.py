@@ -26,11 +26,18 @@ class CourseContentResponse(CourseContentCreate):
 class CreateCourse(BaseModel):
     name: str
     description: str
+    price_available: bool
     price: int
     images: List[str]
     is_image_list: bool
     course_level: str
     course_duration: int
+    provider: str
+    has_discount: bool
+    discount_requires_min_people: bool
+    discount_always_available: bool
+    discount_percentage: int
+    discount_min_people: int
     course_type: str
     has_certificate: bool
     certificate_type: str
@@ -41,11 +48,17 @@ class CreateCourse(BaseModel):
 class UpdateCourse(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
+    price_available: Optional[bool] = None
     price: Optional[int] = None
     images: Optional[List[str]] = None
     is_image_list: Optional[bool] = None
     course_level: Optional[str] = None
     course_duration: Optional[int] = None
+    has_discount: Optional[bool] = None
+    discount_requires_min_people: Optional[bool] = None
+    discount_always_available: Optional[bool] = None
+    discount_percentage: Optional[int] = None
+    discount_min_people: Optional[int] = None
     course_type: Optional[str] = None
     has_certificate: Optional[bool] = None
     certificate_type: Optional[str] = None
@@ -63,6 +76,7 @@ class CourseResponse(BaseModel):
     id: int
     name: str
     description: str
+    price_available: bool
     price: int
     images: List[str]
     is_image_list: bool
@@ -70,6 +84,11 @@ class CourseResponse(BaseModel):
     course_duration: int
     course_type: str
     has_certificate: bool
+    has_discount: bool
+    discount_requires_min_people: bool
+    discount_always_available: bool
+    discount_percentage: Optional[int] = int
+    discount_min_people: Optional[int] = int
     certificate_type: str
     provider: str
     has_online_content: bool

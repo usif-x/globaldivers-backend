@@ -1,10 +1,13 @@
 # app/models/course.py
 from datetime import datetime, timezone
 from typing import List
+
 from sqlalchemy import Boolean, DateTime, Float, Integer, String, text
 from sqlalchemy.dialects.mysql import JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.db.conn import Base
+
 
 class Course(Base):
     __tablename__ = "courses"
@@ -15,6 +18,9 @@ class Course(Base):
     # Course information
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     description: Mapped[str] = mapped_column(String(10000), nullable=True)
+    price_available: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default=text("1")
+    )
     price: Mapped[float] = mapped_column(
         Float, nullable=False, server_default=text("0")
     )
@@ -29,6 +35,17 @@ class Course(Base):
     course_level: Mapped[str] = mapped_column(String(100), nullable=False)
     course_duration: Mapped[int] = mapped_column(Integer, nullable=False)
     course_type: Mapped[str] = mapped_column(String(100), nullable=False)
+    has_discount: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default=text("0")
+    )
+    discount_requires_min_people: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default=text("0")
+    )
+    discount_always_available: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default=text("0")
+    )
+    discount_min_people: Mapped[int] = mapped_column(Integer, nullable=True)
+    discount_percentage: Mapped[int] = mapped_column(Integer, nullable=True)
 
     # Certificate settings
     has_certificate: Mapped[bool] = mapped_column(
@@ -61,7 +78,7 @@ class Course(Base):
         "User",
         secondary="user_course_subscriptions",
         back_populates="subscribed_courses",
-        lazy="select"
+        lazy="select",
     )
 
     # One-to-Many relationship with CourseContent (if you have this model)
@@ -69,7 +86,7 @@ class Course(Base):
         "CourseContent",
         back_populates="course",
         cascade="all, delete-orphan",
-        lazy="select"
+        lazy="select",
     )
 
     def __repr__(self) -> str:

@@ -45,6 +45,8 @@ class Trip(Base):
         back_populates="trips", passive_deletes=True
     )
     included: Mapped[list[str]] = mapped_column(JSON, nullable=False)
+    duration: Mapped[int] = mapped_column(Integer, nullable=True)
+    duration_unit: Mapped[str] = mapped_column(String(20), nullable=True)
     not_included: Mapped[list[str]] = mapped_column(JSON, nullable=False)
     terms_and_conditions: Mapped[list[str]] = mapped_column(JSON, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
