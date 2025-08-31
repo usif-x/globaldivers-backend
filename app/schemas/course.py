@@ -32,6 +32,7 @@ class CreateCourse(BaseModel):
     is_image_list: bool
     course_level: str
     course_duration: int
+    course_duration_unit: str
     provider: str
     has_discount: bool
     discount_requires_min_people: bool
@@ -54,6 +55,7 @@ class UpdateCourse(BaseModel):
     is_image_list: Optional[bool] = None
     course_level: Optional[str] = None
     course_duration: Optional[int] = None
+    course_duration_unit: Optional[str] = None
     has_discount: Optional[bool] = None
     discount_requires_min_people: Optional[bool] = None
     discount_always_available: Optional[bool] = None
@@ -82,6 +84,7 @@ class CourseResponse(BaseModel):
     is_image_list: bool
     course_level: str
     course_duration: int
+    course_duration_unit: str
     course_type: str
     has_certificate: bool
     has_discount: bool

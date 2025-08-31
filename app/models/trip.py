@@ -34,9 +34,6 @@ class Trip(Base):
     )
     discount_min_people: Mapped[int] = mapped_column(Integer, nullable=True)
     discount_percentage: Mapped[int] = mapped_column(Integer, nullable=True)
-    duration: Mapped[int] = mapped_column(
-        Integer, nullable=False, server_default=text("8")
-    )
     package_id: Mapped[int] = mapped_column(
         ForeignKey("packages.id"),
         nullable=False,

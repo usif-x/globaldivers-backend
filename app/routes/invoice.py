@@ -225,6 +225,15 @@ def update_invoice_picked_up_status(
 
 
 @router.post(
+    "/webhook/create-easykash-callback",
+    summary="Handle payment callbacks from EasyKash",
+    status_code=status.HTTP_200_OK,
+)
+def handle_easykash_webhook():
+    return InvoiceService.create_callback_data()
+
+
+@router.post(
     "/webhook/easykash-callback",
     summary="Handle payment callbacks from EasyKash",
     status_code=status.HTTP_200_OK,

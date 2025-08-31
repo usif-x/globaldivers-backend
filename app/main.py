@@ -53,9 +53,7 @@ app.add_middleware(SlowAPIMiddleware)
 async def rate_limit_exceeded_handler(request: Request, exc: RateLimitExceeded):
     return JSONResponse(
         status_code=HTTP_429_TOO_MANY_REQUESTS,
-        content={
-            "detail": "Rate limit exceeded, please wait one minute and try again"
-        },
+        content={"detail": "Rate limit exceeded, please wait one minute and try again"},
     )
 
 
@@ -65,7 +63,7 @@ for route in routes:
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -110,7 +108,9 @@ async def test_storage():
 
 @app.get("/", include_in_schema=False)
 async def root():
-    return RedirectResponse(url="https://global-frontend-lac.vercel.app/")  # Frontend URL
+    return RedirectResponse(
+        url="https://global-frontend-lac.vercel.app/"
+    )  # Frontend URL
 
 
 @app.get("/document", include_in_schema=False)
@@ -126,7 +126,6 @@ async def docs():
 @app.get("/health", include_in_schema=False)
 async def health():
     return {"status": "ok"}
-
 
 
 create_super_admin()

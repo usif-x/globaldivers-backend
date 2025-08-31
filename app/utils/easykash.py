@@ -4,6 +4,7 @@ import hashlib  # <-- NEW IMPORT
 import hmac  # <-- NEW IMPORT
 import os
 import random
+import time
 
 import requests
 from dotenv import load_dotenv
@@ -130,6 +131,52 @@ class EasyKash:
         except Exception as e:
             print(f"An unexpected error occurred during callback verification: {e}")
             return False
+
+    def create_test_callback(self) -> dict:
+        """
+        Creates a simulated EasyKash callback payload with a valid signatureHash.
+        Useful for testing verify_callback().
+        """
+        # Example data (you can change values to test)
+        payload = {
+            "ProductCode": "EDV4471",
+            "Amount": "11.00",
+            "ProductType": "Direct Pay",
+            "PaymentMethod": "Cash Through Fawry",
+            "BuyerName": "mee",
+            "BuyerEmail": "test@mail.com",
+            "BuyerMobile": "0123456789",
+            "Timestamp": str(int(time.time())),
+            "status": "PAID",
+            "voucher": "",
+            "easykashRef": "291112234",
+            "VoucherData": "Direct Pay",
+            "customerReference": "8344418037617",
+        }
+
+        # ترتيب القيم زي التوثيق
+        data_to_secure = [
+            payload["ProductCode"],
+            payload["Amount"],
+            payload["ProductType"],
+            payload["PaymentMethod"],
+            payload["status"],
+            payload["easykashRef"],
+            payload["customerReference"],
+        ]
+        concatenated_string = "".join(data_to_secure)
+
+        # Calculate HMAC-SHA512
+        signature = hmac.new(
+            secret_key.encode("utf-8"),
+            concatenated_string.encode("utf-8"),
+            hashlib.sha512,
+        ).hexdigest()
+
+        # Attach the signature to payload
+        payload["signatureHash"] = signature
+
+        return payload
 
 
 # Create a single instance to be used throughout the app

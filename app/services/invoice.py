@@ -382,6 +382,10 @@ class InvoiceService:
         db.commit()
 
     @staticmethod
+    def create_callback_data():
+        return easykash_client.create_test_callback()
+
+    @staticmethod
     def process_payment_callback(db: Session, payload: EasyKashCallbackPayload):
         """
         Updates an invoice based on a verified payment callback.

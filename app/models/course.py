@@ -34,6 +34,7 @@ class Course(Base):
     # Course details
     course_level: Mapped[str] = mapped_column(String(100), nullable=False)
     course_duration: Mapped[int] = mapped_column(Integer, nullable=False)
+    course_duration_unit: Mapped[str] = mapped_column(String(20), nullable=True)
     course_type: Mapped[str] = mapped_column(String(100), nullable=False)
     has_discount: Mapped[bool] = mapped_column(
         Boolean, nullable=False, server_default=text("0")
