@@ -83,16 +83,21 @@ class InvoiceUpdate(BaseModel):
 
 class EasyKashCallbackPayload(BaseModel):
     ProductCode: str
-    PaymentMethod: str
+    Amount: str
     ProductType: str
-    Amount: str  # Amount comes as a string
-    BuyerEmail: str
-    BuyerMobile: str
-    BuyerName: str
-    Timestamp: str
+    PaymentMethod: str
     status: str
-    voucher: Optional[str] = None
     easykashRef: str
-    VoucherData: Optional[Any] = None
     customerReference: str
     signatureHash: str
+
+    # Make these optional since they might not always be sent
+    BuyerName: Optional[str] = None
+    BuyerEmail: Optional[str] = None
+    BuyerMobile: Optional[str] = None
+    Timestamp: Optional[str] = None
+    voucher: Optional[str] = None
+    VoucherData: Optional[str] = None
+
+    class Config:
+        extra = "allow"  # Allow extra fields

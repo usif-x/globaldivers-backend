@@ -89,6 +89,7 @@ class EasyKash:
     def verify_callback(self, payload: dict) -> bool:
         """
         Verifies the integrity and authenticity of an incoming callback from EasyKash.
+        This version is robust against missing optional keys.
         """
         if not self.secret_key:
             print("ERROR: EASYKASH_SECRET_KEY is not set. Cannot verify callback.")
@@ -98,9 +99,83 @@ class EasyKash:
             # 1. Extract the signature hash from the payload
             received_signature = payload.get("signatureHash")
             if not received_signature:
+                print("Callback verification failed: signatureHash missing.")
                 return False
 
             # 2. Get the values to be concatenated IN THE SPECIFIED ORDER
+            # IMPORTANT: Double-check this order with EasyKash documentation.
+            # Use .get(key, "") to safely handle optional fields.
+            data_to_secure = [
+                payload.get("ProductCode", ""),
+                payload.get("Amount", ""),
+                payload.get("ProductType", ""),
+                payload.get("PaymentMethod", ""),
+                payload.get("status", ""),
+                payload.get("easykashRef", ""),
+                payload.get("customerReference", ""),  # This is now safe
+            ]
+
+            # 3. Concatenate the values into a single string
+            concatenated_string = "".join(str(v) for v in data_to_secure)
+
+            # For debugging purposes, you can print these:
+            # print(f"String to hash: '{concatenated_string}'")
+
+            # 4. Calculate the HMAC-SHA512 hash
+            calculated_signature = hmac.new(
+                self.secret_key.encode("utf-8"),
+                concatenated_string.encode("utf-8"),
+                hashlib.sha512,
+            ).hexdigest()
+
+            # For debugging purposes:
+            # print(f"Received Signature:   {received_signature}")
+            # print(f"Calculated Signature: {calculated_signature}")
+
+            # 5. Compare the calculated hash with the received hash in a secure way
+            return hmac.compare_digest(calculated_signature, received_signature)
+
+        except Exception as e:
+            # Removed KeyError catch as .get() prevents it.
+            print(f"An unexpected error occurred during callback verification: {e}")
+            return False
+
+    def verify_callback_debug(self, payload: dict) -> bool:
+        """
+        Enhanced verification with detailed debugging
+        """
+        if not self.secret_key:
+            print("ERROR: EASYKASH_SECRET_KEY is not set. Cannot verify callback.")
+            return False
+
+        try:
+            # 1. Extract the signature hash from the payload
+            received_signature = payload.get("signatureHash")
+            print(f"Received signature: {received_signature}")
+
+            if not received_signature:
+                print("ERROR: No signatureHash in payload")
+                return False
+
+            # 2. Check all required fields are present
+            required_fields = [
+                "ProductCode",
+                "Amount",
+                "ProductType",
+                "PaymentMethod",
+                "status",
+                "easykashRef",
+                "customerReference",
+            ]
+
+            missing_fields = [
+                field for field in required_fields if field not in payload
+            ]
+            if missing_fields:
+                print(f"ERROR: Missing required fields: {missing_fields}")
+                return False
+
+            # 3. Get the values in the specified order
             data_to_secure = [
                 payload["ProductCode"],
                 payload["Amount"],
@@ -111,21 +186,61 @@ class EasyKash:
                 payload["customerReference"],
             ]
 
-            # 3. Concatenate the values into a single string
-            concatenated_string = "".join(str(v) for v in data_to_secure)
+            print(f"Data to secure (ordered): {data_to_secure}")
 
-            # 4. Calculate the HMAC-SHA512 hash
+            # 4. Concatenate the values
+            concatenated_string = "".join(str(v) for v in data_to_secure)
+            print(f"Concatenated string: '{concatenated_string}'")
+            print(f"Concatenated length: {len(concatenated_string)}")
+
+            # 5. Calculate the HMAC-SHA512 hash
             calculated_signature = hmac.new(
                 self.secret_key.encode("utf-8"),
                 concatenated_string.encode("utf-8"),
                 hashlib.sha512,
             ).hexdigest()
 
-            # 5. Compare the calculated hash with the received hash in a secure way
+            print(f"Calculated signature: {calculated_signature}")
+            print(
+                f"Signatures match: {hmac.compare_digest(calculated_signature, received_signature)}"
+            )
+
+            # 6. Try alternative concatenation methods in case EasyKash uses different approach
+            print(f"=== TRYING ALTERNATIVE SIGNATURE METHODS ===")
+
+            # Method 2: Include all fields in alphabetical order
+            all_fields_alpha = sorted(
+                [k for k in payload.keys() if k != "signatureHash"]
+            )
+            alt_data_1 = "".join(str(payload[field]) for field in all_fields_alpha)
+            alt_sig_1 = hmac.new(
+                self.secret_key.encode("utf-8"),
+                alt_data_1.encode("utf-8"),
+                hashlib.sha512,
+            ).hexdigest()
+            print(f"Alternative 1 (all fields alphabetical): {alt_sig_1}")
+            print(
+                f"Alt 1 matches: {hmac.compare_digest(alt_sig_1, received_signature)}"
+            )
+
+            # Method 3: Different field order (as they appear in JSON)
+            json_order_fields = list(payload.keys())
+            json_order_fields.remove("signatureHash")
+            alt_data_2 = "".join(str(payload[field]) for field in json_order_fields)
+            alt_sig_2 = hmac.new(
+                self.secret_key.encode("utf-8"),
+                alt_data_2.encode("utf-8"),
+                hashlib.sha512,
+            ).hexdigest()
+            print(f"Alternative 2 (JSON order): {alt_sig_2}")
+            print(
+                f"Alt 2 matches: {hmac.compare_digest(alt_sig_2, received_signature)}"
+            )
+
+            # Return original comparison
             return hmac.compare_digest(calculated_signature, received_signature)
 
         except KeyError as e:
-            # A key was missing from the payload, so it's invalid.
             print(f"Callback verification failed due to missing key: {e}")
             return False
         except Exception as e:
@@ -140,7 +255,7 @@ class EasyKash:
         # Example data (you can change values to test)
         payload = {
             "ProductCode": "EDV4471",
-            "Amount": "11.00",
+            "Amount": "5.00",
             "ProductType": "Direct Pay",
             "PaymentMethod": "Cash Through Fawry",
             "BuyerName": "mee",
@@ -151,7 +266,7 @@ class EasyKash:
             "voucher": "",
             "easykashRef": "291112234",
             "VoucherData": "Direct Pay",
-            "customerReference": "8344418037617",
+            "customerReference": "32594128644",
         }
 
         # ترتيب القيم زي التوثيق

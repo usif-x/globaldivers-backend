@@ -2,7 +2,7 @@
 
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -238,16 +238,36 @@ def handle_easykash_webhook():
     summary="Handle payment callbacks from EasyKash",
     status_code=status.HTTP_200_OK,
 )
-def handle_easykash_webhook(
-    payload: EasyKashCallbackPayload,
+async def handle_easykash_webhook(  # Add 'async' and the Request object
+    request: Request,
     db: Session = Depends(get_db),
 ):
     """
     This public endpoint receives notifications from EasyKash.
     It verifies the signature and updates the invoice status accordingly.
     """
-    # 1. Verify the signature first. This is the security gate.
-    is_valid = easykash_client.verify_callback(payload.model_dump())
+    # --- START DEBUGGING ---
+    # Log the raw body to see exactly what EasyKash is sending
+    body_bytes = await request.body()
+    print("--- RAW EASYKASH CALLBACK BODY ---")
+    print(body_bytes.decode())
+    print("---------------------------------")
+    # --- END DEBUGGING ---
+
+    # Now, parse it manually for validation
+    try:
+        payload_dict = await request.json()
+        payload = EasyKashCallbackPayload(**payload_dict)
+    except Exception as e:
+        print(f"Pydantic validation failed: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Invalid payload structure: {e}",
+        )
+
+    # 1. Verify the signature first.
+    # We already have the dict, so we can pass it directly
+    is_valid = easykash_client.verify_callback_debug(payload_dict)
 
     if not is_valid:
         raise HTTPException(
