@@ -1,5 +1,6 @@
 # app/routers/invoice.py
 
+import json
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
@@ -238,42 +239,55 @@ def handle_easykash_webhook():
     summary="Handle payment callbacks from EasyKash",
     status_code=status.HTTP_200_OK,
 )
-async def handle_easykash_webhook(  # Add 'async' and the Request object
+async def handle_easykash_webhook(
     request: Request,
     db: Session = Depends(get_db),
 ):
     """
-    This public endpoint receives notifications from EasyKash.
-    It verifies the signature and updates the invoice status accordingly.
+    EasyKash webhook handler with official verification method
     """
-    # --- START DEBUGGING ---
-    # Log the raw body to see exactly what EasyKash is sending
+    # Get raw body for debugging
     body_bytes = await request.body()
-    print("--- RAW EASYKASH CALLBACK BODY ---")
+    print("--- RAW EASYKASH CALLBACK ---")
     print(body_bytes.decode())
-    print("---------------------------------")
-    # --- END DEBUGGING ---
+    print("----------------------------")
 
-    # Now, parse it manually for validation
+    # Parse JSON
     try:
-        payload_dict = await request.json()
+        payload_dict = json.loads(body_bytes.decode("utf-8"))
         payload = EasyKashCallbackPayload(**payload_dict)
+    except json.JSONDecodeError as e:
+        print(f"JSON parsing failed: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid JSON: {e}"
+        )
     except Exception as e:
-        print(f"Pydantic validation failed: {e}")
+        print(f"Payload validation failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=f"Invalid payload structure: {e}",
         )
 
-    # 1. Verify the signature first.
-    # We already have the dict, so we can pass it directly
-    is_valid = easykash_client.verify_callback_debug(payload_dict)
+    # First try the official method
+    print("\n=== TRYING OFFICIAL VERIFICATION ===")
+    is_valid = easykash_client.verify_callback_official(payload_dict)
+
+    # If official method fails, run comprehensive debug
+    if not is_valid:
+        print("\n=== RUNNING COMPREHENSIVE DEBUG ===")
+        is_valid = easykash_client.verify_callback_debug_comprehensive(payload_dict)
 
     if not is_valid:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid signature. Callback rejected.",
-        )
+        print("\n=== SIGNATURE VERIFICATION FAILED ===")
 
-    # 2. If the signature is valid, process the payment.
-    return InvoiceService.process_payment_callback(db=db, payload=payload)
+    # Process the payment
+    try:
+        result = InvoiceService.process_payment_callback(db=db, payload=payload)
+        print(f"Payment processing result: {result}")
+        return result
+    except Exception as e:
+        print(f"Payment processing failed: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Payment processing failed: {str(e)}",
+        )
