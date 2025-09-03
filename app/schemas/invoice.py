@@ -91,7 +91,7 @@ class EasyKashCallbackPayload(BaseModel):
     customerReference: str
     signatureHash: str
 
-    # Make these optional since they might not always be sent
+    # Optional fields that are not part of the signature calculation
     BuyerName: Optional[str] = None
     BuyerEmail: Optional[str] = None
     BuyerMobile: Optional[str] = None
@@ -100,4 +100,5 @@ class EasyKashCallbackPayload(BaseModel):
     VoucherData: Optional[str] = None
 
     class Config:
-        extra = "allow"  # Allow extra fields
+        # Allows other fields from EasyKash to be present without causing a validation error
+        extra = "allow"

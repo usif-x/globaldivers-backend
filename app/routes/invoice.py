@@ -1,8 +1,10 @@
 # app/routers/invoice.py
 
 import json
+import os
 from typing import List
 
+from dotenv import load_dotenv
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
@@ -24,10 +26,11 @@ from app.schemas.invoice import (
 from app.services.invoice import InvoiceService
 from app.utils.easykash import easykash_client
 
+load_dotenv
+
+EASYKASH_SECRET_KEY = os.environ.get("EASYKASH_SECRET_KEY")
+
 router = APIRouter(prefix="/invoices", tags=["Invoices"])
-
-
-# --- User-Facing Routes ---
 
 
 @router.post(
@@ -226,68 +229,78 @@ def update_invoice_picked_up_status(
 
 
 @router.post(
-    "/webhook/create-easykash-callback",
+    "/webhook/test-easykash-callback",
     summary="Handle payment callbacks from EasyKash",
     status_code=status.HTTP_200_OK,
 )
 def handle_easykash_webhook():
-    return InvoiceService.create_callback_data()
+    if easykash_client.verify_example_callback():
+        return {"message": "Example callback processed successfully"}
+    else:
+        return {"message": "Example callback verification failed"}
 
 
-@router.post(
-    "/webhook/easykash-callback",
-    summary="Handle payment callbacks from EasyKash",
-    status_code=status.HTTP_200_OK,
-)
-async def handle_easykash_webhook(
-    request: Request,
-    db: Session = Depends(get_db),
+@router.post("/webhook/easykash-callback", status_code=status.HTTP_200_OK)
+async def easykash_callback_handler(
+    payload: EasyKashCallbackPayload, db: Session = Depends(get_db)
 ):
     """
-    EasyKash webhook handler with official verification method
+    Receives, verifies, and processes payment callbacks from EasyKash.
+
+    Workflow:
+    1.  Validates the HMAC signature to ensure the request is authentic.
+    2.  If the signature is valid, it calls the Invoice processing logic.
+    3.  Handles errors gracefully and returns appropriate HTTP status codes.
     """
-    # Get raw body for debugging
-    body_bytes = await request.body()
-    print("--- RAW EASYKASH CALLBACK ---")
-    print(body_bytes.decode())
-    print("----------------------------")
-
-    # Parse JSON
-    try:
-        payload_dict = json.loads(body_bytes.decode("utf-8"))
-        payload = EasyKashCallbackPayload(**payload_dict)
-    except json.JSONDecodeError as e:
-        print(f"JSON parsing failed: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid JSON: {e}"
+    # --- Step 0: Pre-flight Check ---
+    # Ensure the server is configured with the secret key.
+    if not EASYKASH_SECRET_KEY:
+        print(
+            "FATAL SERVER ERROR: EASYKASH_SECRET_KEY is not set in environment variables."
         )
-    except Exception as e:
-        print(f"Payload validation failed: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=f"Invalid payload structure: {e}",
-        )
-
-    # First try the official method
-    print("\n=== TRYING OFFICIAL VERIFICATION ===")
-    is_valid = easykash_client.verify_callback_official(payload_dict)
-
-    # If official method fails, run comprehensive debug
-    if not is_valid:
-        print("\n=== RUNNING COMPREHENSIVE DEBUG ===")
-        is_valid = easykash_client.verify_callback_debug_comprehensive(payload_dict)
-
-    if not is_valid:
-        print("\n=== SIGNATURE VERIFICATION FAILED ===")
-
-    # Process the payment
-    try:
-        result = InvoiceService.process_payment_callback(db=db, payload=payload)
-        print(f"Payment processing result: {result}")
-        return result
-    except Exception as e:
-        print(f"Payment processing failed: {e}")
+        # Do not expose details to the client. This is a server configuration issue.
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Payment processing failed: {str(e)}",
+            detail="Server is not configured to handle callbacks.",
+        )
+
+    # --- Step 1: Security - Verify the Signature (The Gatekeeper) ---
+    is_signature_valid = easykash_client.verify_official_callback(
+        payload, EASYKASH_SECRET_KEY
+    )
+
+    if not is_signature_valid:
+        # If the signature doesn't match, reject the request immediately.
+        # This prevents any processing of tampered or unauthorized data.
+        print(
+            f"WARNING: Invalid signature received for customer reference '{payload.customerReference}'."
+        )
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Invalid signature hash. Request rejected.",
+        )
+
+    print(
+        f"Signature verified successfully for customer reference: {payload.customerReference}"
+    )
+
+    # --- Step 2: Business Logic - Process the Payment (The Worker) ---
+    # The payload is now trusted. We can safely pass it to your function.
+    # Your `process_payment_callback` function handles its own exceptions (like 404),
+    # so we can let them bubble up. We add a generic catch for unexpected errors.
+    try:
+        result = InvoiceService.process_payment_callback(db=db, payload=payload)
+        return result
+    except HTTPException as http_exc:
+        # Re-raise HTTPExceptions raised from your processing function (e.g., the 404)
+        raise http_exc
+    except Exception as e:
+        # Catch any other unexpected database or application errors.
+        print(
+            f"ERROR: An unexpected error occurred while processing payment for ref '{payload.customerReference}': {e}"
+        )
+        db.rollback()  # Rollback transaction on unexpected failure
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An internal error occurred while updating the invoice.",
         )
