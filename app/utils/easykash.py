@@ -86,7 +86,7 @@ class EasyKash:
                 "details": response.text,
             }
 
-    def verify_callback(self, payload: dict) -> bool:
+    def verify_callback(self, payload: dict, secret_key: str) -> bool:
         # Extract data from the payload
         product_code = payload.get("ProductCode")
         amount = payload.get("Amount")
@@ -111,7 +111,7 @@ class EasyKash:
 
         # Generate HMAC SHA-512 hash
         calculated_signature = hmac.new(
-            self.secret_key.encode("utf-8"), data_str.encode("utf-8"), hashlib.sha512
+            secret_key.encode("utf-8"), data_str.encode("utf-8"), hashlib.sha512
         ).hexdigest()
 
         print("Concatenated data =", data_str)

@@ -19,7 +19,7 @@ from app.schemas.invoice import (
     InvoiceUpdate,
 )
 from app.services.invoice import InvoiceService
-from app.utils.easykash import easykash_client
+from app.utils.easykash import easykash_client, secret_key
 
 router = APIRouter(prefix="/invoices", tags=["Invoices"])
 
@@ -238,7 +238,7 @@ async def easykash_callback_handler(payload: dict, db: Session = Depends(get_db)
     """
 
     # --- Step 1: Verify signature ---
-    is_signature_valid = easykash_client.verify_callback(payload)
+    is_signature_valid = easykash_client.verify_callback(payload, secret_key)
     if not is_signature_valid:
         print(
             f"WARNING: Invalid signature received for customer reference '{payload.get('customerReference')}'."
