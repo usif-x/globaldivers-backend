@@ -1,7 +1,3 @@
-# app/routers/invoice.py
-
-import json
-import os
 from typing import List
 
 from dotenv import load_dotenv
@@ -16,7 +12,6 @@ from app.models.user import User
 # --- IMPORT NEW AND UPDATED SCHEMAS ---
 from app.schemas.invoice import UserInvoiceSummaryResponse  # <-- NEW
 from app.schemas.invoice import (
-    EasyKashCallbackPayload,
     InvoiceCreate,
     InvoiceCreateResponse,
     InvoiceResponse,
@@ -25,10 +20,6 @@ from app.schemas.invoice import (
 )
 from app.services.invoice import InvoiceService
 from app.utils.easykash import easykash_client
-
-load_dotenv
-
-EASYKASH_SECRET_KEY = os.environ.get("EASYKASH_SECRET_KEY")
 
 router = APIRouter(prefix="/invoices", tags=["Invoices"])
 
@@ -245,15 +236,9 @@ async def easykash_callback_handler(payload: dict, db: Session = Depends(get_db)
     """
     Receives, verifies, and processes payment callbacks from EasyKash.
     """
-    # --- Step 0: Check server config ---
-    if not EASYKASH_SECRET_KEY:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Server is not configured to handle callbacks.",
-        )
 
     # --- Step 1: Verify signature ---
-    is_signature_valid = easykash_client.verify_callback(payload, EASYKASH_SECRET_KEY)
+    is_signature_valid = easykash_client.verify_callback(payload)
     if not is_signature_valid:
         print(
             f"WARNING: Invalid signature received for customer reference '{payload.get('customerReference')}'."

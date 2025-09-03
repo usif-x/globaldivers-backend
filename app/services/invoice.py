@@ -380,10 +380,7 @@ class InvoiceService:
 
         db.delete(invoice)
         db.commit()
-
-    @staticmethod
-    def create_callback_data():
-        return easykash_client.create_test_callback()
+        return {"message": "Invoice deleted"}
 
     @staticmethod
     def process_payment_callback(db: Session, payload: dict):

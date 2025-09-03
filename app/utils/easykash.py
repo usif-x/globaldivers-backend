@@ -15,9 +15,6 @@ private_key = os.environ.get("EASYKASH_PRIVATE_KEY")
 secret_key = os.environ.get("EASYKASH_SECRET_KEY")
 
 
-from app.schemas.invoice import EasyKashCallbackPayload
-
-
 class EasyKash:
     def __init__(self, private_key, secret_key):
         self.private_key = private_key
@@ -89,7 +86,7 @@ class EasyKash:
                 "details": response.text,
             }
 
-    def verify_callback(self, payload: dict, secret_key: str) -> bool:
+    def verify_callback(self, payload: dict) -> bool:
         # Extract data from the payload
         product_code = payload.get("ProductCode")
         amount = payload.get("Amount")
@@ -114,7 +111,7 @@ class EasyKash:
 
         # Generate HMAC SHA-512 hash
         calculated_signature = hmac.new(
-            secret_key.encode("utf-8"), data_str.encode("utf-8"), hashlib.sha512
+            self.secret_key.encode("utf-8"), data_str.encode("utf-8"), hashlib.sha512
         ).hexdigest()
 
         print("Concatenated data =", data_str)
