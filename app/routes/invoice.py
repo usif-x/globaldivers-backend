@@ -241,9 +241,7 @@ def handle_easykash_webhook():
 
 
 @router.post("/webhook/easykash-callback", status_code=status.HTTP_200_OK)
-async def easykash_callback_handler(
-    payload: EasyKashCallbackPayload, db: Session = Depends(get_db)
-):
+async def easykash_callback_handler(payload: dict, db: Session = Depends(get_db)):
     """
     Receives, verifies, and processes payment callbacks from EasyKash.
 
@@ -265,9 +263,7 @@ async def easykash_callback_handler(
         )
 
     # --- Step 1: Security - Verify the Signature (The Gatekeeper) ---
-    is_signature_valid = easykash_client.verify_official_callback(
-        payload, EASYKASH_SECRET_KEY
-    )
+    is_signature_valid = easykash_client.verify_callback(payload, EASYKASH_SECRET_KEY)
 
     if not is_signature_valid:
         # If the signature doesn't match, reject the request immediately.

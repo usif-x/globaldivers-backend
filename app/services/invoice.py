@@ -386,7 +386,7 @@ class InvoiceService:
         return easykash_client.create_test_callback()
 
     @staticmethod
-    def process_payment_callback(db: Session, payload: EasyKashCallbackPayload):
+    def process_payment_callback(db: Session, payload: dict):
         """
         Updates an invoice based on a verified payment callback.
         This function is now more robust and easier to maintain.

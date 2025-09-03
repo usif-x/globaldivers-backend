@@ -2,6 +2,7 @@
 
 import hashlib  # <-- NEW IMPORT
 import hmac  # <-- NEW IMPORT
+import json
 import os
 import random
 
@@ -88,43 +89,39 @@ class EasyKash:
                 "details": response.text,
             }
 
-    def verify_official_callback(
-        self, payload: EasyKashCallbackPayload, secret_key: str
-    ) -> bool:
-        """
-        Verifies the integrity of an EasyKash callback payload.
+    def verify_callback(payload: dict, secret_key: str) -> bool:
+        # Extract data from the payload
+        product_code = payload.get("ProductCode")
+        amount = payload.get("Amount")
+        product_type = payload.get("ProductType")
+        payment_method = payload.get("PaymentMethod")
+        status = payload.get("status")
+        easykash_ref = payload.get("easykashRef")
+        customer_reference = payload.get("customerReference")
+        signature_hash = payload.get("signatureHash")
 
-        Args:
-            payload: The parsed Pydantic model of the incoming callback data.
-            secret_key: Your HMAC secret key provided by EasyKash support.
-
-        Returns:
-            True if the signature is valid, False otherwise.
-        """
-        # Step 1 & 2: Sort and concatenate the values in the specified order.
-        # The order is critical: ProductCode, Amount, ProductType, PaymentMethod, status, easykashRef, customerReference
-        data_to_sign = [
-            payload.ProductCode,
-            payload.Amount,
-            payload.ProductType,
-            payload.PaymentMethod,
-            payload.status,
-            payload.easykashRef,
-            payload.customerReference,
+        # Prepare data for verification (concatenated string)
+        data_to_secure = [
+            str(product_code),
+            str(amount),
+            str(product_type),
+            str(payment_method),
+            str(status),
+            str(easykash_ref),
+            str(customer_reference),
         ]
-        concatenated_string = "".join(data_to_sign)
+        data_str = "".join(data_to_secure)
 
-        # Step 3: Calculate the HMAC SHA512 hash.
-        # The key and message must be converted to bytes.
+        # Generate HMAC SHA-512 hash
         calculated_signature = hmac.new(
-            key=secret_key.encode("utf-8"),
-            msg=concatenated_string.encode("utf-8"),
-            digestmod=hashlib.sha512,
+            secret_key.encode("utf-8"), data_str.encode("utf-8"), hashlib.sha512
         ).hexdigest()
 
-        # Step 4: Compare the calculated signature with the one from the payload.
-        # Use hmac.compare_digest for a timing-attack-resistant comparison.
-        return hmac.compare_digest(calculated_signature, payload.signatureHash)
+        print("Concatenated data =", data_str)
+        print("Calculated signature =", calculated_signature)
+        print("Received signature   =", signature_hash)
+
+        return calculated_signature == signature_hash
 
     # --- 3. Example Verification Function ---
     def verify_example_callback(self):
@@ -134,61 +131,30 @@ class EasyKash:
         """
         print("--- Running EasyKash Example Verification ---")
 
-        # The example payload from the documentation
-        example_payload_dict = {
-            "ProductCode": "EDV4471",
-            "Amount": "11.00",
-            "ProductType": "Direct Pay",
-            "PaymentMethod": "Cash Through Fawry",
-            "BuyerName": "mee",
-            "BuyerEmail": "test@mail.com",
-            "BuyerMobile": "0123456789",
-            "status": "PAID",
-            "voucher": "",
-            "easykashRef": "2911105009",
-            "VoucherData": "Direct Pay",
-            "customerReference": "TEST11111",
-            "signatureHash": "0bd9ce502950ffa358314c170dace42e7ba3e0c776f5a32eb15c3d496bc9c294835036dd90d4f287233b800c9bde2f6591b6b8a1f675b6bfe64fd799da29d1d0",
-        }
+        payload_json = """{
+"ProductCode":"EDV4471",
+"Amount":"11.00",
+"ProductType":"Direct Pay",
+"PaymentMethod":"Cash Through Fawry",
+"BuyerName":"mee",
+"BuyerEmail":"test@mail.com",
+"BuyerMobile":"0123456789",
+"status":"PAID",
+"voucher":"",
+"easykashRef":"2911105009",
+"VoucherData":"Direct Pay",
+"customerReference":"TEST11111",
+"signatureHash":"0bd9ce502950ffa358314c170dace42e7ba3e0c776f5a32eb15c3d496bc9c294835036dd90d4f287233b800c9bde2f6591b6b8a1f675b6bfe64fd799da29d1d0"
+        }"""
 
-        # The example secret key from the documentation
-        example_secret_key = "da9fe30575517d987762a859842b5631"
+        secret_key = "da9fe30575517d987762a859842b5631"
 
-        # The expected concatenated string from the documentation for cross-checking
-        expected_concatenated_data = (
-            "EDV447111.00Direct PayCash Through FawryPAID2911105009TEST11111"
-        )
-        print(f"Expected concatenated string: {expected_concatenated_data}")
+        payload = json.loads(payload_json)
 
-        # Parse the dictionary into our Pydantic model
-        payload_obj = EasyKashCallbackPayload(**example_payload_dict)
-
-        # Recreate the concatenated string to ensure our logic is correct
-        data_to_sign = [
-            payload_obj.ProductCode,
-            payload_obj.Amount,
-            payload_obj.ProductType,
-            payload_obj.PaymentMethod,
-            payload_obj.status,
-            payload_obj.easykashRef,
-            payload_obj.customerReference,
-        ]
-        actual_concatenated_data = "".join(data_to_sign)
-        print(f"  Actual concatenated string: {actual_concatenated_data}")
-        print(
-            f"Strings match: {expected_concatenated_data == actual_concatenated_data}"
-        )
-        print("-" * 20)
-
-        # Call the official verification function
-        is_valid = self.verify_official_callback(payload_obj, example_secret_key)
-
-        # Print the result
-        if is_valid:
-            print("✅ SUCCESS: The example signature was verified successfully!")
+        if self.verify_callback(payload, secret_key):
+            return True
         else:
-            print("❌ FAILURE: The example signature is invalid. Check the logic.")
-        print("-" * 50)
+            return False
 
 
 # Create a single instance to be used throughout the app
