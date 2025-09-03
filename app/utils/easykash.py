@@ -89,7 +89,7 @@ class EasyKash:
                 "details": response.text,
             }
 
-    def verify_callback(payload: dict, secret_key: str) -> bool:
+    def verify_callback(self, payload: dict, secret_key: str) -> bool:
         # Extract data from the payload
         product_code = payload.get("ProductCode")
         amount = payload.get("Amount")
