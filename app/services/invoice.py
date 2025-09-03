@@ -389,49 +389,41 @@ class InvoiceService:
     def process_payment_callback(db: Session, payload: dict):
         """
         Updates an invoice based on a verified payment callback.
-        This function is now more robust and easier to maintain.
         """
-        # --- 1. Find the Invoice ---
+        # --- 1. Find invoice ---
         invoice = (
             db.query(Invoice)
-            .filter(Invoice.customer_reference == payload.customerReference)
+            .filter(Invoice.customer_reference == payload.get("customerReference"))
             .first()
         )
 
         if not invoice:
-            # This is correct. If not found, raise an error so the sender knows.
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Invoice with customer reference {payload.customerReference} not found.",
+                detail=f"Invoice with customer reference {payload.get('customerReference')} not found.",
             )
 
-        # --- 2. Idempotency Check (No changes needed) ---
-        # If the invoice is already in a final state, we might not want to change it.
-        # Checking for 'PAID' is a good start.
+        # --- 2. Idempotency ---
         if invoice.status == "PAID":
             return {"status": "success", "message": "Invoice already marked as paid."}
 
-        # --- 3. Validate and Sanitize the Incoming Status ---
-        incoming_status = payload.status.upper()
-
-        # Define the list of statuses we are willing to accept from the webhook.
+        # --- 3. Validate status ---
+        incoming_status = payload.get("status", "").upper()
         VALID_CALLBACK_STATUSES = ["PAID", "FAILED", "CANCELLED", "EXPIRED"]
 
         if incoming_status not in VALID_CALLBACK_STATUSES:
-            # If the status is unknown (e.g., "PROCESSING", "REFUNDED", or a typo),
-            # we log it but do NOT update our database with an invalid state.
             print(
-                f"Received unknown status '{payload.status}' for invoice ref {payload.customerReference}. No action taken."
+                f"Received unknown status '{payload.get('status')}' "
+                f"for invoice ref {payload.get('customerReference')}."
             )
             return {
-                "status": "noop",  # No Operation
-                "message": f"Received unknown or unhandled status '{payload.status}'. Invoice not updated.",
+                "status": "noop",
+                "message": f"Received unhandled status '{payload.get('status')}'. Invoice not updated.",
             }
 
-        # --- 4. Perform the Update (The DRY part) ---
-        # Since the status is now validated, we can safely update.
+        # --- 4. Update invoice ---
         invoice.status = incoming_status
-        invoice.easykash_reference = payload.easykashRef
+        invoice.easykash_reference = payload.get("easykashRef")
 
         db.commit()
         db.refresh(invoice)

@@ -244,32 +244,19 @@ def handle_easykash_webhook():
 async def easykash_callback_handler(payload: dict, db: Session = Depends(get_db)):
     """
     Receives, verifies, and processes payment callbacks from EasyKash.
-
-    Workflow:
-    1.  Validates the HMAC signature to ensure the request is authentic.
-    2.  If the signature is valid, it calls the Invoice processing logic.
-    3.  Handles errors gracefully and returns appropriate HTTP status codes.
     """
-    # --- Step 0: Pre-flight Check ---
-    # Ensure the server is configured with the secret key.
+    # --- Step 0: Check server config ---
     if not EASYKASH_SECRET_KEY:
-        print(
-            "FATAL SERVER ERROR: EASYKASH_SECRET_KEY is not set in environment variables."
-        )
-        # Do not expose details to the client. This is a server configuration issue.
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Server is not configured to handle callbacks.",
         )
 
-    # --- Step 1: Security - Verify the Signature (The Gatekeeper) ---
+    # --- Step 1: Verify signature ---
     is_signature_valid = easykash_client.verify_callback(payload, EASYKASH_SECRET_KEY)
-
     if not is_signature_valid:
-        # If the signature doesn't match, reject the request immediately.
-        # This prevents any processing of tampered or unauthorized data.
         print(
-            f"WARNING: Invalid signature received for customer reference '{payload.customerReference}'."
+            f"WARNING: Invalid signature received for customer reference '{payload.get('customerReference')}'."
         )
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -277,25 +264,20 @@ async def easykash_callback_handler(payload: dict, db: Session = Depends(get_db)
         )
 
     print(
-        f"Signature verified successfully for customer reference: {payload.customerReference}"
+        f"Signature verified successfully for customer reference: {payload.get('customerReference')}"
     )
 
-    # --- Step 2: Business Logic - Process the Payment (The Worker) ---
-    # The payload is now trusted. We can safely pass it to your function.
-    # Your `process_payment_callback` function handles its own exceptions (like 404),
-    # so we can let them bubble up. We add a generic catch for unexpected errors.
+    # --- Step 2: Business logic ---
     try:
         result = InvoiceService.process_payment_callback(db=db, payload=payload)
         return result
-    except HTTPException as http_exc:
-        # Re-raise HTTPExceptions raised from your processing function (e.g., the 404)
-        raise http_exc
+    except HTTPException:
+        raise
     except Exception as e:
-        # Catch any other unexpected database or application errors.
+        db.rollback()
         print(
-            f"ERROR: An unexpected error occurred while processing payment for ref '{payload.customerReference}': {e}"
+            f"ERROR: Unexpected error while processing payment for ref '{payload.get('customerReference')}': {e}"
         )
-        db.rollback()  # Rollback transaction on unexpected failure
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An internal error occurred while updating the invoice.",
