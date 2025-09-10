@@ -69,15 +69,6 @@ class PackageServices:
             }
         else:
             raise HTTPException(404, detail="Package not found")
-    @db_exception_handler
-    def delete_all_packages(self):
-        try:
-            self.db.execute(delete(Package))
-            self.db.commit()
-            return {"success": True, "message": "All packages deleted successfully"}
-        except SQLAlchemyError as e:
-            self.db.rollback()
-            return {"success": False, "message": f"Error deleting packages: {str(e)}"}
 
     @db_exception_handler
     def get_trip_by_package_id(self, id: int):
@@ -87,3 +78,14 @@ class PackageServices:
             return package.trips
         else:
             raise HTTPException(404, detail="Package not found")
+
+
+    @db_exception_handler
+    def delete_all_packages(self):
+        try:
+            self.db.execute(delete(Package))
+            self.db.commit()
+            return {"success": True, "message": "All packages deleted successfully"}
+        except SQLAlchemyError as e:
+            self.db.rollback()
+            return {"success": False, "message": f"Error deleting packages: {str(e)}"}

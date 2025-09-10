@@ -11,7 +11,6 @@ from app.models.invoice import Invoice
 # --- IMPORT THE NEW SCHEMA ---
 from app.schemas.invoice import UserInvoiceSummaryResponse  # <-- NEW
 from app.schemas.invoice import (
-    EasyKashCallbackPayload,
     InvoiceCreate,
     InvoiceCreateResponse,
     InvoiceResponse,
@@ -22,11 +21,6 @@ from app.utils.easykash import easykash_client
 
 
 class InvoiceService:
-    # ... create_invoice method (no changes) ...
-    # ... get_invoice method (no changes) ...
-    # ... get_invoice_admin method (no changes) ...
-    # ... get_my_invoices_for_user method (no changes) ...
-
     @staticmethod
     def create_invoice(
         db: Session, invoice_data: InvoiceCreate, user_id: int
@@ -421,6 +415,7 @@ class InvoiceService:
         # --- 4. Update invoice ---
         invoice.status = incoming_status
         invoice.easykash_reference = payload.get("easykashRef")
+        invoice.payment_method = payload.get("paymentMethod")
 
         db.commit()
         db.refresh(invoice)

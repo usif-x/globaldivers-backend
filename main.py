@@ -4,8 +4,6 @@ from datetime import datetime
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, RedirectResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
@@ -42,6 +40,15 @@ templates = Jinja2Templates(directory="app/templates")
 
 app.state.limiter = limiter
 app.add_middleware(SlowAPIMiddleware)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3001"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 
 @app.exception_handler(RateLimitExceeded)

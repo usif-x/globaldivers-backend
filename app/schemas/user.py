@@ -12,7 +12,6 @@ class UserResponse(BaseModel):
     email: str
     created_at: datetime
     updated_at: datetime
-    role: str
     last_login: Optional[str] = None
     is_active: bool
     is_blocked: bool

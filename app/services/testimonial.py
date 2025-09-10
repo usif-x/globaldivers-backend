@@ -28,7 +28,7 @@ class TestimonialServices:
         self.db.add(new_testimonial)
         self.db.commit()
         self.db.refresh(new_testimonial)
-        return new_testimonial
+        return {"success": True, "message": "Testimonial created successfully"}
 
     @db_exception_handler
     def get_all_testimonials(self):

@@ -12,7 +12,7 @@ package_routes = APIRouter(prefix="/packages", tags=["Package Endpoints"])
 
 
 @package_routes.post(
-    "/", response_model=PackageResponse, dependencies=[Depends(get_current_admin)]
+    "/", response_model=PackageResponse
 )
 async def create_package(package: CreatePackage, db: Session = Depends(get_db)):
     return PackageServices(db).create_package(package)
@@ -27,6 +27,10 @@ async def get_all_packages(db: Session = Depends(get_db)):
 @package_routes.get("/{id}", response_model=PackageResponse)
 async def get_package_by_id(id: int = Path(..., ge=1), db: Session = Depends(get_db)):
     return PackageServices(db).get_package_by_id(id)
+
+@package_routes.delete("/all")
+async def delete_all_packages(db: Session = Depends(get_db)):
+    return PackageServices(db).delete_all_packages()
 
 
 @package_routes.delete("/{id}", dependencies=[Depends(get_current_admin)])
