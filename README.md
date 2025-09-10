@@ -24,18 +24,21 @@ A FastAPI-based backend service for Global Divers, providing RESTful APIs for di
 ### Using Docker (Recommended)
 
 1. **Clone the repository**
+
    ```bash
    git clone <your-repo-url>
    cd globaldivers/backend
    ```
 
 2. **Set up environment variables**
+
    ```bash
    cp .env.example .env
    # Edit .env with your configuration
    ```
 
 3. **Start the services**
+
    ```bash
    docker-compose up -d
    ```
@@ -48,17 +51,20 @@ A FastAPI-based backend service for Global Divers, providing RESTful APIs for di
 ### Local Development
 
 1. **Install dependencies**
+
    ```bash
    pip install -r requirements.txt
    ```
 
 2. **Set up environment variables**
+
    ```bash
    cp .env.example .env
    # Edit .env with your local configuration
    ```
 
 3. **Run database migrations**
+
    ```bash
    alembic upgrade head
    ```
@@ -104,91 +110,20 @@ EASYKASH_SECRET_KEY=your_secret_key
 CORS_ORIGIN=http://localhost:3000
 ```
 
-## API Endpoints
-
-### Authentication
-- `POST /auth/login` - User login
-- `POST /auth/register` - User registration
-- `POST /auth/admin/login` - Admin login
-- `POST /auth/refresh` - Refresh access token
-
-### Users
-- `GET /users` - Get all users (Admin only)
-- `GET /users/{user_id}` - Get user by ID
-- `PUT /users/{user_id}` - Update user
-- `DELETE /users/{user_id}` - Delete user
-
-### Courses
-- `GET /courses` - Get all courses
-- `POST /courses` - Create new course (Admin)
-- `GET /courses/{course_id}` - Get course details
-- `PUT /courses/{course_id}` - Update course (Admin)
-- `DELETE /courses/{course_id}` - Delete course (Admin)
-
-### Dive Centers
-- `GET /dive-centers` - Get all dive centers
-- `POST /dive-centers` - Create dive center (Admin)
-- `GET /dive-centers/{center_id}` - Get dive center details
-- `PUT /dive-centers/{center_id}` - Update dive center (Admin)
-
-### Trips & Packages
-- `GET /trips` - Get all trips
-- `POST /trips` - Create trip (Admin)
-- `GET /packages` - Get all packages
-- `POST /packages` - Create package (Admin)
-
-### Payments
-- `POST /invoices` - Create payment invoice
-- `POST /invoices/{invoice_id}/pay` - Process payment
-- `GET /invoices/{invoice_id}` - Get invoice status
-
-## Project Structure
-
-```
-backend/
-├── app/
-│   ├── core/           # Core functionality
-│   │   ├── config.py   # Application configuration
-│   │   ├── database.py # Database connection
-│   │   ├── security.py # JWT authentication
-│   │   └── limiter.py  # Rate limiting
-│   ├── models/         # SQLAlchemy models
-│   ├── routes/         # API route handlers
-│   ├── schemas/        # Pydantic schemas
-│   ├── services/       # Business logic
-│   └── utils/          # Utility functions
-├── migrations/         # Database migrations
-├── main.py            # Application entry point
-├── Dockerfile         # Container configuration
-├── docker-compose.yml # Multi-container setup
-└── requirements.txt   # Python dependencies
-```
-
 ## Development
-
-### Running Tests
-```bash
-# To be implemented
-pytest tests/
-```
 
 ### Database Migrations
 
 Create new migration:
+
 ```bash
 alembic revision --autogenerate -m "migration_description"
 ```
 
 Apply migrations:
+
 ```bash
 alembic upgrade head
-```
-
-### Code Formatting
-```bash
-# To be implemented
-black .
-isort .
 ```
 
 ## Deployment
@@ -222,12 +157,14 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Support
 
 For support and questions:
+
 - Create an issue on GitHub
 - Email: support@globaldivers.com
 
 ## API Documentation
 
 Interactive API documentation is available at `/docs` when the application is running. The documentation includes:
+
 - All available endpoints
 - Request/response schemas
 - Authentication requirements
@@ -236,6 +173,7 @@ Interactive API documentation is available at `/docs` when the application is ru
 ## Health Check
 
 The application includes a health check endpoint at `/health` that returns:
+
 ```json
 {
   "status": "healthy",
