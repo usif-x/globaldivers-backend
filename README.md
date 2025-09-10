@@ -27,7 +27,7 @@ A FastAPI-based backend service for Global Divers, providing RESTful APIs for di
 
    ```bash
    git clone <your-repo-url>
-   cd globaldivers/backend
+   cd globaldivers-backend
    ```
 
 2. **Set up environment variables**
