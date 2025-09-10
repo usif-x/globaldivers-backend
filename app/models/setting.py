@@ -3,7 +3,7 @@ from typing import Optional
 from sqlalchemy import JSON, Integer, String, text
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.db.conn import Base
+from app.core.database import Base
 
 
 class WebsiteSettings(Base):

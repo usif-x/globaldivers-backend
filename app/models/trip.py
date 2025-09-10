@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from sqlalchemy import JSON, Boolean, DateTime, Float, ForeignKey, Integer, String, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.db.conn import Base
+from app.core.database import Base
 
 from .package import Package
 
@@ -15,22 +15,22 @@ class Trip(Base):
     description: Mapped[str] = mapped_column(String(10000), nullable=True)
     images: Mapped[list[str]] = mapped_column(JSON, nullable=False)
     is_image_list: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, server_default=text("0")
+        Boolean, nullable=False, default=False, server_default=text("false")
     )
     adult_price: Mapped[float] = mapped_column(Float, nullable=False)
     child_allowed: Mapped[bool] = mapped_column(
-        Boolean, nullable=True, server_default=text("0")
+        Boolean, nullable=True, default=False, server_default=text("false")
     )
     child_price: Mapped[float] = mapped_column(Float, nullable=False)
     maxim_person: Mapped[int] = mapped_column(Integer, nullable=False)
     has_discount: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, server_default=text("0")
+        Boolean, nullable=False, default=False, server_default=text("false")
     )
     discount_requires_min_people: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, server_default=text("0")
+        Boolean, nullable=False, default=False, server_default=text("false")
     )
     discount_always_available: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, server_default=text("0")
+        Boolean, nullable=False, default=False, server_default=text("false")
     )
     discount_min_people: Mapped[int] = mapped_column(Integer, nullable=True)
     discount_percentage: Mapped[int] = mapped_column(Integer, nullable=True)

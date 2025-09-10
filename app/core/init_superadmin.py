@@ -1,22 +1,23 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.db.conn import SessionLocal
+from app.core.database import SessionLocal
 from app.models.admin import Admin
-
+from app.core.config import settings  # استدعاء ملف الإعدادات
 from .hashing import hash_password
 
 
 def create_super_admin():
     db: Session = SessionLocal()
     try:
-        name = "Super Admin"
-        username = "superadmin"
-        email = "superadmin@gmin.com"
-        default_password = "superadmin123"
-        level = 2
+        name = settings.ADMIN_NAME
+        username = settings.ADMIN_USERNAME
+        email = settings.ADMIN_EMAIL
+        default_password = settings.ADMIN_PASSWORD
+        level = settings.ADMIN_LEVEL
 
-        stmt = select(Admin).where(Admin.id == 1)
+        # تحقق إذا كان هناك Admin مسبقاً
+        stmt = select(Admin).where(Admin.username == username)
         admin = db.execute(stmt).scalars().first()
 
         if admin:
@@ -46,6 +47,3 @@ def create_super_admin():
         )
     finally:
         db.close()
-
-
-# test

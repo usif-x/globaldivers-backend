@@ -2,7 +2,7 @@
 from datetime import datetime
 from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, func, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from app.db.conn import Base
+from app.core.database import Base
 
 class Testimonial(Base):
     __tablename__ = "testimonials"

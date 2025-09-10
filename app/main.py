@@ -4,7 +4,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
@@ -14,18 +14,11 @@ from starlette.status import HTTP_429_TOO_MANY_REQUESTS
 from app.core.cache import init_cache
 from app.core.init_superadmin import create_super_admin
 from app.core.limiter import limiter
-from app.db.conn import Base, engine
-from app.models.admin import Admin
-from app.models.best_selling import BestSelling
-from app.models.course import Course
-from app.models.dive_center import DiveCenter
-from app.models.gallery import Gallery
-from app.models.invoice import Invoice
-from app.models.package import Package
-from app.models.testimonial import Testimonial
-from app.models.trip import Trip
-from app.models.user import User
+from app.core.database import Base, engine
+from app.models import *
 from app.routes.all import routes
+from limits.storage import RedisStorage
+from app.core.config import settings
 
 
 @asynccontextmanager
@@ -47,7 +40,9 @@ app = FastAPI(
 
 app.state.limiter = limiter
 app.add_middleware(SlowAPIMiddleware)
+storage = RedisStorage(str(settings.DB_REDIS_URI))
 
+limiter._storage = storage
 
 @app.exception_handler(RateLimitExceeded)
 async def rate_limit_exceeded_handler(request: Request, exc: RateLimitExceeded):
@@ -108,9 +103,43 @@ async def test_storage():
 
 @app.get("/", include_in_schema=False)
 async def root():
-    return RedirectResponse(
-        url="https://global-frontend-lac.vercel.app/"
-    )  # Frontend URL
+    return HTMLResponse(content="""
+    <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>403 Forbidden</title>
+  <style>
+    body {
+      background-color: black;
+      color: #333;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    h1 {
+      font-size: 5rem;
+      margin: 0;
+      color: #dc3545;
+    }
+    p {
+      color: white;
+      font-size: 1.2rem;
+      margin: 10px 0 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>403</h1>
+  <p>Forbidden – You don’t have permission to access this page.</p>
+</body>
+</html>
+""")
 
 
 @app.get("/document", include_in_schema=False)
@@ -121,7 +150,6 @@ async def redoc():
 @app.get("/documentation", include_in_schema=False)
 async def docs():
     return RedirectResponse(url="/docs")
-
 
 @app.get("/health", include_in_schema=False)
 async def health():
@@ -134,4 +162,10 @@ create_super_admin()
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run(
+        "app.main:app",
+        host="0.0.0.0",
+        port=settings.PORT,
+        reload=settings.DEBUG,
+    )
+

@@ -1,11 +1,11 @@
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String
+from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql.expression import text
 
-from app.db.conn import Base
+from app.core.database import Base
 
 if TYPE_CHECKING:
     from app.models.course import Course
@@ -17,7 +17,7 @@ class CourseContent(Base):
     course_id: Mapped[int] = mapped_column(ForeignKey("courses.id"), nullable=False)
 
     title: Mapped[str] = mapped_column(String(100), nullable=False)
-    description: Mapped[str] = mapped_column(String(500), nullable=True)
+    description: Mapped[str] = mapped_column(Text, nullable=True)
     content_type: Mapped[str] = mapped_column(
         String(50), nullable=False
     )  # e.g., video, pdf, quiz

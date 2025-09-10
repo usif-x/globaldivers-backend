@@ -21,5 +21,3 @@ build/
 .DS_Store
 
 storage/
-test/
-.vercel

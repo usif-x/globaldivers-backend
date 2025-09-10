@@ -2,11 +2,11 @@
 from datetime import datetime, timezone
 from typing import List
 
-from sqlalchemy import Boolean, DateTime, Float, Integer, String, text
+from sqlalchemy import Boolean, DateTime, Float, Integer, String, text, Text
 from sqlalchemy.dialects.mysql import JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.db.conn import Base
+from app.core.database import Base
 
 
 class Course(Base):
@@ -17,18 +17,18 @@ class Course(Base):
 
     # Course information
     name: Mapped[str] = mapped_column(String(100), nullable=False)
-    description: Mapped[str] = mapped_column(String(10000), nullable=True)
+    description: Mapped[str] = mapped_column(Text, nullable=True)
     price_available: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, server_default=text("1")
+        Boolean, nullable=False, default=True, server_default=text("true")
     )
     price: Mapped[float] = mapped_column(
-        Float, nullable=False, server_default=text("0")
+        Float, nullable=False, default=0.0, server_default=text("0.0")
     )
 
     # Course media and settings
     images: Mapped[List[str]] = mapped_column(JSON, nullable=False)
     is_image_list: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, server_default=text("'0'")
+        Boolean, nullable=False, default=False, server_default=text("false")
     )
 
     # Course details
@@ -37,20 +37,20 @@ class Course(Base):
     course_duration_unit: Mapped[str] = mapped_column(String(20), nullable=True)
     course_type: Mapped[str] = mapped_column(String(100), nullable=False)
     has_discount: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, server_default=text("0")
+        Boolean, nullable=False, default=False, server_default=text("false")
     )
     discount_requires_min_people: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, server_default=text("0")
+        Boolean, nullable=False, default=False, server_default=text("false")
     )
     discount_always_available: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, server_default=text("0")
+        Boolean, nullable=False, default=False, server_default=text("false")
     )
     discount_min_people: Mapped[int] = mapped_column(Integer, nullable=True)
     discount_percentage: Mapped[int] = mapped_column(Integer, nullable=True)
 
     # Certificate settings
     has_certificate: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, server_default=text("'1'")
+        Boolean, nullable=False, default=True, server_default=text("true")
     )
     certificate_type: Mapped[str] = mapped_column(String(100), nullable=False)
 
@@ -59,7 +59,7 @@ class Course(Base):
         String(100), nullable=False, server_default=text("'Padi'")
     )
     has_online_content: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, server_default=text("'1'")
+        Boolean, nullable=False, default=True, server_default=text("true")
     )
 
     # Timestamps

@@ -1,9 +1,9 @@
 from datetime import datetime, timezone
 
-from sqlalchemy import DateTime, String, text
+from sqlalchemy import DateTime, String, text, Boolean
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.db.conn import Base
+from app.core.database import Base
 
 
 class Admin(Base):
@@ -29,8 +29,11 @@ class Admin(Base):
         String(40), nullable=False, server_default="1"
     )
     is_active: Mapped[bool] = mapped_column(
-        String(40), nullable=False, default=True, server_default=text("'true'")
-    )
+    Boolean,
+    nullable=False,
+    default=True,
+    server_default=text("true")
+)
     last_login: Mapped[str] = mapped_column(
         String(50), nullable=True, server_default=text("'null'")
     )

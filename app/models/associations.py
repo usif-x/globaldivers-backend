@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, Table
-from app.db.conn import Base
+from app.core.database import Base
 
 user_course_subscriptions = Table(
     'user_course_subscriptions',

@@ -1,15 +1,13 @@
-import os
-
-from dotenv import load_dotenv
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 from redis import asyncio as aioredis
-
-load_dotenv()
-
-REDIS_URL = os.environ.get("REDIS_URI_TWO")
+from app.core.config import settings
 
 
 async def init_cache():
-    redis = aioredis.from_url(REDIS_URL, encoding="utf8", decode_responses=False)
+    redis = aioredis.from_url(
+        str(settings.DB_REDIS_URI),  # 👈 نحولها لسترينج
+        encoding="utf8",
+        decode_responses=False
+    )
     FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")

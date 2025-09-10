@@ -2,7 +2,7 @@
 from datetime import datetime
 from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, func, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from app.db.conn import Base
+from app.core.database import Base
 
 class Notification(Base):
     __tablename__ = "notifications"
@@ -22,7 +22,7 @@ class Notification(Base):
 
     # Status
     is_read: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, server_default=text("'0'")
+        Boolean, nullable=False, default=False, server_default=text("false")
     )
 
     # Timestamps

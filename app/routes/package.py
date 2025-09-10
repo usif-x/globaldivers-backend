@@ -41,7 +41,7 @@ async def update_package(
     return PackageServices(db).update_package(package, id)
 
 
-@package_routes.get("/{id}/trips", response_model=list[TripResponse])
+@package_routes.get("/{id}/trips")
 @cache(expire=600)
 async def get_trip_by_package_id(
     id: int = Path(..., ge=1), db: Session = Depends(get_db)

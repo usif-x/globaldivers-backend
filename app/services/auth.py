@@ -23,15 +23,13 @@ class AuthServices:
         self.db = db
 
     @db_exception_handler
-    def create_new_user(self, user: UserCreate) -> UserResponse:
+    def create_new_user(self, user: UserCreate):
         creation_date = datetime.now(timezone.utc)
         new_user = User(
             full_name=user.full_name,
             password=hash_password(user.password),
             email=user.email,
             last_login=creation_date.isoformat(),
-            created_at=datetime.now(timezone.utc),
-            updated_at=datetime.now(timezone.utc),
         )
         self.db.add(new_user)
         self.db.commit()
@@ -58,7 +56,6 @@ class AuthServices:
         if verify_password(user.password, logged_user.password):
             login_date = datetime.now(timezone.utc)
             logged_user.last_login = login_date.isoformat()
-            logged_user.updated_at = datetime.now(timezone.utc)
             self.db.commit()
             self.db.refresh(logged_user)
 

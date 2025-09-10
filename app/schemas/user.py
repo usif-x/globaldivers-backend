@@ -16,7 +16,6 @@ class UserResponse(BaseModel):
     last_login: Optional[str] = None
     is_active: bool
     is_blocked: bool
-    testimonials: Optional[List[TestimonialResponse]] = []
 
     class Config:
         from_attributes = True

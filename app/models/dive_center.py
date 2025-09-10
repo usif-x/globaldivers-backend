@@ -1,12 +1,12 @@
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Dict, List, Optional
 
 from pydantic import HttpUrl, validate_arguments
-from sqlalchemy import JSON, Boolean, DateTime, Float, String
+from sqlalchemy import JSON, Boolean, DateTime, String, Text, text
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql import func
 
-from app.db.conn import Base
+from app.core.database import Base
 
 
 class DiveCenter(Base):
@@ -14,11 +14,11 @@ class DiveCenter(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
-    description: Mapped[Optional[str]] = mapped_column(String(10000), nullable=True)
+    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     # Store image URLs as a JSON list of validated URLs
     images: Mapped[List[str]] = mapped_column(JSON, nullable=False, default=list)
-    is_image_list: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    is_image_list: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default=text("false"))
 
     phone: Mapped[str] = mapped_column(String(30), nullable=False)
     email: Mapped[str] = mapped_column(String(100), nullable=False)

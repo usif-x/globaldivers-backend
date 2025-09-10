@@ -1,10 +1,11 @@
 from fastapi import HTTPException
-from sqlalchemy import select
+from sqlalchemy import select, delete
 from sqlalchemy.orm import Session
 
 from app.core.exception_handler import db_exception_handler
 from app.models.trip import Trip
 from app.schemas.trip import CreateTrip, TripResponse, UpdateTrip
+
 
 
 class TripServices:
@@ -29,7 +30,10 @@ class TripServices:
     def get_trip_by_id(self, id: int):
         stmt = select(Trip).where(Trip.id == id)
         trip = self.db.execute(stmt).scalars().first()
-        return trip
+        if trip:
+            return TripResponse.model_validate(trip, from_attributes=True)
+        else:
+            raise HTTPException(404, detail="Trip not found")
 
     @db_exception_handler
     def delete_trip(self, id: int):
@@ -62,9 +66,10 @@ class TripServices:
 
     @db_exception_handler
     def delete_all_trips(self):
-        stmt = select(Trip)
-        trips = self.db.execute(stmt).scalars().all()
-        for trip in trips:
-            self.db.delete(trip)
-        self.db.commit()
-        return {"success": True, "message": "All trips deleted successfully"}
+        try:
+            self.db.execute(delete(Trip))
+            self.db.commit()
+            return {"success": True, "message": "All trips deleted successfully"}
+        except SQLAlchemyError as e:
+            self.db.rollback()
+            return {"success": False, "message": f"Error deleting trips: {str(e)}"}

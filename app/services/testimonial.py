@@ -1,13 +1,15 @@
 from datetime import datetime, timezone
 
 from fastapi import HTTPException
-from sqlalchemy import select
+from sqlalchemy import select, delete
 from sqlalchemy.orm import Session, joinedload
 
 from app.core.exception_handler import db_exception_handler
 from app.models.testimonial import Testimonial
 from app.models.user import User
 from app.schemas.testimonial import CreateTestimonial
+from sqlalchemy.exc import SQLAlchemyError
+
 
 
 class TestimonialServices:
@@ -96,3 +98,15 @@ class TestimonialServices:
             return {"success": True, "message": "Testimonial deleted successfully"}
         else:
             raise HTTPException(404, detail="Testimonial not found")
+    
+    @db_exception_handler
+    def delete_all_testimonials(self):
+        try:
+            self.db.execute(delete(Testimonial))
+            self.db.commit()
+            return {"success": True, "message": "All testimonials deleted successfully"}
+        except SQLAlchemyError as e:
+            self.db.rollback()
+            return {"success": False, "message": f"Error deleting testimonials: {str(e)}"}
+
+

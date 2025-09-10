@@ -1,22 +1,9 @@
 from logging.config import fileConfig
 
+from sqlalchemy import engine_from_config
+from sqlalchemy import pool
+
 from alembic import context
-from sqlalchemy import engine_from_config, pool
-
-from app.models.admin import Admin
-from app.models.course import Course
-from app.models.gallery import Gallery
-from app.models.invoice import Invoice
-from app.models.package import Package
-from app.models.setting import WebsiteSettings
-from app.models.testimonial import Testimonial
-from app.models.trip import Trip
-from app.models.notification import Notification
-from app.models.best_selling import BestSelling
-from app.models.dive_center import DiveCenter
-
-# Models
-from app.models.user import User
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -29,29 +16,14 @@ if config.config_file_name is not None:
 
 # add your model's MetaData object here
 # for 'autogenerate' support
-from app.db.conn import Base
-
+from app.models import *
+from app.core.database import Base
 target_metadata = Base.metadata
-
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
-import os
-
-from dotenv import load_dotenv
-
-load_dotenv()
-DB_HOST = os.environ.get("DB_HOST")
-DB_USERNAME = os.environ.get("DB_USERNAME")
-DB_PASSWORD = os.environ.get("DB_PASSWORD")
-DB_NAME = os.environ.get("DB_NAME")
-DB_URI = f"mysql+pymysql://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}"
-ONLINE_DATABASE_URL = os.environ.get("ONLINE_DB_URI")
-
-
-config.set_main_option("sqlalchemy.url", DB_URI)
 
 
 def run_migrations_offline() -> None:
@@ -92,7 +64,9 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(connection=connection, target_metadata=target_metadata)
+        context.configure(
+            connection=connection, target_metadata=target_metadata
+        )
 
         with context.begin_transaction():
             context.run_migrations()

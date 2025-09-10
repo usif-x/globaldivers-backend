@@ -1,9 +1,11 @@
 from fastapi import HTTPException
-from sqlalchemy import select
+from sqlalchemy import select, delete
 from sqlalchemy.orm import Session
 
 from app.models.package import Package
 from app.schemas.package import CreatePackage, PackageResponse, UpdatePackage
+from sqlalchemy.exc import SQLAlchemyError
+from app.core.exception_handler import db_exception_handler
 
 
 class PackageServices:
@@ -11,6 +13,7 @@ class PackageServices:
     def __init__(self, db: Session):
         self.db = db
 
+    @db_exception_handler
     def create_package(self, package: CreatePackage):
         new_package = Package(**package.model_dump())
         self.db.add(new_package)
@@ -18,26 +21,36 @@ class PackageServices:
         self.db.refresh(new_package)
         return new_package
 
+    @db_exception_handler
     def get_all_packages(self):
         stmt = select(Package)
         packages = self.db.execute(stmt).scalars().all()
         return packages
 
+    @db_exception_handler
     def get_package_by_id(self, id: int):
         stmt = select(Package).where(Package.id == id)
         package = self.db.execute(stmt).scalars().first()
-        return package
-
-    def delete_package(self, id: int):
-        stmt = select(Package).where(Package.id == id)
-        package = self.db.execute(stmt).scalars().first()
         if package:
-            self.db.delete(package)
-            self.db.commit()
-            return {"success": True, "message": "Package deleted successfully"}
+            return package
         else:
             raise HTTPException(404, detail="Package not found")
 
+    @db_exception_handler
+    def delete_package(self, id: int):
+        try:
+            stmt = select(Package).where(Package.id == id)
+            package = self.db.execute(stmt).scalars().first()
+            if package:
+                self.db.delete(package)
+                self.db.commit()
+                return {"success": True, "message": "Package deleted successfully"}
+            else:
+                raise HTTPException(404, detail="Package not found")
+        except SQLAlchemyError as e:
+            self.db.rollback()
+            return {"success": False, "message": f"Error deleting package: {str(e)}"}
+    @db_exception_handler
     def update_package(self, package: UpdatePackage, id: int):
         stmt = select(Package).where(Package.id == id)
         updated_package = self.db.execute(stmt).scalars().first()
@@ -56,15 +69,17 @@ class PackageServices:
             }
         else:
             raise HTTPException(404, detail="Package not found")
-
+    @db_exception_handler
     def delete_all_packages(self):
-        stmt = select(Package)
-        packages = self.db.execute(stmt).scalars().all()
-        for package in packages:
-            self.db.delete(package)
-        self.db.commit()
-        return {"success": True, "message": "All packages deleted successfully"}
+        try:
+            self.db.execute(delete(Package))
+            self.db.commit()
+            return {"success": True, "message": "All packages deleted successfully"}
+        except SQLAlchemyError as e:
+            self.db.rollback()
+            return {"success": False, "message": f"Error deleting packages: {str(e)}"}
 
+    @db_exception_handler
     def get_trip_by_package_id(self, id: int):
         stmt = select(Package).where(Package.id == id)
         package = self.db.execute(stmt).scalars().first()
