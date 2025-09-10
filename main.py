@@ -1,6 +1,6 @@
 from contextlib import asynccontextmanager
 from pathlib import Path
-
+from datetime import datetime
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, RedirectResponse
@@ -11,15 +11,13 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 from slowapi.util import get_remote_address
 from starlette.status import HTTP_429_TOO_MANY_REQUESTS
-
-from app.core.cache import init_cache
 from app.core.init_superadmin import create_super_admin
 from app.core.limiter import limiter
 from app.core.database import Base, engine
 from app.models import *
 from app.routes.all import routes
-from limits.storage import RedisStorage
 from app.core.config import settings
+from app.core.cache import init_cache
 import uvicorn
 
 
@@ -44,7 +42,6 @@ templates = Jinja2Templates(directory="app/templates")
 
 app.state.limiter = limiter
 app.add_middleware(SlowAPIMiddleware)
-storage = RedisStorage(str(settings.DB_REDIS_URI))
 
 
 @app.exception_handler(RateLimitExceeded)
@@ -57,17 +54,6 @@ async def rate_limit_exceeded_handler(request: Request, exc: RateLimitExceeded):
 
 for route in routes:
     app.include_router(route)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.CORS_ORIGIN if hasattr(settings, 'CORS_ORIGIN') else ["*"],
-    allow_credentials=False,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-
-
 
 @app.get("/", include_in_schema=False)
 async def root(request: Request):
@@ -85,7 +71,11 @@ async def docs():
 
 @app.get("/health", include_in_schema=False)
 async def health():
-    return {"status": "ok"}
+    return {
+        "status": "healthy",
+        "timestamp": datetime.now(),
+        "version": settings.APP_VERSION
+    }
 
 if __name__ == "__main__":
     PROJECT_ROOT = Path(__file__).parent.parent
@@ -98,4 +88,3 @@ if __name__ == "__main__":
         port=settings.PORT,
         reload=settings.DEBUG,
     )
-
