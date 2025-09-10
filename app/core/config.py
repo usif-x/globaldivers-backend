@@ -5,8 +5,8 @@ from functools import lru_cache
 
 class Settings(BaseSettings):
     # Application Settings
-    APP_NAME: str = "Top Divers Hurghada  website server"
-    APP_DESCRIPTION: str = "Top Divers Hurghada  website server"
+    APP_NAME: str = "Top Divers Hurghada website server"
+    APP_DESCRIPTION: str = "Top Divers Hurghada website server"
     APP_VERSION: str = "1.0.0"
     ENVIRONMENT: Literal["development", "staging", "production"] = "development"
     DEBUG: bool = True
@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     DB_ENGINE: str = "postgresql"
     DB_NAME: str
     DB_HOST: str
-    DB_PORT: int = 5432   # ✅ الافتراضي
+    DB_PORT: int = 5432
     DB_USERNAME: str
     DB_PASSWORD: str
     DB_REDIS_URI: RedisDsn
@@ -37,6 +37,11 @@ class Settings(BaseSettings):
     ADMIN_USERNAME: str
     ADMIN_PASSWORD: str
     ADMIN_LEVEL: int
+
+
+    # Cors
+
+    CORS_ORIGIN: str
     
     # Construct database URL from components
     @property
@@ -46,14 +51,28 @@ class Settings(BaseSettings):
     # Validate that debug is False in production
     @field_validator("DEBUG", mode="before")
     @classmethod
-    def validate_debug_in_production(cls, v, values):
-        if values.data.get("ENVIRONMENT") == "production" and v:
+    def validate_debug_in_production(cls, v):
+        # Convert string 'false' to boolean False
+        if isinstance(v, str):
+            if v.lower() == "false":
+                return False
+            elif v.lower() == "true":
+                return True
+        
+        return v
+    
+    # Additional validation after conversion
+    @field_validator("DEBUG", mode="after")
+    @classmethod
+    def check_debug_in_production(cls, v, info):
+        if info.data.get("ENVIRONMENT") == "production" and v:
             raise ValueError("DEBUG should be False in production")
         return v
     
     class Config:
         env_file = ".env"
         case_sensitive = True
+        env_file_encoding = "utf-8"
 
 @lru_cache()
 def get_settings() -> Settings:
