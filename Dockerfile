@@ -25,6 +25,9 @@ RUN pip wheel --no-cache-dir --wheel-dir /wheels -r requirements.txt
 # --- Stage 2: Final Stage ---
 FROM python:3.10-slim
 
+# Create a non-root user for security
+RUN adduser --disabled-password --gecos "" appuser
+
 # Set the working directory in the container
 WORKDIR /app
 
@@ -37,6 +40,12 @@ RUN pip install --no-cache-dir /wheels/*
 
 # Copy the entire application source code
 COPY . .
+
+# Change ownership of the app directory to the non-root user
+RUN chown -R appuser:appuser /app
+
+# Switch to the non-root user
+USER appuser
 
 # Expose the port the app runs on (FastAPI's default is 8000)
 EXPOSE 8000

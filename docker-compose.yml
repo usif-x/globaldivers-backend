@@ -1,5 +1,18 @@
 version: "3.8"
 
+# Quick Start:
+# 1. Copy .env.example to .env and configure your environment variables
+# 2. Run: docker-compose up -d
+# 3. The application will be available at http://localhost:8000
+# 4. API documentation at http://localhost:8000/docs
+#
+# Required environment variables in .env file:
+# - DB_NAME, DB_USERNAME, DB_PASSWORD: PostgreSQL credentials
+# - JWT_SECRET_KEY: At least 32 characters
+# - ADMIN_EMAIL, ADMIN_USERNAME, ADMIN_PASSWORD: Admin account
+# - EASYKASH_PRIVATE_KEY, EASYKASH_SECRET_KEY: Payment gateway
+# - CORS_ORIGIN: Your frontend URL (e.g., http://localhost:3000)
+
 services:
   web:
     build: .
@@ -7,6 +20,49 @@ services:
       - "8000:8000"
     volumes:
       - storage_data:/app/storage
+    environment:
+      - DB_HOST=postgres
+      - DB_REDIS_URI=redis://redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
   storage_data:
+  postgres_data:
+  redis_data:
