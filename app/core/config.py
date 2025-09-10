@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     # JWT Settings
     JWT_SECRET_KEY: str = Field(..., min_length=32)
     JWT_ALGORITHM: str = "HS256"
-    JWT_ACCESS_TOKEN_EXPIRE_DAYS: int = 7
+    JWT_USER_ACCESS_TOKEN_EXPIRE_DAYS: int = 7
     JWT_ADMIN_ACCESS_TOKEN_EXPIRE_DAYS: int = 30
     
     # Database Settings

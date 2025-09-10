@@ -3,16 +3,16 @@
 import hashlib  # <-- NEW IMPORT
 import hmac  # <-- NEW IMPORT
 import json
-import os
+
 import random
 
 import requests
-from dotenv import load_dotenv
 
-load_dotenv()
+from app.core.config import settings
 
-private_key = os.environ.get("EASYKASH_PRIVATE_KEY")
-secret_key = os.environ.get("EASYKASH_SECRET_KEY")
+
+private_key = settings.EASYKASH_PRIVATE_KEY
+secret_key = settings.EASYKASH_SECRET_KEY
 
 
 class EasyKash:

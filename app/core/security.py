@@ -10,13 +10,13 @@ from sqlalchemy.orm import Session
 from app.models.admin import Admin
 from app.models.user import User
 
-load_dotenv()
+from app.core.config import settings
 
 
-SECRET_KEY = os.environ.get("SECRET_KEY")
-ALGORITHM = os.environ.get("ALGORITHM")
-USER_ACCESS_TOKEN_EXPIRE_DAYS = os.environ.get("USER_ACCESS_TOKEN_EXPIRE_DAYS")
-ADMIN_ACCESS_TOKEN_EXPIRE_DAYS = os.environ.get("ADMIN_ACCESS_TOKEN_EXPIRE_DAYS")
+SECRET_KEY = settings.JWT_SECRET_KEY
+ALGORITHM = settings.JWT_ALGORITHM
+USER_ACCESS_TOKEN_EXPIRE_DAYS = settings.JWT_USER_ACCESS_TOKEN_EXPIRE_DAYS
+ADMIN_ACCESS_TOKEN_EXPIRE_DAYS = settings.JWT_ADMIN_ACCESS_TOKEN_EXPIRE_DAYS
 
 
 def create_user_access_token(id: int, iat: str):
