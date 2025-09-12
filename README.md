@@ -1,6 +1,6 @@
-# Global Divers Backend API
+# Top Divers Backend API
 
-A FastAPI-based backend service for Global Divers, providing RESTful APIs for dive center management, course booking, trip reservations, and payment processing.
+A FastAPI-based backend service for Top Divers, providing RESTful APIs for dive center management, course booking, trip reservations, and payment processing.
 
 ## Features
 
@@ -27,7 +27,7 @@ A FastAPI-based backend service for Global Divers, providing RESTful APIs for di
 
    ```bash
    git clone <your-repo-url>
-   cd globaldivers-backend
+   cd Topdivers-backend
    ```
 
 2. **Set up environment variables**
@@ -86,7 +86,7 @@ PORT=8000
 
 # Database
 DB_ENGINE=postgresql
-DB_NAME=global_divers
+DB_NAME=Top_divers
 DB_HOST=localhost
 DB_PORT=5432
 DB_USERNAME=postgres
