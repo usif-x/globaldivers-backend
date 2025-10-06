@@ -1,6 +1,8 @@
 from contextlib import asynccontextmanager
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
+
+import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, RedirectResponse
@@ -9,15 +11,14 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 from slowapi.util import get_remote_address
 from starlette.status import HTTP_429_TOO_MANY_REQUESTS
+
+from app.core.cache import init_cache
+from app.core.config import settings
+from app.core.database import Base, engine
 from app.core.init_superadmin import create_super_admin
 from app.core.limiter import limiter
-from app.core.database import Base, engine
 from app.models import *
 from app.routes.all import routes
-from app.core.config import settings
-from app.core.cache import init_cache
-import uvicorn
-
 
 
 @asynccontextmanager
@@ -36,19 +37,22 @@ app = FastAPI(
     version=settings.APP_VERSION,
 )
 
-templates = Jinja2Templates(directory="app/templates") 
+templates = Jinja2Templates(directory="app/templates")
 
 app.state.limiter = limiter
 app.add_middleware(SlowAPIMiddleware)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3001"],
+    # Allow requests from any origin. Using a regex allows credentials to be
+    # sent while matching all origins (browsers block '*' when credentials
+    # are allowed). If you do NOT need credentials, you can alternatively
+    # use allow_origins=["*"] and set allow_credentials=False.
+    allow_origin_regex=r".*",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 
 @app.exception_handler(RateLimitExceeded)
@@ -61,6 +65,7 @@ async def rate_limit_exceeded_handler(request: Request, exc: RateLimitExceeded):
 
 for route in routes:
     app.include_router(route)
+
 
 @app.get("/", include_in_schema=False)
 async def root(request: Request):
@@ -76,13 +81,15 @@ async def redoc():
 async def docs():
     return RedirectResponse(url="/docs")
 
+
 @app.get("/health", include_in_schema=False)
 async def health():
     return {
         "status": "healthy",
         "timestamp": datetime.now(),
-        "version": settings.APP_VERSION
+        "version": settings.APP_VERSION,
     }
+
 
 if __name__ == "__main__":
     PROJECT_ROOT = Path(__file__).parent.parent
