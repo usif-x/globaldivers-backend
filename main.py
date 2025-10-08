@@ -90,6 +90,7 @@ async def health():
         "status": "healthy",
         "timestamp": datetime.now(),
         "version": settings.APP_VERSION,
+        "environment": settings.ENVIRONMENT,
     }
 
 
