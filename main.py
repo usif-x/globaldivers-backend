@@ -64,11 +64,12 @@ app.add_middleware(SlowAPIMiddleware)
 
 app.add_middleware(
     CORSMiddleware,
-    # Allow requests from any origin. Using a regex allows credentials to be
-    # sent while matching all origins (browsers block '*' when credentials
-    # are allowed). If you do NOT need credentials, you can alternatively
-    # use allow_origins=["*"] and set allow_credentials=False.
-    allow_origin_regex=r".*",
+    allow_origins=[
+        "https://topdivers.online",
+        "http://localhost",
+        "http://localhost:3000",
+        "http://localhost:8080",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
