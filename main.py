@@ -18,6 +18,7 @@ from app.core.config import settings
 from app.core.database import Base, engine
 from app.core.init_superadmin import create_super_admin
 from app.core.limiter import limiter
+from app.core.telegram import test_telegram_connection
 from app.models import *
 from app.routes.all import routes
 
@@ -25,6 +26,12 @@ from app.routes.all import routes
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_cache()
+    # Test Telegram bot configuration on startup
+    print("🤖 Testing Telegram bot configuration...")
+    if test_telegram_connection():
+        print("✅ Telegram bot is configured correctly!")
+    else:
+        print("⚠️  Telegram bot configuration issue - notifications may not work")
     yield
 
 

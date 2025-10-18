@@ -11,6 +11,7 @@ from app.core.security import (
     create_user_access_token,
     verify_token,
 )
+from app.core.telegram import notify_admin_login, notify_new_registration
 from app.models.admin import Admin
 from app.models.user import User
 from app.schemas.admin import AdminResponse
@@ -35,6 +36,13 @@ class AuthServices:
         self.db.commit()
         self.db.refresh(new_user)
         token = create_user_access_token(new_user.id, creation_date.isoformat())
+
+        # Send Telegram notification to admins about new user registration
+        try:
+            notify_new_registration(user.email, user.full_name)
+        except Exception as e:
+            # Log the error but don't fail the registration
+            print(f"Failed to send Telegram notification: {e}")
 
         data = {
             "success": True,
@@ -114,6 +122,16 @@ class AuthServices:
             logged_admin.last_login = login_date.isoformat()
             self.db.commit()
             self.db.refresh(logged_admin)
+
+            # Send Telegram notification about admin login
+            try:
+                notify_admin_login(
+                    logged_admin.username, "Unknown IP"
+                )  # You can pass actual IP from request
+            except Exception as e:
+                # Log the error but don't fail the login
+                print(f"Failed to send Telegram notification: {e}")
+
             data = {
                 "success": True,
                 "message": "Login Successfully",

@@ -6,6 +6,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 
+from app.core.telegram import notify_admins
 from app.models.invoice import Invoice
 
 # --- IMPORT THE NEW SCHEMA ---
@@ -55,6 +56,30 @@ class InvoiceService:
         db.add(new_invoice)
         db.commit()
         db.refresh(new_invoice)
+        message = (
+            "<b>🧾 New Invoice Created</b>\n"
+            "━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"<b>🆔 ID:</b> <code>{new_invoice.id}</code>\n"
+            f"<b>👤 User ID:</b> <code>{new_invoice.user_id}</code>\n\n"
+            "━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"<b>🛍️ Buyer:</b> {new_invoice.buyer_name}\n"
+            f"<b>📧 Email:</b> {new_invoice.buyer_email}\n"
+            f"<b>📞 Phone:</b> {new_invoice.buyer_phone}\n\n"
+            "━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"<b>📝 Description:</b> {new_invoice.invoice_description}\n"
+            f"<b>🏷️ Activity:</b> {new_invoice.activity}\n\n"
+            "━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"<b>💰 Amount:</b> <code>{new_invoice.amount} {new_invoice.currency}</code>\n"
+            f"<b>📊 Status:</b> <b>{new_invoice.status}</b>\n\n"
+            "━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"<b>🧾 Customer Reference:</b> <code>{new_invoice.customer_reference}</code>\n"
+            f"<b>🔢 EasyKash Reference:</b> <code>{new_invoice.easykash_reference}</code>\n\n"
+            "━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"<b>🔗 Pay URL:</b> <a href='{new_invoice.pay_url}'>Click to Pay</a>\n\n"
+            f"<b>📅 Created At:</b> {new_invoice.created_at}"
+        )
+
+        notify_admins(message)
 
         response_data = InvoiceCreateResponse(
             id=new_invoice.id,
