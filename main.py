@@ -38,12 +38,23 @@ async def lifespan(app: FastAPI):
 Base.metadata.create_all(bind=engine)
 
 
-app = FastAPI(
-    lifespan=lifespan,
-    title=settings.APP_NAME,
-    description=settings.APP_DESCRIPTION,
-    version=settings.APP_VERSION,
-)
+# Disable docs in production
+if settings.ENVIRONMENT == "production":
+    app = FastAPI(
+        lifespan=lifespan,
+        title=settings.APP_NAME,
+        description=settings.APP_DESCRIPTION,
+        version=settings.APP_VERSION,
+        docs_url=None,
+        redoc_url=None,
+    )
+else:
+    app = FastAPI(
+        lifespan=lifespan,
+        title=settings.APP_NAME,
+        description=settings.APP_DESCRIPTION,
+        version=settings.APP_VERSION,
+    )
 
 templates = Jinja2Templates(directory="app/templates")
 app.mount("/storage", StaticFiles(directory="storage"), name="storage")
