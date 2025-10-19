@@ -55,19 +55,19 @@ class AnalyticsServices:
         return self.db.query(Invoice).count()
 
     def get_pending_invoices_count(self):
-        return self.db.query(Invoice).filter(Invoice.status == "pending").count()
+        return self.db.query(Invoice).filter(Invoice.status == "PENDING").count()
 
     def get_expired_invoices_count(self):
-        return self.db.query(Invoice).filter(Invoice.status == "expired").count()
+        return self.db.query(Invoice).filter(Invoice.status == "EXPIRED").count()
 
     def get_paid_invoices_count(self):
-        return self.db.query(Invoice).filter(Invoice.status == "paid").count()
+        return self.db.query(Invoice).filter(Invoice.status == "PAID").count()
 
     def get_unpaid_invoices_count(self):
-        return self.db.query(Invoice).filter(Invoice.status == "unpaid").count()
+        return self.db.query(Invoice).filter(Invoice.status == "NEW").count()
 
     def get_cancelled_invoices_count(self):
-        return self.db.query(Invoice).filter(Invoice.status == "cancelled").count()
+        return self.db.query(Invoice).filter(Invoice.status == "CANCELLED").count()
 
     def get_all(self):
         return {
