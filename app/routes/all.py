@@ -7,6 +7,7 @@ from .dive_center import dive_center_routes
 from .divesites import divesites_routes
 from .gallery import gallery_routes
 from .invoice import router as invoice_routes
+from .order import router as order_routes
 from .package import package_routes
 from .setting import setting_routes
 from .testimonial import testimonial_routes
@@ -28,4 +29,5 @@ routes = [
     setting_routes,
     best_selling_routes,
     dive_center_routes,
+    order_routes,
 ]
