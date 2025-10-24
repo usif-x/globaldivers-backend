@@ -3,6 +3,7 @@
 from datetime import datetime
 
 from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, Text, func
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
@@ -19,6 +20,7 @@ class Invoice(Base):
     buyer_phone: Mapped[str] = mapped_column(String(100), nullable=False)
     invoice_description: Mapped[str] = mapped_column(Text, nullable=False)
     activity: Mapped[str] = mapped_column(String(100), nullable=False)
+    activity_details: Mapped[list] = mapped_column(JSONB, nullable=True)
     picked_up: Mapped[bool] = mapped_column(Boolean, default=False, nullable=True)
     amount: Mapped[float] = mapped_column(Float, nullable=False)
     currency: Mapped[str] = mapped_column(String(50), nullable=False)

@@ -37,6 +37,16 @@ class InvoiceService:
                 detail=f"Failed to create payment link: {easykash_response.get('details')}",
             )
 
+        # Convert activity_details to a list of dicts for database storage
+        activity_details_dict = (
+            [
+                details.model_dump(mode="json")
+                for details in invoice_data.activity_details
+            ]
+            if invoice_data.activity_details
+            else None
+        )
+
         new_invoice = Invoice(
             user_id=user_id,
             buyer_name=invoice_data.buyer_name,
@@ -44,6 +54,7 @@ class InvoiceService:
             buyer_phone=invoice_data.buyer_phone,
             invoice_description=invoice_data.invoice_description,
             activity=invoice_data.activity,
+            activity_details=activity_details_dict,
             amount=invoice_data.amount,
             currency=invoice_data.currency,
             pay_url=easykash_response.get("pay_url"),
@@ -56,6 +67,19 @@ class InvoiceService:
         db.add(new_invoice)
         db.commit()
         db.refresh(new_invoice)
+
+        # --- Enhanced Telegram Notification ---
+        activity_details_str = ""
+        if new_invoice.activity_details:
+            for detail in new_invoice.activity_details:
+                activity_details_str += (
+                    f"  - <b>{detail.get('name', 'N/A')}</b>\n"
+                    f"    <b>Date:</b> {detail.get('activity_date', 'N/A')}\n"
+                    f"    <b>Guests:</b> {detail.get('adults', 0)} Adult(s), {detail.get('children', 0)} Child(ren)\n"
+                    f"    <b>Hotel:</b> {detail.get('hotel_name', 'N/A')}, Room #{detail.get('room_number', 'N/A')}\n"
+                    f"    <b>Requests:</b> {detail.get('special_requests', 'None')}\n\n"
+                )
+
         message = (
             "<b>🧾 New Invoice Created</b>\n"
             "━━━━━━━━━━━━━━━━━━━━━━━\n\n"
@@ -68,6 +92,7 @@ class InvoiceService:
             "━━━━━━━━━━━━━━━━━━━━━━━\n\n"
             f"<b>📝 Description:</b> {new_invoice.invoice_description}\n"
             f"<b>🏷️ Activity:</b> {new_invoice.activity}\n\n"
+            f"<b>📋 Activity Details:</b>\n{activity_details_str if activity_details_str else '  None provided.'}\n"
             "━━━━━━━━━━━━━━━━━━━━━━━\n\n"
             f"<b>💰 Amount:</b> <code>{new_invoice.amount} {new_invoice.currency}</code>\n"
             f"<b>📊 Status:</b> <b>{new_invoice.status}</b>\n\n"
@@ -368,7 +393,11 @@ class InvoiceService:
             )
 
         for key, value in update_data.items():
-            setattr(invoice, key, value)
+            if key == "activity_details" and value:
+                # Pydantic models in a list need to be converted to dicts
+                setattr(invoice, key, [item.model_dump(mode="json") for item in value])
+            else:
+                setattr(invoice, key, value)
 
         db.commit()
         db.refresh(invoice)

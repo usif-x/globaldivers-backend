@@ -1,9 +1,24 @@
 # app/schemas/invoice.py
 
-from datetime import datetime
-from typing import Any, Optional
+from datetime import date, datetime
+from typing import Any, List, Optional
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
+
+
+# --- NEW Activity Detail Schema ---
+class ActivityDetail(BaseModel):
+    name: str = Field(
+        ..., description="Name of the activity, e.g., 'Trip Booking: test'"
+    )
+    activity_date: date = Field(..., description="Date of the trip or activity")
+    adults: int = Field(..., gt=0, description="Number of adults")
+    children: int = Field(default=0, ge=0, description="Number of children")
+    hotel_name: Optional[str] = Field(None, description="Name of the hotel for pickup")
+    room_number: Optional[str] = Field(None, description="Room number for pickup")
+    special_requests: Optional[str] = Field(
+        None, description="Any special requests from the customer"
+    )
 
 
 # --- Existing schemas ---
@@ -13,6 +28,7 @@ class InvoiceBase(BaseModel):
     buyer_phone: str
     invoice_description: str
     activity: str
+    activity_details: Optional[List[ActivityDetail]] = None
     picked_up: Optional[bool] = False
     amount: float
     currency: str
@@ -37,6 +53,7 @@ class InvoiceResponse(InvoiceBase):
     status: str
     pay_url: Optional[str] = None
     activity: str
+    activity_details: Optional[List[Any]] = None
     picked_up: bool
     customer_reference: Optional[str] = None
     easykash_reference: Optional[str] = None
@@ -75,6 +92,7 @@ class InvoiceUpdate(BaseModel):
     buyer_phone: Optional[str] = None
     invoice_description: Optional[str] = None
     activity: Optional[str] = None
+    activity_details: Optional[List[ActivityDetail]] = None
     amount: Optional[float] = None
     currency: Optional[str] = None
     picked_up: Optional[bool] = None
