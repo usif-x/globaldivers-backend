@@ -14,6 +14,7 @@ class OrderFilter(BaseModel):
     picked_up: Optional[bool] = None
     user_id: Optional[int] = None
     buyer_email: Optional[str] = None
+    invoice_type: Optional[str] = None
 
 
 class FilteredOrdersResponse(BaseModel):

@@ -23,5 +23,6 @@ def get_filtered_orders(
     - **picked_up**: Filter by whether the order has been picked up (true/false).
     - **user_id**: Filter by the ID of the user who created the invoice.
     - **buyer_email**: Filter by the email of the buyer.
+    - **invoice_type**: Filter by the type of invoice ('online' or 'cash').
     """
     return OrderService.filter_invoices(db=db, filters=filters)

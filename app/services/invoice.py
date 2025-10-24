@@ -26,15 +26,11 @@ class InvoiceService:
     def create_invoice(
         db: Session, invoice_data: InvoiceCreate, user_id: int
     ) -> InvoiceCreateResponse:
-        payment_payload = invoice_data.model_dump()
-        easykash_response = easykash_client.create_payment(
-            payment_data=payment_payload, user_id=user_id
-        )
-
-        if not easykash_response.get("success"):
+        # Validate invoice_type
+        if invoice_data.invoice_type not in ["online", "cash"]:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Failed to create payment link: {easykash_response.get('details')}",
+                detail="Invoice type must be either 'online' or 'cash'",
             )
 
         # Convert activity_details to a list of dicts for database storage
@@ -47,6 +43,35 @@ class InvoiceService:
             else None
         )
 
+        # Initialize common invoice data
+        customer_reference = None
+        pay_url = None
+        easykash_reference = None
+        status = "PENDING"
+
+        # Handle online payments
+        if invoice_data.invoice_type == "online":
+            payment_payload = invoice_data.model_dump()
+            easykash_response = easykash_client.create_payment(
+                payment_data=payment_payload, user_id=user_id
+            )
+
+            if not easykash_response.get("success"):
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Failed to create payment link: {easykash_response.get('details')}",
+                )
+
+            customer_reference = easykash_response.get("customer_reference")
+            pay_url = easykash_response.get("pay_url")
+            easykash_reference = easykash_response.get("easykash_reference")
+        else:
+            # For cash payments, generate a simple customer reference for tracking
+            import random
+            import time
+
+            customer_reference = f"CASH-{int(time.time())}-{random.randint(1000, 9999)}"
+
         new_invoice = Invoice(
             user_id=user_id,
             buyer_name=invoice_data.buyer_name,
@@ -57,11 +82,12 @@ class InvoiceService:
             activity_details=activity_details_dict,
             amount=invoice_data.amount,
             currency=invoice_data.currency,
-            pay_url=easykash_response.get("pay_url"),
-            status="PENDING",
+            invoice_type=invoice_data.invoice_type,
+            pay_url=pay_url,
+            status=status,
             picked_up=False,
-            customer_reference=easykash_response.get("customer_reference"),
-            easykash_reference=easykash_response.get("easykash_reference"),
+            customer_reference=customer_reference,
+            easykash_reference=easykash_reference,
         )
 
         db.add(new_invoice)
@@ -91,18 +117,30 @@ class InvoiceService:
             f"<b>📞 Phone:</b> {new_invoice.buyer_phone}\n\n"
             "━━━━━━━━━━━━━━━━━━━━━━━\n\n"
             f"<b>📝 Description:</b> {new_invoice.invoice_description}\n"
-            f"<b>🏷️ Activity:</b> {new_invoice.activity}\n\n"
+            f"<b>🏷️ Activity:</b> {new_invoice.activity}\n"
+            f"<b>💳 Type:</b> {new_invoice.invoice_type.upper()}\n\n"
             f"<b>📋 Activity Details:</b>\n{activity_details_str if activity_details_str else '  None provided.'}\n"
             "━━━━━━━━━━━━━━━━━━━━━━━\n\n"
             f"<b>💰 Amount:</b> <code>{new_invoice.amount} {new_invoice.currency}</code>\n"
             f"<b>📊 Status:</b> <b>{new_invoice.status}</b>\n\n"
-            "━━━━━━━━━━━━━━━━━━━━━━━\n\n"
-            f"<b>🧾 Customer Reference:</b> <code>{new_invoice.customer_reference}</code>\n"
-            f"<b>🔢 EasyKash Reference:</b> <code>{new_invoice.easykash_reference}</code>\n\n"
-            "━━━━━━━━━━━━━━━━━━━━━━━\n\n"
-            f"<b>🔗 Pay URL:</b> <a href='{new_invoice.pay_url}'>Click to Pay</a>\n\n"
-            f"<b>📅 Created At:</b> {new_invoice.created_at}"
         )
+
+        if new_invoice.invoice_type == "online":
+            message += (
+                "━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                f"<b>🧾 Customer Reference:</b> <code>{new_invoice.customer_reference}</code>\n"
+                f"<b>🔢 EasyKash Reference:</b> <code>{new_invoice.easykash_reference}</code>\n\n"
+                "━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                f"<b>🔗 Pay URL:</b> <a href='{new_invoice.pay_url}'>Click to Pay</a>\n\n"
+            )
+        else:
+            message += (
+                "━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                f"<b>🧾 Customer Reference:</b> <code>{new_invoice.customer_reference}</code>\n"
+                "<b>💵 CASH PAYMENT</b> - No online payment required\n\n"
+            )
+
+        message += f"<b>📅 Created At:</b> {new_invoice.created_at}"
 
         notify_admins(message)
 
@@ -111,7 +149,8 @@ class InvoiceService:
             user_id=new_invoice.user_id,
             status=new_invoice.status,
             customer_reference=new_invoice.customer_reference,
-            pay_url=easykash_response.get("pay_url"),
+            pay_url=new_invoice.pay_url,
+            invoice_type=new_invoice.invoice_type,
             created_at=new_invoice.created_at,
         )
         return response_data

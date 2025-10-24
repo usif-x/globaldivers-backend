@@ -30,6 +30,8 @@ class OrderService:
             query = query.filter(Invoice.user_id == filters.user_id)
         if filters.buyer_email:
             query = query.filter(Invoice.buyer_email.ilike(f"%{filters.buyer_email}%"))
+        if filters.invoice_type:
+            query = query.filter(Invoice.invoice_type == filters.invoice_type)
 
         invoices = query.order_by(Invoice.created_at.desc()).all()
 

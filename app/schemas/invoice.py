@@ -32,6 +32,9 @@ class InvoiceBase(BaseModel):
     picked_up: Optional[bool] = False
     amount: float
     currency: str
+    invoice_type: str = Field(
+        default="online", description="Type of invoice: 'online' or 'cash'"
+    )
 
 
 class InvoiceCreate(InvoiceBase):
@@ -42,8 +45,9 @@ class InvoiceCreateResponse(BaseModel):
     id: int
     user_id: int
     status: str
-    customer_reference: str
-    pay_url: str
+    customer_reference: Optional[str] = None
+    pay_url: Optional[str] = None
+    invoice_type: str
     created_at: datetime
 
 
@@ -57,6 +61,7 @@ class InvoiceResponse(InvoiceBase):
     picked_up: bool
     customer_reference: Optional[str] = None
     easykash_reference: Optional[str] = None
+    invoice_type: str
     created_at: datetime
     updated_at: datetime
 
@@ -97,6 +102,7 @@ class InvoiceUpdate(BaseModel):
     currency: Optional[str] = None
     picked_up: Optional[bool] = None
     status: Optional[str] = None  # Allow admins to manually change the status
+    invoice_type: Optional[str] = None
 
 
 class EasyKashCallbackPayload(BaseModel):
