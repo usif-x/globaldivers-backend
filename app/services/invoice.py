@@ -68,9 +68,10 @@ class InvoiceService:
         else:
             # For cash payments, generate a simple customer reference for tracking
             import random
-            import time
 
-            customer_reference = f"CASH-{int(time.time())}-{random.randint(1000, 9999)}"
+            customer_reference = (
+                f"{random.randint(1000, 9999)}{user_id}{random.randint(1000,9999)}"
+            )
 
         new_invoice = Invoice(
             user_id=user_id,
