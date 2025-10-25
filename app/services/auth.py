@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.core.exception_handler import db_exception_handler
 from app.core.hashing import hash_password, verify_password
+from app.core.mailer import send_email
 from app.core.security import (
     create_admin_access_token,
     create_user_access_token,
@@ -43,6 +44,18 @@ class AuthServices:
         except Exception as e:
             # Log the error but don't fail the registration
             print(f"Failed to send Telegram notification: {e}")
+
+        # Send welcome email to new user
+        try:
+            send_email(
+                to_email=new_user.email,
+                subject="Welcome to Top Divers Hurghada!",
+                template_name="welcome_email.html",
+                context={"full_name": new_user.full_name},
+            )
+        except Exception as e:
+            # Log the error but don't fail the registration
+            print(f"Failed to send welcome email: {e}")
 
         data = {
             "success": True,

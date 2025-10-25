@@ -48,6 +48,18 @@ class Settings(BaseSettings):
     TELEGRAM_BOT_TOKEN: str = ""
     TELEGRAM_ADMIN_IDS_STR: str = Field(default="", alias="TELEGRAM_ADMIN_IDS")
 
+    # Email Settings
+    SMTP_HOST: str = Field(..., description="SMTP server host")
+    SMTP_PORT: int = Field(..., description="SMTP server port")
+    SMTP_USERNAME: str = Field(..., description="SMTP server username")
+    SMTP_PASSWORD: str = Field(..., description="SMTP server password")
+    EMAIL_FROM: str = Field(..., description="Default from email address")
+    EMAIL_FROM_NAME: str = Field(..., description="Default from name")
+    EMAIL_USE_TLS: bool = Field(default=True, description="Use TLS for SMTP connection")
+    EMAIL_USE_SSL: bool = Field(
+        default=False, description="Use SSL for SMTP connection"
+    )
+
     @computed_field
     @property
     def TELEGRAM_ADMIN_IDS(self) -> list[int]:

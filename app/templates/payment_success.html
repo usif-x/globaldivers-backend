@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Payment Confirmed - Top Divers Hurghada</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Arial, sans-serif;
+        background-color: #f5f5f5;
+      }
+      .email-container {
+        max-width: 600px;
+        margin: 40px auto;
+        background: #ffffff;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+      .header {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        padding: 40px 30px;
+        text-align: center;
+      }
+      .logo {
+        font-size: 60px;
+        margin-bottom: 15px;
+      }
+      .header h1 {
+        color: #ffffff;
+        font-size: 28px;
+        font-weight: 600;
+        margin: 0;
+      }
+      .content {
+        padding: 40px 30px;
+        text-align: center;
+      }
+      .greeting {
+        font-size: 22px;
+        color: #333333;
+        margin-bottom: 20px;
+      }
+      .message {
+        font-size: 16px;
+        color: #666666;
+        line-height: 1.6;
+        margin-bottom: 25px;
+      }
+      .success-box {
+        background: #d4edda;
+        border: 2px solid #28a745;
+        padding: 25px;
+        margin: 25px 0;
+        border-radius: 8px;
+        text-align: center;
+      }
+      .success-icon {
+        font-size: 50px;
+        margin-bottom: 15px;
+      }
+      .success-title {
+        font-size: 24px;
+        color: #155724;
+        font-weight: 700;
+        margin-bottom: 10px;
+      }
+      .success-message {
+        font-size: 16px;
+        color: #155724;
+      }
+      .invoice-box {
+        background: #f8f9fa;
+        border-left: 4px solid #28a745;
+        padding: 20px;
+        margin: 25px 0;
+        border-radius: 4px;
+        text-align: left;
+      }
+      .invoice-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid #e0e0e0;
+      }
+      .invoice-row:last-child {
+        border-bottom: none;
+        font-weight: 600;
+        font-size: 18px;
+        color: #28a745;
+        padding-top: 15px;
+      }
+      .invoice-label {
+        color: #666666;
+        font-weight: 500;
+      }
+      .invoice-value {
+        color: #333333;
+        font-weight: 600;
+      }
+      .button {
+        display: inline-block;
+        background: #28a745;
+        color: #ffffff;
+        text-decoration: none;
+        padding: 14px 40px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 16px;
+        margin: 20px 0;
+      }
+      .footer {
+        background: #f8f8f8;
+        padding: 30px;
+        text-align: center;
+        color: #888888;
+        font-size: 14px;
+        border-top: 1px solid #e0e0e0;
+      }
+      .footer-brand {
+        font-weight: 600;
+        color: #333333;
+        margin-bottom: 10px;
+      }
+      @media only screen and (max-width: 600px) {
+        .email-container {
+          margin: 20px;
+          border-radius: 6px;
+        }
+        .header {
+          padding: 30px 20px;
+        }
+        .header h1 {
+          font-size: 24px;
+        }
+        .content {
+          padding: 30px 20px;
+        }
+        .greeting {
+          font-size: 20px;
+        }
+        .invoice-row {
+          flex-direction: column;
+          gap: 5px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="email-container">
+      <!-- Header -->
+      <div class="header">
+        <div class="logo">✅</div>
+        <h1>Payment Confirmed!</h1>
+      </div>
+
+      <!-- Content -->
+      <div class="content">
+        <div class="greeting">Hi {{ buyer_name }}! 🎉</div>
+
+        <!-- Success Box -->
+        <div class="success-box">
+          <div class="success-icon">💳</div>
+          <div class="success-title">Payment Successful!</div>
+          <div class="success-message">
+            Your payment has been confirmed and your booking is now secured.
+          </div>
+        </div>
+
+        <p class="message">
+          Thank you for your payment! We've received your payment and your
+          booking is now confirmed.
+        </p>
+
+        <!-- Invoice Details -->
+        <div class="invoice-box">
+          <div class="invoice-row">
+            <span class="invoice-label">Invoice ID:</span>
+            <span class="invoice-value">#{{ invoice_id }}</span>
+          </div>
+          <div class="invoice-row">
+            <span class="invoice-label">Reference:</span>
+            <span class="invoice-value">{{ customer_reference }}</span>
+          </div>
+          <div class="invoice-row">
+            <span class="invoice-label">Activity:</span>
+            <span class="invoice-value">{{ activity }}</span>
+          </div>
+          <div class="invoice-row">
+            <span class="invoice-label">Payment Method:</span>
+            <span class="invoice-value">{{ payment_method }}</span>
+          </div>
+          <div class="invoice-row">
+            <span class="invoice-label">Amount Paid:</span>
+            <span class="invoice-value">{{ amount }} {{ currency }}</span>
+          </div>
+        </div>
+
+        <p class="message">
+          We're excited to have you dive with us! Our team will contact you soon
+          with further details about your booking.
+        </p>
+
+        <a href="https://topdivers.online" class="button">View My Bookings</a>
+      </div>
+
+      <!-- Footer -->
+      <div class="footer">
+        <div class="footer-brand">Top Divers Hurghada</div>
+        <div>📍 Hurghada, Red Sea, Egypt</div>
+        <div>📧 info@topdivers.online</div>
+        <div style="margin-top: 15px; font-size: 12px; color: #aaaaaa">
+          © 2025 Top Divers Hurghada. All rights reserved.
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
