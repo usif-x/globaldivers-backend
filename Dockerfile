@@ -41,9 +41,6 @@ RUN pip install --no-cache-dir /wheels/*
 # Copy the entire application source code
 COPY . .
 
-# Make the startup script executable
-RUN chmod +x start.sh
-
 # Change ownership of the app directory to the non-root user
 RUN chown -R appuser:appuser /app
 
@@ -55,5 +52,5 @@ EXPOSE 8000
 
 # The default command to run the app.
 # We will override this in Dokploy to include migrations.
-CMD ["./start.sh"]
+CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port 8000"]
 
