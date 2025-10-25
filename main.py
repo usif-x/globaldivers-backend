@@ -109,8 +109,8 @@ async def health():
 
 
 if __name__ == "__main__":
-    PROJECT_ROOT = Path(__file__).parent.parent
-    STORAGE_DIR = PROJECT_ROOT / "storage"
+    BASE_DIR = Path(__file__).resolve().parent
+    STORAGE_DIR = BASE_DIR / "storage"
     STORAGE_DIR.mkdir(exist_ok=True)
     create_super_admin()
     uvicorn.run(
