@@ -38,6 +38,10 @@ async def get_current_user(request: Request, db: Session = Depends(get_db)):
 
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
+        if not user.is_active:
+            raise HTTPException(status_code=403, detail="Inactive user")
+        if user.is_blocked:
+            raise HTTPException(status_code=403, detail="Blocked user")
 
         return user  # This is the User model instance, not the payload
 
