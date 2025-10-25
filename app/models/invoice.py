@@ -24,6 +24,9 @@ class Invoice(Base):
     picked_up: Mapped[bool] = mapped_column(Boolean, default=False, nullable=True)
     amount: Mapped[float] = mapped_column(Float, nullable=False)
     currency: Mapped[str] = mapped_column(String(50), nullable=False)
+    invoice_type: Mapped[str] = mapped_column(
+        String(20), default="online", nullable=False, server_default="online"
+    )
     payment_method: Mapped[str] = mapped_column(
         String(50), default="easykash", nullable=False
     )
