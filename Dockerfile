@@ -55,7 +55,5 @@ EXPOSE 8000
 
 # The default command to run the app.
 # We will override this in Dokploy to include migrations.
-# The default command to run the app.
-# We will override this in Dokploy to include migrations.
 CMD ["./start.sh"]
 
