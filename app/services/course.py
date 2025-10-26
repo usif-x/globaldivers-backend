@@ -3,6 +3,7 @@ from sqlalchemy import and_, select
 from sqlalchemy.orm import Session, joinedload
 
 from app.core.exception_handler import db_exception_handler
+from app.core.telegram import notify_admins
 from app.models.course import Course
 from app.models.course_content import CourseContent
 from app.models.user import User
@@ -175,3 +176,47 @@ class CourseServices:
         self.db.commit()
 
         return {"message": f"Successfully enrolled in {course.name}"}
+
+    @db_exception_handler
+    def send_course_inquiry(self, inquiry_data: dict):
+        """
+        Sends a course inquiry notification to admins via Telegram.
+        """
+        # Extract inquiry data
+        course_id = inquiry_data.get("course_id")
+        course_name = inquiry_data.get("course_name")
+        full_name = inquiry_data.get("full_name")
+        email = inquiry_data.get("email")
+        phone = inquiry_data.get("phone")
+        message = inquiry_data.get("message", "No message provided")
+        number_of_people = inquiry_data.get("number_of_people", 1)
+        status = inquiry_data.get("status", "pending")
+
+        # Build Telegram notification message
+        telegram_message = (
+            "<b>📚 New Course Inquiry</b>\n"
+            "━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"<b>📖 Course:</b> {course_name}\n"
+            f"<b>🆔 Course ID:</b> <code>{course_id}</code>\n\n"
+            "━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"<b>👤 Name:</b> {full_name}\n"
+            f"<b>📧 Email:</b> {email}\n"
+            f"<b>📞 Phone:</b> {phone}\n"
+            f"<b>👥 Number of People:</b> {number_of_people}\n\n"
+            "━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"<b>💬 Message:</b>\n{message}\n\n"
+            "━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"<b>📊 Status:</b> <b>{status.upper()}</b>"
+        )
+
+        # Send notification to admins
+        try:
+            notify_admins(telegram_message)
+        except Exception as e:
+            print(f"Failed to send Telegram notification: {e}")
+            # Don't raise exception, just log it
+
+        return {
+            "success": True,
+            "message": "Course inquiry received successfully. Our team will contact you soon!",
+        }

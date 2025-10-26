@@ -6,6 +6,7 @@ from app.core.database import get_db
 from app.core.dependencies import get_current_admin, get_current_user
 from app.models.user import User
 from app.schemas.course import (
+    CourseInquiry,
     CourseResponse,
     CreateCourse,
     EnrollCourse,
@@ -88,3 +89,16 @@ async def enroll_in_course(
     return CourseServices(db).enroll_user_in_course(
         user_id=data.user_id, course_id=data.course_id
     )
+
+
+@course_routes.post("/{course_id}/inquire")
+async def send_course_inquiry(
+    course_id: int,
+    inquiry: CourseInquiry,
+    db: Session = Depends(get_db),
+):
+    """
+    Sends a course inquiry to admins via Telegram.
+    No authentication required for public course inquiries.
+    """
+    return CourseServices(db).send_course_inquiry(inquiry.model_dump())

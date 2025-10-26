@@ -74,6 +74,17 @@ class EnrollCourse(BaseModel):
     user_id: int
 
 
+class CourseInquiry(BaseModel):
+    course_id: int
+    course_name: str
+    full_name: str
+    email: str
+    phone: str
+    message: Optional[str] = None
+    number_of_people: int = 1
+    status: str = "pending"
+
+
 class CourseResponse(BaseModel):
     id: int
     name: str
