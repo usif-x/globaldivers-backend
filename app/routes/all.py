@@ -12,6 +12,7 @@ from .package import package_routes
 from .setting import setting_routes
 from .testimonial import testimonial_routes
 from .trip import trip_routes
+from .upload import upload_routes
 from .user import user_routes
 
 routes = [
@@ -30,4 +31,5 @@ routes = [
     best_selling_routes,
     dive_center_routes,
     order_routes,
+    upload_routes,
 ]

@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends, Path
+from typing import List, Optional
+
+from fastapi import APIRouter, Depends, File, Form, Path, UploadFile
 from fastapi_cache.decorator import cache
 from sqlalchemy.orm import Session
 
@@ -6,6 +8,7 @@ from app.core.database import get_db
 from app.core.dependencies import get_current_admin, get_current_user
 from app.models.user import User
 from app.schemas.course import (
+    CourseContentCreate,
     CourseInquiry,
     CourseResponse,
     CreateCourse,
@@ -50,15 +53,123 @@ async def get_course_content_by_id(
 @course_routes.post(
     "/", response_model=CourseResponse, dependencies=[Depends(get_current_admin)]
 )
-async def create_course(course: CreateCourse, db: Session = Depends(get_db)):
-    return CourseServices(db).create_course(course)
+async def create_course(
+    name: str = Form(...),
+    description: str = Form(...),
+    price_available: bool = Form(...),
+    price: int = Form(...),
+    is_image_list: bool = Form(False),
+    course_level: str = Form(...),
+    course_duration: int = Form(...),
+    course_duration_unit: str = Form(...),
+    provider: str = Form(...),
+    has_discount: bool = Form(False),
+    discount_requires_min_people: bool = Form(False),
+    discount_always_available: bool = Form(False),
+    discount_percentage: int = Form(0),
+    discount_min_people: int = Form(0),
+    course_type: str = Form(...),
+    has_certificate: bool = Form(...),
+    certificate_type: str = Form(...),
+    has_online_content: bool = Form(False),
+    images: List[UploadFile] = File(None),
+    db: Session = Depends(get_db),
+):
+    # Create course object from form data
+    course_data = CreateCourse(
+        name=name,
+        description=description,
+        price_available=price_available,
+        price=price,
+        images=[],  # Will be filled by the service
+        is_image_list=is_image_list,
+        course_level=course_level,
+        course_duration=course_duration,
+        course_duration_unit=course_duration_unit,
+        provider=provider,
+        has_discount=has_discount,
+        discount_requires_min_people=discount_requires_min_people,
+        discount_always_available=discount_always_available,
+        discount_percentage=discount_percentage,
+        discount_min_people=discount_min_people,
+        course_type=course_type,
+        has_certificate=has_certificate,
+        certificate_type=certificate_type,
+        has_online_content=has_online_content,
+        contents=None,  # Course contents can be added separately
+    )
+
+    return await CourseServices(db).create_course(course_data, images)
 
 
 @course_routes.put(
     "/{id}", response_model=CourseResponse, dependencies=[Depends(get_current_admin)]
 )
-async def update_course(course: UpdateCourse, id: int, db: Session = Depends(get_db)):
-    return CourseServices(db).update_course(id, course)
+async def update_course(
+    id: int,
+    name: str = Form(None),
+    description: str = Form(None),
+    price_available: bool = Form(None),
+    price: int = Form(None),
+    is_image_list: bool = Form(None),
+    course_level: str = Form(None),
+    course_duration: int = Form(None),
+    course_duration_unit: str = Form(None),
+    provider: str = Form(None),
+    has_discount: bool = Form(None),
+    discount_requires_min_people: bool = Form(None),
+    discount_always_available: bool = Form(None),
+    discount_percentage: int = Form(None),
+    discount_min_people: int = Form(None),
+    course_type: str = Form(None),
+    has_certificate: bool = Form(None),
+    certificate_type: str = Form(None),
+    has_online_content: bool = Form(None),
+    images: List[UploadFile] = File(None),
+    db: Session = Depends(get_db),
+):
+    # Create update object from form data, excluding None values
+    update_data = {}
+
+    if name is not None:
+        update_data["name"] = name
+    if description is not None:
+        update_data["description"] = description
+    if price_available is not None:
+        update_data["price_available"] = price_available
+    if price is not None:
+        update_data["price"] = price
+    if is_image_list is not None:
+        update_data["is_image_list"] = is_image_list
+    if course_level is not None:
+        update_data["course_level"] = course_level
+    if course_duration is not None:
+        update_data["course_duration"] = course_duration
+    if course_duration_unit is not None:
+        update_data["course_duration_unit"] = course_duration_unit
+    if provider is not None:
+        update_data["provider"] = provider
+    if has_discount is not None:
+        update_data["has_discount"] = has_discount
+    if discount_requires_min_people is not None:
+        update_data["discount_requires_min_people"] = discount_requires_min_people
+    if discount_always_available is not None:
+        update_data["discount_always_available"] = discount_always_available
+    if discount_percentage is not None:
+        update_data["discount_percentage"] = discount_percentage
+    if discount_min_people is not None:
+        update_data["discount_min_people"] = discount_min_people
+    if course_type is not None:
+        update_data["course_type"] = course_type
+    if has_certificate is not None:
+        update_data["has_certificate"] = has_certificate
+    if certificate_type is not None:
+        update_data["certificate_type"] = certificate_type
+    if has_online_content is not None:
+        update_data["has_online_content"] = has_online_content
+
+    course_update = UpdateCourse(**update_data)
+    return await CourseServices(db).update_course(id, course_update, images)
 
 
 @course_routes.delete("/{id}", dependencies=[Depends(get_current_admin)])

@@ -1,22 +1,64 @@
-from fastapi import HTTPException
+from typing import List
+
+from fastapi import HTTPException, UploadFile
 from sqlalchemy import and_, select
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, joinedload
 
+from app.core.config import settings
 from app.core.exception_handler import db_exception_handler
 from app.core.telegram import notify_admins
 from app.models.course import Course
 from app.models.course_content import CourseContent
 from app.models.user import User
 from app.schemas.course import CourseResponse, CreateCourse, UpdateCourse
+from app.utils.upload_img import delete_uploaded_image, upload_images
 
 
 class CourseServices:
     def __init__(self, db: Session):
         self.db = db
 
+    def _convert_filenames_to_urls(self, filenames: List[str]) -> List[str]:
+        """Convert image filenames to full URLs"""
+        if not filenames:
+            return []
+
+        base_url = settings.APP_URL.rstrip("/")
+        return [f"{base_url}/storage/images/{filename}" for filename in filenames]
+
+    def _extract_filenames_from_urls(self, urls: List[str]) -> List[str]:
+        """Extract filenames from full URLs (for delete operations)"""
+        if not urls:
+            return []
+
+        filenames = []
+        for url in urls:
+            if "/storage/images/" in url:
+                filename = url.split("/storage/images/")[-1]
+                filenames.append(filename)
+        return filenames
+
     @db_exception_handler
-    def create_course(self, course: CreateCourse):
-        new_course = Course(**course.model_dump(exclude={"contents"}))
+    async def create_course(
+        self, course: CreateCourse, images: List[UploadFile] = None
+    ):
+        # Upload images if provided
+        image_filenames = []
+        if images:
+            try:
+                # Upload all images and get their filenames
+                image_filenames = await upload_images(images)
+            except Exception as e:
+                raise HTTPException(
+                    status_code=400, detail=f"Failed to upload images: {str(e)}"
+                )
+
+        # Create course with uploaded image filenames
+        course_data = course.model_dump(exclude={"contents"})
+        course_data["images"] = image_filenames
+
+        new_course = Course(**course_data)
         self.db.add(new_course)
         self.db.commit()
         self.db.refresh(new_course)
@@ -30,24 +72,39 @@ class CourseServices:
                 self.db.add(new_content)
             self.db.commit()
 
+        # Convert filenames to full URLs before returning
+        new_course.images = self._convert_filenames_to_urls(new_course.images)
         return new_course
 
     @db_exception_handler
     def get_all_courses(self):
         stmt = select(Course)
         courses = self.db.execute(stmt).scalars().all()
+
+        # Convert filenames to full URLs for all courses
+        for course in courses:
+            course.images = self._convert_filenames_to_urls(course.images)
+
         return courses
 
     @db_exception_handler
     def get_all_courses_with_contents(self):
         stmt = select(Course).options(joinedload(Course.contents))
         courses = self.db.execute(stmt).unique().scalars().all()
+
+        # Convert filenames to full URLs for all courses
+        for course in courses:
+            course.images = self._convert_filenames_to_urls(course.images)
+
         return courses
 
     @db_exception_handler
     def get_course_by_id(self, id: int):
         stmt = select(Course).where(Course.id == id)
         course = self.db.execute(stmt).scalars().first()
+        if course:
+            # Convert filenames to full URLs
+            course.images = self._convert_filenames_to_urls(course.images)
         return course
 
     @db_exception_handler
@@ -58,6 +115,9 @@ class CourseServices:
         course = self.db.execute(stmt).scalars().first()
         if not course:
             raise HTTPException(404, detail="Course not found")
+
+        # Convert filenames to full URLs
+        course.images = self._convert_filenames_to_urls(course.images)
         return course
 
     @db_exception_handler
@@ -87,10 +147,14 @@ class CourseServices:
                 403, detail="You not subscribed to this course or course not found"
             )
 
+        # Convert filenames to full URLs
+        course.images = self._convert_filenames_to_urls(course.images)
         return course
 
     @db_exception_handler
-    def update_course(self, id: int, course_update: UpdateCourse):
+    async def update_course(
+        self, id: int, course_update: UpdateCourse, images: List[UploadFile] = None
+    ):
         # 1. Fetch the course from the database
         course_db = self.db.query(Course).filter(Course.id == id).first()
         if not course_db:
@@ -99,6 +163,35 @@ class CourseServices:
         # 2. Get the update data and separate the 'contents'
         update_data = course_update.model_dump(exclude_unset=True)
         new_contents_data = update_data.pop("contents", None)
+
+        # Handle image updates
+        if images:
+            try:
+                # Delete old images from storage
+                if course_db.images:
+                    # Extract filenames from URLs if needed
+                    old_filenames = (
+                        self._extract_filenames_from_urls(course_db.images)
+                        if course_db.images
+                        and "/storage/images/"
+                        in (course_db.images[0] if course_db.images else "")
+                        else course_db.images
+                    )
+
+                    for old_image in old_filenames:
+                        try:
+                            delete_uploaded_image(old_image)
+                        except Exception as e:
+                            print(f"Failed to delete old image {old_image}: {e}")
+
+                # Upload new images
+                new_image_filenames = await upload_images(images)
+                update_data["images"] = new_image_filenames
+
+            except Exception as e:
+                raise HTTPException(
+                    status_code=400, detail=f"Failed to upload new images: {str(e)}"
+                )
 
         # 3. Update the simple, flat attributes of the course
         for key, value in update_data.items():
@@ -117,24 +210,74 @@ class CourseServices:
         # 5. Commit the transaction and refresh the course object
         self.db.commit()
         self.db.refresh(course_db)
+
+        # Convert filenames to full URLs before returning
+        course_db.images = self._convert_filenames_to_urls(course_db.images)
         return course_db
 
     @db_exception_handler
     def delete_course(self, id: int):
-        stmt = select(Course).where(Course.id == id)
-        course = self.db.execute(stmt).scalars().first()
-        if course:
-            self.db.delete(course)
-            self.db.commit()
-            return {"success": True, "message": "Course deleted successfully"}
-        else:
-            raise HTTPException(404, detail="Course not found")
+        try:
+            stmt = select(Course).where(Course.id == id)
+            course = self.db.execute(stmt).scalars().first()
+            if course:
+                # Delete associated images from storage
+                if course.images:
+                    # Extract filenames from URLs if needed
+                    filenames_to_delete = (
+                        self._extract_filenames_from_urls(course.images)
+                        if course.images
+                        and "/storage/images/"
+                        in (course.images[0] if course.images else "")
+                        else course.images
+                    )
+
+                    for image_filename in filenames_to_delete:
+                        try:
+                            delete_uploaded_image(image_filename)
+                        except Exception as e:
+                            print(f"Failed to delete image {image_filename}: {e}")
+
+                self.db.delete(course)
+                self.db.commit()
+                return {"success": True, "message": "Course deleted successfully"}
+            else:
+                raise HTTPException(404, detail="Course not found")
+        except SQLAlchemyError as e:
+            self.db.rollback()
+            return {"success": False, "message": f"Error deleting course: {str(e)}"}
 
     @db_exception_handler
     def delete_all_courses(self):
-        self.db.query(Course).delete()
-        self.db.commit()
-        return {"success": True, "message": "All courses deleted successfully"}
+        try:
+            # Get all courses to delete their images
+            courses = self.db.execute(select(Course)).scalars().all()
+
+            # Delete all associated images from storage
+            for course in courses:
+                if course.images:
+                    # Extract filenames from URLs if needed
+                    filenames_to_delete = (
+                        self._extract_filenames_from_urls(course.images)
+                        if course.images
+                        and "/storage/images/"
+                        in (course.images[0] if course.images else "")
+                        else course.images
+                    )
+
+                    for image_filename in filenames_to_delete:
+                        try:
+                            delete_uploaded_image(image_filename)
+                        except Exception as e:
+                            print(f"Failed to delete image {image_filename}: {e}")
+
+            # Delete all courses from database
+            self.db.query(Course).delete()
+            self.db.commit()
+            return {"success": True, "message": "All courses deleted successfully"}
+        except SQLAlchemyError as e:
+            self.db.rollback()
+            return {"success": False, "message": f"Error deleting courses: {str(e)}"}
 
     @db_exception_handler
     def add_contents_to_course(self, course_id: int, contents: list):

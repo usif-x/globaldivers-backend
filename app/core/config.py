@@ -8,6 +8,7 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     # Application Settings
     APP_NAME: str = "Top Divers Hurghada website server"
+    APP_URL: str = "http://localhost:8000"
     APP_DESCRIPTION: str = "Top Divers Hurghada website server"
     APP_VERSION: str = "1.0.0"
     ENVIRONMENT: Literal["development", "staging", "production"] = "development"
