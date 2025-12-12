@@ -1,0 +1,14 @@
+# Nixpacks configuration for Top Divers Backend
+# This file configures the deployment using Nixpacks instead of Dockerfile
+
+[phases.setup]
+nixPkgs = ["python39", "gcc", "libpq"]
+
+[phases.install]
+cmds = ["pip install -r requirements.txt"]
+
+[phases.build]
+cmds = ["echo 'Build phase complete'"]
+
+[start]
+cmd = "python main.py prod --workers 4"
