@@ -1,14 +1,10 @@
 # Nixpacks configuration for Top Divers Backend
-# This file configures the deployment using Nixpacks instead of Dockerfile
 
 [phases.setup]
-nixPkgs = ["python39", "python39Packages.pip", "gcc", "postgresql"]
+aptPkgs = ["postgresql-client", "gcc", "python3-dev"]
 
 [phases.install]
-cmds = ["pip install --upgrade pip", "pip install -r requirements.txt"]
-
-[phases.build]
-cmds = ["echo 'Build phase complete'"]
+cmds = ["pip install --upgrade pip setuptools wheel", "pip install -r requirements.txt"]
 
 [start]
 cmd = "python main.py prod --workers 4"
