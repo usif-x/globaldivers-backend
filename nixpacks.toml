@@ -2,7 +2,7 @@
 # This file configures the deployment using Nixpacks instead of Dockerfile
 
 [phases.setup]
-nixPkgs = ["python39", "gcc", "libpq"]
+nixPkgs = ["python39", "gcc", "postgresql"]
 
 [phases.install]
 cmds = ["pip install -r requirements.txt"]
