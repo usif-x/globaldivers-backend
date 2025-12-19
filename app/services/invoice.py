@@ -146,43 +146,43 @@ class InvoiceService:
 
         notify_admins(message)
 
-        # Send invoice creation email to customer
-        try:
-            if invoice_data.invoice_type == "online":
-                payment_section = f"""
-                <div class="button-container">
-                  <a href="{new_invoice.pay_url}" class="button">Pay Now Online</a>
-                </div>
-                <div class="note">
-                  ⏰ Please complete your payment to secure your booking.
-                </div>
-                """
-            else:
-                payment_section = """
-                <div class="note">
-                  💵 <strong>Cash Payment:</strong> You can pay in cash when you arrive. 
-                  Please keep your reference number for verification.
-                </div>
-                """
+        # # Send invoice creation email to customer
+        # try:
+        #     if invoice_data.invoice_type == "online":
+        #         payment_section = f"""
+        #         <div class="button-container">
+        #           <a href="{new_invoice.pay_url}" class="button">Pay Now Online</a>
+        #         </div>
+        #         <div class="note">
+        #           ⏰ Please complete your payment to secure your booking.
+        #         </div>
+        #         """
+        #     else:
+        #         payment_section = """
+        #         <div class="note">
+        #           💵 <strong>Cash Payment:</strong> You can pay in cash when you arrive.
+        #           Please keep your reference number for verification.
+        #         </div>
+        #         """
 
-            send_email(
-                to_email=new_invoice.buyer_email,
-                subject=f"Invoice Created - {new_invoice.activity}",
-                template_name="invoice_created.html",
-                context={
-                    "buyer_name": new_invoice.buyer_name,
-                    "invoice_id": str(new_invoice.id),
-                    "customer_reference": new_invoice.customer_reference,
-                    "activity": new_invoice.activity,
-                    "description": new_invoice.invoice_description,
-                    "amount": str(new_invoice.amount),
-                    "currency": new_invoice.currency,
-                    "payment_section": payment_section,
-                },
-            )
-        except Exception as e:
-            # Log the error but don't fail the invoice creation
-            print(f"Failed to send invoice creation email: {e}")
+        #     send_email(
+        #         to_email=new_invoice.buyer_email,
+        #         subject=f"Invoice Created - {new_invoice.activity}",
+        #         template_name="invoice_created.html",
+        #         context={
+        #             "buyer_name": new_invoice.buyer_name,
+        #             "invoice_id": str(new_invoice.id),
+        #             "customer_reference": new_invoice.customer_reference,
+        #             "activity": new_invoice.activity,
+        #             "description": new_invoice.invoice_description,
+        #             "amount": str(new_invoice.amount),
+        #             "currency": new_invoice.currency,
+        #             "payment_section": payment_section,
+        #         },
+        #     )
+        # except Exception as e:
+        #     # Log the error but don't fail the invoice creation
+        #     print(f"Failed to send invoice creation email: {e}")
 
         response_data = InvoiceCreateResponse(
             id=new_invoice.id,
@@ -555,24 +555,24 @@ class InvoiceService:
 
         # Send payment success email if payment is confirmed
         if incoming_status == "PAID":
-            try:
-                send_email(
-                    to_email=invoice.buyer_email,
-                    subject=f"Payment Confirmed - {invoice.activity}",
-                    template_name="payment_success.html",
-                    context={
-                        "buyer_name": invoice.buyer_name,
-                        "invoice_id": str(invoice.id),
-                        "customer_reference": invoice.customer_reference,
-                        "activity": invoice.activity,
-                        "payment_method": invoice.payment_method or "Online Payment",
-                        "amount": str(invoice.amount),
-                        "currency": invoice.currency,
-                    },
-                )
-            except Exception as e:
-                # Log the error but don't fail the callback processing
-                print(f"Failed to send payment success email: {e}")
+            # try:
+            #     send_email(
+            #         to_email=invoice.buyer_email,
+            #         subject=f"Payment Confirmed - {invoice.activity}",
+            #         template_name="payment_success.html",
+            #         context={
+            #             "buyer_name": invoice.buyer_name,
+            #             "invoice_id": str(invoice.id),
+            #             "customer_reference": invoice.customer_reference,
+            #             "activity": invoice.activity,
+            #             "payment_method": invoice.payment_method or "Online Payment",
+            #             "amount": str(invoice.amount),
+            #             "currency": invoice.currency,
+            #         },
+            #     )
+            # except Exception as e:
+            #     # Log the error but don't fail the callback processing
+            #     print(f"Failed to send payment success email: {e}")
 
             return {
                 "status": "success",
