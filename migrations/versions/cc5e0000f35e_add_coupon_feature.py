@@ -75,9 +75,6 @@ def upgrade() -> None:
             sa.PrimaryKeyConstraint("coupon_id", "user_id", "used_at"),
         )
     # ### end Alembic commands ###
-    op.create_index(op.f("ix_coupons_code"), "coupons", ["code"], unique=True)
-    op.create_table(
-        "coupon_user_usage",
         sa.Column("coupon_id", sa.Integer(), nullable=False),
         sa.Column("user_id", sa.Integer(), nullable=False),
         sa.Column("used_at", sa.DateTime(timezone=True), nullable=False),
