@@ -74,14 +74,14 @@ def upgrade() -> None:
             sa.ForeignKeyConstraint(["user_id"], ["users.id"], ondelete="CASCADE"),
             sa.PrimaryKeyConstraint("coupon_id", "user_id", "used_at"),
         )
-    # ### end Alembic commands ###
+        # ### end Alembic commands ###
         sa.Column("coupon_id", sa.Integer(), nullable=False),
         sa.Column("user_id", sa.Integer(), nullable=False),
         sa.Column("used_at", sa.DateTime(timezone=True), nullable=False),
         sa.ForeignKeyConstraint(["coupon_id"], ["coupons.id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(["user_id"], ["users.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("coupon_id", "user_id"),
-    )
+
     # ### end Alembic commands ###
 
 
