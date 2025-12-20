@@ -11,6 +11,7 @@ from .gallery import Gallery
 from .invoice import Invoice
 from .notification import Notification
 from .package import Package
+from .public_notification import PublicNotification
 from .setting import WebsiteSettings
 from .testimonial import Testimonial
 from .trip import Trip
@@ -38,4 +39,5 @@ __all__ = [
     "DiveCenter",
     "BestSelling",
     "Coupon",
+    "PublicNotification",
 ]

@@ -10,6 +10,7 @@ from .gallery import gallery_routes
 from .invoice import router as invoice_routes
 from .order import router as order_routes
 from .package import package_routes
+from .public_notification import public_notification_routes
 from .setting import setting_routes
 from .testimonial import testimonial_routes
 from .trip import trip_routes
@@ -34,4 +35,5 @@ routes = [
     order_routes,
     upload_routes,
     coupon_routes,
+    public_notification_routes,
 ]
