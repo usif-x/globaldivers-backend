@@ -34,6 +34,7 @@ class CouponServices:
         new_coupon = Coupon(
             code=coupon.code,
             activity=coupon.activity,
+            discount_percentage=coupon.discount_percentage,
             can_used_up_to=coupon.can_used_up_to,
             expire_date=coupon.expire_date,
         )
