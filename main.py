@@ -360,6 +360,19 @@ def prod(host: str, port: int, workers: int):
     logger.info(f"  - Workers: {workers}")
     logger.info("=" * 80)
 
+    # Run database migrations
+    logger.info("Running database migrations...")
+    try:
+        from alembic import command
+        from alembic.config import Config
+
+        alembic_cfg = Config("alembic.ini")
+        command.upgrade(alembic_cfg, "head")
+        logger.info("✓ Database migrations completed successfully")
+    except Exception as e:
+        logger.error(f"✗ Database migrations failed: {e}")
+        sys.exit(1)
+
     # Initialize superadmin before starting server
     create_super_admin()
 

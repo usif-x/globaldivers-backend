@@ -9,7 +9,6 @@ from sqlalchemy.orm import Session
 from app.core.mailer import send_email
 from app.core.telegram import notify_admins
 from app.models.invoice import Invoice
-from app.services.coupon import CouponServices
 
 # --- IMPORT THE NEW SCHEMA ---
 from app.schemas.invoice import UserInvoiceSummaryResponse  # <-- NEW
@@ -20,6 +19,7 @@ from app.schemas.invoice import (
     InvoiceSummaryResponse,
     InvoiceUpdate,
 )
+from app.services.coupon import CouponServices
 from app.utils.easykash import easykash_client
 
 
@@ -50,26 +50,28 @@ class InvoiceService:
         pay_url = None
         easykash_reference = None
         status = "PENDING"
-        
+
         # Handle Coupon
         discount_amount = 0.0
         final_amount = invoice_data.amount
-        
+
         if invoice_data.coupon_code:
             coupon_service = CouponServices(db)
             # Validate coupon
-            apply_response = coupon_service.apply_coupon(invoice_data.coupon_code, user_id)
-            
+            apply_response = coupon_service.apply_coupon(
+                invoice_data.coupon_code, user_id
+            )
+
             if apply_response.success and apply_response.coupon:
                 # Calculate discount
                 discount_percentage = apply_response.coupon.discount_percentage
                 discount_amount = (invoice_data.amount * discount_percentage) / 100
                 final_amount = invoice_data.amount - discount_amount
-                
+
                 # Consume coupon
                 coupon_service.consume_coupon(invoice_data.coupon_code, user_id)
             else:
-                # If coupon is invalid, we can either fail or ignore. 
+                # If coupon is invalid, we can either fail or ignore.
                 # Given the user flow, failing is better so they know why price isn't discounted.
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
@@ -81,7 +83,7 @@ class InvoiceService:
             payment_payload = invoice_data.model_dump()
             # Update amount in payload to discounted amount
             payment_payload["amount"] = final_amount
-            
+
             easykash_response = easykash_client.create_payment(
                 payment_data=payment_payload, user_id=user_id
             )
@@ -139,6 +141,10 @@ class InvoiceService:
                     f"    <b>Requests:</b> {detail.get('special_requests', 'None')}\n\n"
                 )
 
+        coupon_str = ""
+        if new_invoice.coupon_code:
+            coupon_str = f"<b>🏷️ Coupon:</b> {new_invoice.coupon_code} (Saved {new_invoice.discount_amount})\n"
+
         message = (
             "<b>🧾 New Invoice Created</b>\n"
             "━━━━━━━━━━━━━━━━━━━━━━━\n\n"
@@ -155,7 +161,7 @@ class InvoiceService:
             f"<b>📋 Activity Details:</b>\n{activity_details_str if activity_details_str else '  None provided.'}\n"
             "━━━━━━━━━━━━━━━━━━━━━━━\n\n"
             f"<b>💰 Amount:</b> <code>{new_invoice.amount} {new_invoice.currency}</code>\n"
-            f"{f'<b>🏷️ Coupon:</b> {new_invoice.coupon_code} (Saved {new_invoice.discount_amount})\n' if new_invoice.coupon_code else ''}"
+            f"{coupon_str}"
             f"<b>📊 Status:</b> <b>{new_invoice.status}</b>\n\n"
         )
 
