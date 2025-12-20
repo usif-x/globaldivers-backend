@@ -7,6 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.exception_handler import db_exception_handler
+from app.models.associations import coupon_user_usage
 from app.models.coupon import Coupon
 from app.models.user import User
 from app.schemas.coupon import (
@@ -138,8 +139,14 @@ class CouponServices:
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
 
-        # Check if user already used this coupon
-        if any(u.id == user.id for u in coupon.users):
+        # Check if user already used this coupon using the association table
+        usage_stmt = select(coupon_user_usage).where(
+            coupon_user_usage.c.coupon_id == coupon.id,
+            coupon_user_usage.c.user_id == user.id,
+        )
+        existing_usage = self.db.execute(usage_stmt).first()
+
+        if existing_usage:
             return ApplyCouponResponse(
                 success=False, message="You have already used this coupon"
             )
