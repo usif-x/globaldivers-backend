@@ -28,6 +28,9 @@ class Coupon(Base):
 
     # Usage tracking
     can_used_up_to: Mapped[int] = mapped_column(Integer, nullable=False, default=100)
+    user_limit: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=1, server_default=text("1")
+    )  # How many times a user can use this coupon (0 = unlimited)
     used_count: Mapped[int] = mapped_column(
         Integer, nullable=False, default=0, server_default=text("0")
     )

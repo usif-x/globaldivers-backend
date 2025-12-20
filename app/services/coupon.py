@@ -37,6 +37,7 @@ class CouponServices:
             activity=coupon.activity,
             discount_percentage=coupon.discount_percentage,
             can_used_up_to=coupon.can_used_up_to,
+            user_limit=coupon.user_limit,
             expire_date=coupon.expire_date,
         )
         self.db.add(new_coupon)
@@ -140,32 +141,69 @@ class CouponServices:
             raise HTTPException(status_code=404, detail="User not found")
 
         # Check if user already used this coupon using the association table
-        usage_stmt = select(coupon_user_usage).where(
+        usage_stmt = select(coupon_user_usage.c.usage_count).where(
             coupon_user_usage.c.coupon_id == coupon.id,
             coupon_user_usage.c.user_id == user.id,
         )
-        existing_usage = self.db.execute(usage_stmt).first()
+        existing_usage_count = self.db.execute(usage_stmt).scalar()
 
-        if existing_usage:
+        if (
+            existing_usage_count
+            and coupon.user_limit > 0
+            and existing_usage_count >= coupon.user_limit
+        ):
             return ApplyCouponResponse(
-                success=False, message="You have already used this coupon"
+                success=False,
+                message="You have reached the usage limit for this coupon",
             )
 
-        # Apply coupon: insert into association table and increment used_count
-        insert_stmt = coupon_user_usage.insert().values(
-            coupon_id=coupon.id, user_id=user.id
-        )
-        self.db.execute(insert_stmt)
-        coupon.used_count += 1
-
-        self.db.commit()
-        self.db.refresh(coupon)
+        # NOTE: We do NOT increment usage here anymore. Usage is incremented when invoice is created.
+        # This allows users to "check" the coupon without consuming it.
 
         return ApplyCouponResponse(
             success=True,
             message="Coupon applied successfully",
             coupon=coupon,
         )
+
+    @db_exception_handler
+    def consume_coupon(self, coupon_code: str, user_id: int):
+        """
+        Consume a coupon usage for a user.
+        Should be called when an invoice is created/paid.
+        """
+        coupon = self.get_coupon_by_code(coupon_code)
+        if not coupon:
+            return  # Should have been validated before
+
+        # Check usage again to be safe (race condition possible but low risk for this app)
+        usage_stmt = select(coupon_user_usage.c.usage_count).where(
+            coupon_user_usage.c.coupon_id == coupon.id,
+            coupon_user_usage.c.user_id == user_id,
+        )
+        existing_usage_count = self.db.execute(usage_stmt).scalar()
+
+        if existing_usage_count:
+            # Update existing usage
+            update_stmt = (
+                coupon_user_usage.update()
+                .where(
+                    coupon_user_usage.c.coupon_id == coupon.id,
+                    coupon_user_usage.c.user_id == user_id,
+                )
+                .values(usage_count=existing_usage_count + 1)
+            )
+            self.db.execute(update_stmt)
+        else:
+            # Insert new usage
+            insert_stmt = coupon_user_usage.insert().values(
+                coupon_id=coupon.id, user_id=user_id, usage_count=1
+            )
+            self.db.execute(insert_stmt)
+
+        coupon.used_count += 1
+        self.db.commit()
+        self.db.refresh(coupon)
 
     @db_exception_handler
     def get_coupon_usage_stats(self) -> dict:

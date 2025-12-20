@@ -10,6 +10,7 @@ class CouponCreate(BaseModel):
     activity: str = Field(default="all")  # trip, course, all
     discount_percentage: float = Field(..., gt=0, le=100)  # 0 < discount <= 100
     can_used_up_to: int = Field(default=100, ge=1)
+    user_limit: int = Field(default=1, ge=0)  # 0 = unlimited
     expire_date: Optional[datetime] = None
 
 
@@ -18,6 +19,7 @@ class CouponUpdate(BaseModel):
     activity: Optional[str] = None
     discount_percentage: Optional[float] = Field(None, gt=0, le=100)
     can_used_up_to: Optional[int] = Field(None, ge=1)
+    user_limit: Optional[int] = Field(None, ge=0)
     is_active: Optional[bool] = None
     expire_date: Optional[datetime] = None
 
@@ -28,6 +30,7 @@ class CouponResponse(BaseModel):
     activity: str
     discount_percentage: float
     can_used_up_to: int
+    user_limit: int
     used_count: int
     remaining: int
     can_used: bool

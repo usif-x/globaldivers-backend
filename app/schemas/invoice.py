@@ -38,7 +38,7 @@ class InvoiceBase(BaseModel):
 
 
 class InvoiceCreate(InvoiceBase):
-    pass
+    coupon_code: Optional[str] = None
 
 
 class InvoiceCreateResponse(BaseModel):

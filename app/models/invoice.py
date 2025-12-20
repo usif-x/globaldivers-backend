@@ -41,6 +41,10 @@ class Invoice(Base):
         String(50), nullable=True, unique=True
     )
 
+    # Coupon info
+    coupon_code: Mapped[str] = mapped_column(String(50), nullable=True)
+    discount_amount: Mapped[float] = mapped_column(Float, nullable=True, default=0.0)
+
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )

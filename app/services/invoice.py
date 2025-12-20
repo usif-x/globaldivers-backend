@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from app.core.mailer import send_email
 from app.core.telegram import notify_admins
 from app.models.invoice import Invoice
+from app.services.coupon import CouponServices
 
 # --- IMPORT THE NEW SCHEMA ---
 from app.schemas.invoice import UserInvoiceSummaryResponse  # <-- NEW
@@ -49,10 +50,38 @@ class InvoiceService:
         pay_url = None
         easykash_reference = None
         status = "PENDING"
+        
+        # Handle Coupon
+        discount_amount = 0.0
+        final_amount = invoice_data.amount
+        
+        if invoice_data.coupon_code:
+            coupon_service = CouponServices(db)
+            # Validate coupon
+            apply_response = coupon_service.apply_coupon(invoice_data.coupon_code, user_id)
+            
+            if apply_response.success and apply_response.coupon:
+                # Calculate discount
+                discount_percentage = apply_response.coupon.discount_percentage
+                discount_amount = (invoice_data.amount * discount_percentage) / 100
+                final_amount = invoice_data.amount - discount_amount
+                
+                # Consume coupon
+                coupon_service.consume_coupon(invoice_data.coupon_code, user_id)
+            else:
+                # If coupon is invalid, we can either fail or ignore. 
+                # Given the user flow, failing is better so they know why price isn't discounted.
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Invalid coupon: {apply_response.message}",
+                )
 
         # Handle online payments
         if invoice_data.invoice_type == "online":
             payment_payload = invoice_data.model_dump()
+            # Update amount in payload to discounted amount
+            payment_payload["amount"] = final_amount
+            
             easykash_response = easykash_client.create_payment(
                 payment_data=payment_payload, user_id=user_id
             )
@@ -82,7 +111,7 @@ class InvoiceService:
             invoice_description=invoice_data.invoice_description,
             activity=invoice_data.activity,
             activity_details=activity_details_dict,
-            amount=invoice_data.amount,
+            amount=final_amount,
             currency=invoice_data.currency,
             invoice_type=invoice_data.invoice_type,
             pay_url=pay_url,
@@ -90,6 +119,8 @@ class InvoiceService:
             picked_up=False,
             customer_reference=customer_reference,
             easykash_reference=easykash_reference,
+            coupon_code=invoice_data.coupon_code,
+            discount_amount=discount_amount,
         )
 
         db.add(new_invoice)
@@ -124,6 +155,7 @@ class InvoiceService:
             f"<b>📋 Activity Details:</b>\n{activity_details_str if activity_details_str else '  None provided.'}\n"
             "━━━━━━━━━━━━━━━━━━━━━━━\n\n"
             f"<b>💰 Amount:</b> <code>{new_invoice.amount} {new_invoice.currency}</code>\n"
+            f"{f'<b>🏷️ Coupon:</b> {new_invoice.coupon_code} (Saved {new_invoice.discount_amount})\n' if new_invoice.coupon_code else ''}"
             f"<b>📊 Status:</b> <b>{new_invoice.status}</b>\n\n"
         )
 

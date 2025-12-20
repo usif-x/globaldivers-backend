@@ -43,5 +43,6 @@ coupon_user_usage = Table(
         default=lambda: datetime.now(timezone.utc),
         nullable=False,
     ),
+    Column("usage_count", Integer, default=1, nullable=False),
     extend_existing=True,
 )
