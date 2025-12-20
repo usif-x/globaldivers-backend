@@ -139,7 +139,7 @@ class CouponServices:
             raise HTTPException(status_code=404, detail="User not found")
 
         # Check if user already used this coupon
-        if user in coupon.users:
+        if any(u.id == user.id for u in coupon.users):
             return ApplyCouponResponse(
                 success=False, message="You have already used this coupon"
             )
