@@ -1,9 +1,12 @@
 # app/models/user.py
 from datetime import datetime
 from typing import List
+
 from sqlalchemy import Boolean, DateTime, Integer, String, func, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.core.database import Base
+
 
 class User(Base):
     __tablename__ = "users"
@@ -18,9 +21,8 @@ class User(Base):
     )
     password: Mapped[str] = mapped_column(String(255), nullable=False)
     role: Mapped[str] = mapped_column(
-    String(20), nullable=False, server_default=text("user")
-)
-
+        String(20), nullable=False, server_default=text("user")
+    )
 
     # Status fields
     is_active: Mapped[bool] = mapped_column(
@@ -47,21 +49,18 @@ class User(Base):
         "Testimonial",
         back_populates="user",
         cascade="all, delete-orphan",
-        lazy="select"
+        lazy="select",
     )
 
     invoices: Mapped[List["Invoice"]] = relationship(
-        "Invoice",
-        back_populates="user",
-        cascade="all, delete-orphan",
-        lazy="select"
+        "Invoice", back_populates="user", cascade="all, delete-orphan", lazy="select"
     )
 
     notifications: Mapped[List["Notification"]] = relationship(
         "Notification",
         back_populates="user",
         cascade="all, delete-orphan",
-        lazy="select"
+        lazy="select",
     )
 
     # Many-to-Many relationship with Course
@@ -69,7 +68,12 @@ class User(Base):
         "Course",
         secondary="user_course_subscriptions",
         back_populates="subscribers",
-        lazy="select"
+        lazy="select",
+    )
+
+    # Many-to-Many relationship with Coupon
+    used_coupons: Mapped[List["Coupon"]] = relationship(
+        "Coupon", secondary="coupon_user_usage", back_populates="users", lazy="select"
     )
 
     def __repr__(self) -> str:

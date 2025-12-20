@@ -1,8 +1,9 @@
 from app.core.database import Base
 
 from .admin import Admin
-from .associations import user_course_subscriptions
+from .associations import coupon_user_usage, user_course_subscriptions
 from .best_selling import BestSelling
+from .coupon import Coupon
 from .course import Course
 from .course_content import CourseContent
 from .dive_center import DiveCenter
@@ -19,6 +20,7 @@ from .user import User
 __all__ = [
     # Association tables
     "user_course_subscriptions",
+    "coupon_user_usage",
     # Models
     "User",
     "Testimonial",
@@ -35,4 +37,5 @@ __all__ = [
     "Gallery",
     "DiveCenter",
     "BestSelling",
+    "Coupon",
 ]
