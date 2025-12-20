@@ -17,7 +17,16 @@ from app.schemas.admin import (
     PaginatedUsersResponse,
     PasswordUpdate,
 )
-from app.schemas.user import UserResponse, UserUpdate, UserUpdateStatus
+from app.schemas.course import CourseResponse
+from app.schemas.invoice import InvoiceResponse
+from app.schemas.notification import Notification as NotificationResponse
+from app.schemas.testimonial import TestimonialResponse
+from app.schemas.user import (
+    UserFullDetailsResponse,
+    UserResponse,
+    UserUpdate,
+    UserUpdateStatus,
+)
 
 
 class AdminServices:
@@ -332,3 +341,30 @@ class AdminServices:
             self.db.delete(testimonial)
         self.db.commit()
         return {"success": True, "message": "All testimonials deleted successfully"}
+
+    @db_exception_handler
+    def get_user_details(self, user_id: int) -> UserFullDetailsResponse:
+        stmt = select(User).where(User.id == user_id)
+        user = self.db.execute(stmt).scalars().first()
+        if not user:
+            raise HTTPException(404, detail="User not found")
+
+        return UserFullDetailsResponse(
+            user=UserResponse.model_validate(user, from_attributes=True),
+            testimonials=[
+                TestimonialResponse.model_validate(t, from_attributes=True)
+                for t in (user.testimonials or [])
+            ],
+            invoices=[
+                InvoiceResponse.model_validate(inv, from_attributes=True)
+                for inv in (user.invoices or [])
+            ],
+            notifications=[
+                NotificationResponse.model_validate(n, from_attributes=True)
+                for n in (user.notifications or [])
+            ],
+            subscribed_courses=[
+                CourseResponse.model_validate(c, from_attributes=True)
+                for c in (user.subscribed_courses or [])
+            ],
+        )

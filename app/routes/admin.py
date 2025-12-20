@@ -15,7 +15,7 @@ from app.schemas.admin import (
     PaginatedUsersResponse,
     PasswordUpdate,
 )
-from app.schemas.user import UserResponse, UserUpdate
+from app.schemas.user import UserFullDetailsResponse, UserResponse, UserUpdate
 from app.services.admin import AdminServices
 from app.services.course import CourseServices
 
@@ -190,6 +190,15 @@ async def get_unaccepted_testimonials(db: Session = Depends(get_db)):
 )
 async def delete_testimonial(id: int, db: Session = Depends(get_db)):
     return AdminServices(db).delete_testimonial(id)
+
+
+@admin_routes.get(
+    "/user/{id}/details",
+    response_model=UserFullDetailsResponse,
+    dependencies=[Depends(get_current_admin)],
+)
+async def get_user_full_details(id: int, db: Session = Depends(get_db)):
+    return AdminServices(db).get_user_details(id)
 
 
 @admin_routes.post("/enroll-user", dependencies=[Depends(get_current_admin)])
