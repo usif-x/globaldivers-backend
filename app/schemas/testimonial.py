@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 class CreateTestimonial(BaseModel):
     description: str
+    notes: str | None = None
     rating: float
 
 
@@ -13,8 +14,7 @@ class TestimonialResponse(BaseModel):
     user_id: int
     description: str
     rating: float
-    is_accepted: bool
-    is_rejected: bool
+    notes: str | None = None
     created_at: datetime
     updated_at: datetime
 

@@ -1,8 +1,11 @@
 # app/models/testimonial.py
 from datetime import datetime
+
 from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, func, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.core.database import Base
+
 
 class Testimonial(Base):
     __tablename__ = "testimonials"
@@ -17,6 +20,7 @@ class Testimonial(Base):
 
     # Testimonial data
     description: Mapped[str] = mapped_column(String(500), nullable=True)
+    notes: Mapped[str] = mapped_column(String(500), nullable=True)
     rating: Mapped[float] = mapped_column(
         Float, nullable=False, server_default=text("0")
     )
@@ -42,10 +46,10 @@ class Testimonial(Base):
 
     # Relationships
     user: Mapped["User"] = relationship(
-        "User",
-        back_populates="testimonials",
-        lazy="joined"
+        "User", back_populates="testimonials", lazy="joined"
     )
 
     def __repr__(self) -> str:
-        return f"<Testimonial(id={self.id}, user_id={self.user_id}, rating={self.rating})>"
+        return (
+            f"<Testimonial(id={self.id}, user_id={self.user_id}, rating={self.rating})>"
+        )
