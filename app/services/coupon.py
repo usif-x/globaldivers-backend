@@ -151,8 +151,11 @@ class CouponServices:
                 success=False, message="You have already used this coupon"
             )
 
-        # Apply coupon: add user to coupon's users list and increment used_count
-        coupon.users.append(user)
+        # Apply coupon: insert into association table and increment used_count
+        insert_stmt = coupon_user_usage.insert().values(
+            coupon_id=coupon.id, user_id=user.id
+        )
+        self.db.execute(insert_stmt)
         coupon.used_count += 1
 
         self.db.commit()

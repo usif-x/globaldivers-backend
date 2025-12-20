@@ -88,13 +88,13 @@ async def delete_coupon(
 )
 async def apply_coupon(
     request: ApplyCouponRequest,
-    user_id: int = Depends(get_current_user),
+    current_user=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """
     Apply a coupon code to the current user.
     """
-    return CouponServices(db).apply_coupon(request.code, user_id)
+    return CouponServices(db).apply_coupon(request.code, current_user.id)
 
 
 @coupon_routes.get("/stats/usage", dependencies=[Depends(get_current_admin)])
