@@ -33,7 +33,10 @@ from app.routes.all import routes
 # ============================================================================
 BASE_DIR = Path(__file__).parent
 LOGS_DIR = BASE_DIR / "logs"
-STORAGE_DIR = BASE_DIR / "storage"
+
+# Allow storage path to be overridden via environment variable for Docker volumes
+STORAGE_PATH = os.getenv("STORAGE_PATH", str(BASE_DIR / "storage"))
+STORAGE_DIR = Path(STORAGE_PATH)
 
 # Create logs and storage folders if not exist
 for directory in [LOGS_DIR, STORAGE_DIR]:
