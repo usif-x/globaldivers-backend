@@ -138,6 +138,25 @@ def fast_check_invoice_status(
     )
 
 
+@router.put(
+    "/m7x4w9h2t6n8v3qp5r1k/fast-pickup",
+    response_model=InvoiceResponse,
+    summary="Fast update pickup status (Public)",
+)
+def fast_update_pickup_status(
+    ref_number: str,
+    picked_up: bool,
+    db: Session = Depends(get_db),
+):
+    """
+    Public endpoint to update invoice pickup status using the reference number.
+    No authentication required. The obscure URL provides security through obscurity.
+    """
+    return InvoiceService.update_pickup_status_public(
+        db=db, customer_reference=ref_number, picked_up=picked_up
+    )
+
+
 # --- Admin-Only Routes ---
 
 # ... other admin routes are unchanged ...
