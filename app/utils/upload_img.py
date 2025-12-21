@@ -196,7 +196,7 @@ class ImageUploader:
         Returns:
             Full URL to the image
         """
-        return f"{base_url.rstrip('/')}/images/{filename}"
+        return f"{base_url.rstrip('/')}/storage/images/{filename}"
 
 
 # Create a global instance
