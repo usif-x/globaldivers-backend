@@ -117,6 +117,27 @@ def get_invoice_by_reference(
     )
 
 
+# --- Public Fast Check Endpoint (No Auth Required) ---
+
+
+@router.get(
+    "/k9dj3nf8s2mxp7q1wb5c/fastcheck",
+    response_model=InvoiceResponse,
+    summary="Fast check invoice status (Public)",
+)
+def fast_check_invoice_status(
+    ref_number: str,
+    db: Session = Depends(get_db),
+):
+    """
+    Public endpoint to check invoice status using the reference number.
+    No authentication required. The obscure URL provides security through obscurity.
+    """
+    return InvoiceService.get_invoice_by_reference_public(
+        db=db, customer_reference=ref_number
+    )
+
+
 # --- Admin-Only Routes ---
 
 # ... other admin routes are unchanged ...

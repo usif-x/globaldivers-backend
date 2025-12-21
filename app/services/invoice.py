@@ -468,6 +468,29 @@ class InvoiceService:
         # 2. If found, get the latest status before returning.
         return InvoiceService._inquire_and_update_invoice(db, invoice)
 
+    @staticmethod
+    def get_invoice_by_reference_public(
+        db: Session, customer_reference: str
+    ) -> InvoiceResponse:
+        """
+        Public method to retrieve an invoice by its customer_reference.
+        No authentication required - used for fast status checks.
+        """
+        invoice = (
+            db.query(Invoice)
+            .filter(Invoice.customer_reference == customer_reference)
+            .first()
+        )
+
+        if not invoice:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Invoice not found.",
+            )
+
+        # Get the latest status before returning
+        return InvoiceService._inquire_and_update_invoice(db, invoice)
+
     # --- CLEANUP: Removed duplicated function, keeping the one with search ---
     @staticmethod
     def get_all_invoices_for_admin(
