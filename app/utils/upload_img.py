@@ -8,13 +8,19 @@ from PIL import Image
 
 
 class ImageUploader:
-    def __init__(self, upload_dir: str = "storage/images"):
+    def __init__(self, upload_dir: str = None):
         """
         Initialize the image uploader.
 
         Args:
             upload_dir: Directory to store uploaded images
         """
+        if upload_dir is None:
+            # Use STORAGE_PATH env var if set, otherwise default to relative "storage"
+            # This matches the logic in main.py
+            base_storage = os.getenv("STORAGE_PATH", "storage")
+            upload_dir = os.path.join(base_storage, "images")
+
         self.upload_dir = Path(upload_dir)
         self.upload_dir.mkdir(parents=True, exist_ok=True)
 

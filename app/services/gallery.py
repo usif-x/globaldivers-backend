@@ -15,7 +15,11 @@ from app.schemas.gallery import ImageCreate, ImageUpdate
 class ImageService:
     """Service class for handling image operations"""
 
-    def __init__(self, storage_dir: str = "storage"):
+    def __init__(self, storage_dir: str = None):
+        if storage_dir is None:
+            # Use STORAGE_PATH env var if set, otherwise default to relative "storage"
+            storage_dir = os.getenv("STORAGE_PATH", "storage")
+
         self.storage_dir = storage_dir
         self.allowed_extensions = {".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp"}
         os.makedirs(storage_dir, exist_ok=True)
