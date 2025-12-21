@@ -39,6 +39,26 @@ class InvoiceBase(BaseModel):
 
 class InvoiceCreate(InvoiceBase):
     coupon_code: Optional[str] = None
+    # --- NEW FIELDS FOR BACKEND VALIDATION ---
+    trip_id: Optional[int] = Field(
+        None,
+        description="REQUIRED if activity='trip': The ID of the trip being booked",
+    )
+    course_id: Optional[int] = Field(
+        None,
+        description="REQUIRED if activity='course': The ID of the course being booked",
+    )
+    # For trips: number of adults and children
+    adults: Optional[int] = Field(
+        None,
+        ge=0,
+        description="REQUIRED if activity='trip': Number of adults (minimum 1)",
+    )
+    children: Optional[int] = Field(
+        None,
+        ge=0,
+        description="Number of children (optional, must be 0 if trip doesn't allow children)",
+    )
 
 
 class InvoiceCreateResponse(BaseModel):
@@ -49,6 +69,11 @@ class InvoiceCreateResponse(BaseModel):
     pay_url: Optional[str] = None
     invoice_type: str
     created_at: datetime
+    # --- NEW: Include discount and pricing details in response ---
+    discount_breakdown: Optional[dict] = Field(
+        None,
+        description="Breakdown of all discounts applied (group discount, promo code, etc.)",
+    )
 
 
 class InvoiceResponse(InvoiceBase):
@@ -64,6 +89,11 @@ class InvoiceResponse(InvoiceBase):
     invoice_type: str
     created_at: datetime
     updated_at: datetime
+    # --- NEW: Include discount breakdown ---
+    discount_breakdown: Optional[dict] = Field(
+        None,
+        description="Breakdown of all discounts applied",
+    )
 
     class Config:
         from_attributes = True

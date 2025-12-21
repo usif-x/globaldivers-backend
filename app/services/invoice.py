@@ -20,6 +20,7 @@ from app.schemas.invoice import (
     InvoiceUpdate,
 )
 from app.services.coupon import CouponServices
+from app.services.price_calculator import PriceCalculator
 from app.utils.easykash import easykash_client
 
 
@@ -28,11 +29,114 @@ class InvoiceService:
     def create_invoice(
         db: Session, invoice_data: InvoiceCreate, user_id: int
     ) -> InvoiceCreateResponse:
-        # Validate invoice_type
+        """
+        Create a new invoice with backend-validated pricing.
+
+        This method:
+        1. Validates the activity type
+        2. Calculates the correct price based on activity details
+        3. Verifies the submitted amount matches the calculated amount
+        4. Applies all applicable discounts (group, promo)
+        5. Creates the invoice with payment processing if online
+
+        Args:
+            db: Database session
+            invoice_data: Invoice creation data with user inputs
+            user_id: ID of the user creating the invoice
+
+        Returns:
+            InvoiceCreateResponse with invoice details and discount breakdown
+
+        Raises:
+            HTTPException: If validation fails or pricing doesn't match
+        """
+
+        # Step 1: Validate invoice_type
         if invoice_data.invoice_type not in ["online", "cash"]:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Invoice type must be either 'online' or 'cash'",
+            )
+
+        # Step 2: Validate activity type and calculate the correct price
+        activity = invoice_data.activity.lower()
+        calculated_amount = None
+        discount_amount = 0.0
+        discount_breakdown = None
+        coupon_obj = None
+
+        if activity == "trip":
+            # Trip activity requires trip_id and participant details
+            if not invoice_data.trip_id:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="trip_id is required when activity type is 'trip'",
+                )
+
+            if invoice_data.adults is None or invoice_data.adults < 1:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="At least 1 adult is required for trip bookings",
+                )
+
+            children = invoice_data.children if invoice_data.children else 0
+
+            # Calculate price using PriceCalculator
+            try:
+                (
+                    calculated_amount,
+                    discount_amount,
+                    discount_breakdown,
+                    coupon_obj,
+                ) = PriceCalculator.calculate_trip_price(
+                    db=db,
+                    trip_id=invoice_data.trip_id,
+                    adults=invoice_data.adults,
+                    children=children,
+                    coupon_code=invoice_data.coupon_code,
+                    user_id=user_id,
+                )
+            except HTTPException:
+                raise
+
+        elif activity == "course":
+            # Course activity requires course_id
+            if not invoice_data.course_id:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="course_id is required when activity type is 'course'",
+                )
+
+            # Calculate price using PriceCalculator
+            try:
+                (
+                    calculated_amount,
+                    discount_amount,
+                    discount_breakdown,
+                    coupon_obj,
+                ) = PriceCalculator.calculate_course_price(
+                    db=db,
+                    course_id=invoice_data.course_id,
+                    coupon_code=invoice_data.coupon_code,
+                    user_id=user_id,
+                )
+            except HTTPException:
+                raise
+
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Unsupported activity type: '{activity}'. Must be 'trip' or 'course'",
+            )
+
+        # Step 3: Verify that the submitted amount matches the calculated amount
+        if not PriceCalculator.verify_amount_matches_calculation(
+            calculated_amount, invoice_data.amount, tolerance=1.0
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Amount mismatch detected. Expected: {calculated_amount}, Got: {invoice_data.amount}. "
+                f"Please recalculate your booking.",
             )
 
         # Convert activity_details to a list of dicts for database storage
@@ -49,39 +153,14 @@ class InvoiceService:
         customer_reference = None
         pay_url = None
         easykash_reference = None
-        status = "PENDING"
+        invoice_status = "PENDING"
 
-        # Handle Coupon
-        discount_amount = 0.0
-        final_amount = invoice_data.amount
+        # Step 4: Handle online payments
+        final_amount = calculated_amount
 
-        if invoice_data.coupon_code:
-            coupon_service = CouponServices(db)
-            # Validate coupon
-            apply_response = coupon_service.apply_coupon(
-                invoice_data.coupon_code, user_id
-            )
-
-            if apply_response.success and apply_response.coupon:
-                # Calculate discount
-                discount_percentage = apply_response.coupon.discount_percentage
-                discount_amount = (invoice_data.amount * discount_percentage) / 100
-                final_amount = invoice_data.amount - discount_amount
-
-                # Consume coupon
-                coupon_service.consume_coupon(invoice_data.coupon_code, user_id)
-            else:
-                # If coupon is invalid, we can either fail or ignore.
-                # Given the user flow, failing is better so they know why price isn't discounted.
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Invalid coupon: {apply_response.message}",
-                )
-
-        # Handle online payments
         if invoice_data.invoice_type == "online":
             payment_payload = invoice_data.model_dump()
-            # Update amount in payload to discounted amount
+            # Update amount in payload to the calculated amount
             payment_payload["amount"] = final_amount
 
             easykash_response = easykash_client.create_payment(
@@ -105,6 +184,7 @@ class InvoiceService:
                 f"{random.randint(1000, 9999)}{user_id}{random.randint(1000,9999)}"
             )
 
+        # Step 5: Create the invoice record
         new_invoice = Invoice(
             user_id=user_id,
             buyer_name=invoice_data.buyer_name,
@@ -117,19 +197,25 @@ class InvoiceService:
             currency=invoice_data.currency,
             invoice_type=invoice_data.invoice_type,
             pay_url=pay_url,
-            status=status,
+            status=invoice_status,
             picked_up=False,
             customer_reference=customer_reference,
             easykash_reference=easykash_reference,
             coupon_code=invoice_data.coupon_code,
             discount_amount=discount_amount,
+            discount_breakdown=discount_breakdown,
         )
 
         db.add(new_invoice)
         db.commit()
         db.refresh(new_invoice)
 
-        # --- Enhanced Telegram Notification ---
+        # Step 6: Consume the coupon if one was used
+        if coupon_obj and invoice_data.coupon_code:
+            coupon_service = CouponServices(db)
+            coupon_service.consume_coupon(invoice_data.coupon_code, user_id)
+
+        # Step 7: Enhanced Telegram Notification
         activity_details_str = ""
         if new_invoice.activity_details:
             for detail in new_invoice.activity_details:
@@ -142,8 +228,24 @@ class InvoiceService:
                 )
 
         coupon_str = ""
-        if new_invoice.coupon_code:
+        if new_invoice.coupon_code and discount_breakdown:
             coupon_str = f"<b>🏷️ Coupon:</b> {new_invoice.coupon_code} (Saved {new_invoice.discount_amount})\n"
+
+        # Add discount breakdown to message if available
+        discount_detail_str = ""
+        if discount_breakdown:
+            discount_detail_str += (
+                f"<b>💵 Base Price:</b> {discount_breakdown.get('base_price', 0)}\n"
+            )
+            if discount_breakdown.get("group_discount"):
+                gd = discount_breakdown["group_discount"]
+                discount_detail_str += f"<b>👥 Group Discount:</b> -{gd.get('amount', 0)} ({gd.get('percentage', 0)}%)\n"
+            if discount_breakdown.get("promo_discount"):
+                pd = discount_breakdown["promo_discount"]
+                discount_detail_str += f"<b>🎟️ Promo Discount:</b> -{pd.get('amount', 0)} ({pd.get('percentage', 0)}%)\n"
+            discount_detail_str += (
+                f"<b>💰 Final Price:</b> {discount_breakdown.get('final_price', 0)}\n\n"
+            )
 
         message = (
             "<b>🧾 New Invoice Created</b>\n"
@@ -160,6 +262,7 @@ class InvoiceService:
             f"<b>💳 Type:</b> {new_invoice.invoice_type.upper()}\n\n"
             f"<b>📋 Activity Details:</b>\n{activity_details_str if activity_details_str else '  None provided.'}\n"
             "━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"{discount_detail_str}"
             f"<b>💰 Amount:</b> <code>{new_invoice.amount} {new_invoice.currency}</code>\n"
             f"{coupon_str}"
             f"<b>📊 Status:</b> <b>{new_invoice.status}</b>\n\n"
@@ -184,44 +287,6 @@ class InvoiceService:
 
         notify_admins(message)
 
-        # # Send invoice creation email to customer
-        # try:
-        #     if invoice_data.invoice_type == "online":
-        #         payment_section = f"""
-        #         <div class="button-container">
-        #           <a href="{new_invoice.pay_url}" class="button">Pay Now Online</a>
-        #         </div>
-        #         <div class="note">
-        #           ⏰ Please complete your payment to secure your booking.
-        #         </div>
-        #         """
-        #     else:
-        #         payment_section = """
-        #         <div class="note">
-        #           💵 <strong>Cash Payment:</strong> You can pay in cash when you arrive.
-        #           Please keep your reference number for verification.
-        #         </div>
-        #         """
-
-        #     send_email(
-        #         to_email=new_invoice.buyer_email,
-        #         subject=f"Invoice Created - {new_invoice.activity}",
-        #         template_name="invoice_created.html",
-        #         context={
-        #             "buyer_name": new_invoice.buyer_name,
-        #             "invoice_id": str(new_invoice.id),
-        #             "customer_reference": new_invoice.customer_reference,
-        #             "activity": new_invoice.activity,
-        #             "description": new_invoice.invoice_description,
-        #             "amount": str(new_invoice.amount),
-        #             "currency": new_invoice.currency,
-        #             "payment_section": payment_section,
-        #         },
-        #     )
-        # except Exception as e:
-        #     # Log the error but don't fail the invoice creation
-        #     print(f"Failed to send invoice creation email: {e}")
-
         response_data = InvoiceCreateResponse(
             id=new_invoice.id,
             user_id=new_invoice.user_id,
@@ -230,6 +295,7 @@ class InvoiceService:
             pay_url=new_invoice.pay_url,
             invoice_type=new_invoice.invoice_type,
             created_at=new_invoice.created_at,
+            discount_breakdown=discount_breakdown,
         )
         return response_data
 
@@ -517,6 +583,57 @@ class InvoiceService:
 
         # Get the latest status before returning
         return InvoiceService._inquire_and_update_invoice(db, invoice)
+
+    @staticmethod
+    def update_payment_status_public(
+        db: Session, customer_reference: str, payment_status: str
+    ) -> InvoiceResponse:
+        """
+        Public method to update invoice payment status using customer_reference.
+        No authentication required - used for fast payment status updates.
+
+        Args:
+            db: Database session
+            customer_reference: Invoice reference number
+            payment_status: New status (PAID, PENDING, CANCELLED, EXPIRED, FAILED)
+
+        Returns:
+            Updated invoice
+
+        Raises:
+            HTTPException: If invoice not found
+        """
+        invoice = (
+            db.query(Invoice)
+            .filter(Invoice.customer_reference == customer_reference)
+            .first()
+        )
+
+        if not invoice:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Invoice not found.",
+            )
+
+        # Update the status
+        invoice.status = payment_status
+        db.commit()
+        db.refresh(invoice)
+
+        # Send Telegram notification about status change
+        message = (
+            f"<b>💳 Invoice Payment Status Updated</b>\n"
+            f"━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            f"<b>🆔 Invoice ID:</b> <code>{invoice.id}</code>\n"
+            f"<b>📝 Reference:</b> <code>{invoice.customer_reference}</code>\n"
+            f"<b>👤 User:</b> {invoice.buyer_name}\n"
+            f"<b>💰 Amount:</b> {invoice.amount} {invoice.currency}\n"
+            f"<b>📊 New Status:</b> <b>{payment_status}</b>\n"
+            f"<b>🕐 Updated At:</b> {invoice.updated_at}"
+        )
+        notify_admins(message)
+
+        return invoice
 
     # --- CLEANUP: Removed duplicated function, keeping the one with search ---
     @staticmethod

@@ -157,6 +157,34 @@ def fast_update_pickup_status(
     )
 
 
+@router.put(
+    "/p8k5m2x9w4q7n3v6r1t/fast-pay",
+    response_model=InvoiceResponse,
+    summary="Fast update payment status (Public)",
+)
+def fast_update_payment_status(
+    ref_number: str,
+    status: str,
+    db: Session = Depends(get_db),
+):
+    """
+    Public endpoint to update invoice payment status using the reference number.
+    Allowed statuses: PAID, PENDING, CANCELLED, EXPIRED, FAILED
+    No authentication required. The obscure URL provides security through obscurity.
+    """
+    # Validate status
+    allowed_statuses = ["PAID", "PENDING", "CANCELLED", "EXPIRED", "FAILED"]
+    if status.upper() not in allowed_statuses:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid status. Allowed: {', '.join(allowed_statuses)}",
+        )
+
+    return InvoiceService.update_payment_status_public(
+        db=db, customer_reference=ref_number, payment_status=status.upper()
+    )
+
+
 # --- Admin-Only Routes ---
 
 # ... other admin routes are unchanged ...
