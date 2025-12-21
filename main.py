@@ -113,9 +113,18 @@ async def lifespan(app: FastAPI):
         # Verify storage setup
         logger.info(f"Storage directory: {STORAGE_DIR.absolute()}")
         logger.info(f"  - Exists: {STORAGE_DIR.exists()}")
+        logger.info(f"  - Is directory: {STORAGE_DIR.is_dir()}")
+        logger.info(f"  - Readable: {os.access(STORAGE_DIR, os.R_OK)}")
         logger.info(f"  - Writable: {os.access(STORAGE_DIR, os.W_OK)}")
+        logger.info(f"  - Executable: {os.access(STORAGE_DIR, os.X_OK)}")
         if STORAGE_DIR.exists():
-            logger.info(f"  - Contents: {len(list(STORAGE_DIR.iterdir()))} items")
+            try:
+                contents = list(STORAGE_DIR.iterdir())
+                logger.info(f"  - Contents: {len(contents)} items")
+                if contents:
+                    logger.info(f"  - Files: {[f.name for f in contents]}")
+            except PermissionError as e:
+                logger.error(f"  - Permission error reading directory: {e}")
 
         logger.info("✓ Application startup completed successfully")
 
