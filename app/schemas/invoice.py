@@ -68,6 +68,7 @@ class InvoiceCreateResponse(BaseModel):
     customer_reference: Optional[str] = None
     pay_url: Optional[str] = None
     invoice_type: str
+    payment_method: Optional[str] = None
     created_at: datetime
     # --- NEW: Include discount and pricing details in response ---
     discount_breakdown: Optional[dict] = Field(
@@ -87,6 +88,7 @@ class InvoiceResponse(InvoiceBase):
     customer_reference: Optional[str] = None
     easykash_reference: Optional[str] = None
     invoice_type: str
+    payment_method: Optional[str] = None
     created_at: datetime
     updated_at: datetime
     # --- NEW: Include discount breakdown ---

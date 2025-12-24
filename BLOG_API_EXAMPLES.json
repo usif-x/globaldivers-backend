@@ -1,0 +1,128 @@
+{
+  "example_blog_creation": {
+    "description": "Example of creating a blog post with mixed text and images",
+    "endpoint": "POST /blogs/",
+    "request": {
+      "title": "Amazing Diving Experience in the Red Sea",
+      "subject": "Explore the beautiful coral reefs and marine life of the Red Sea",
+      "content": [
+        {
+          "type": "text",
+          "content": "# Introduction\n\nThe Red Sea is one of the world's most spectacular diving destinations. With crystal-clear waters and vibrant coral reefs, it offers an unforgettable experience for divers of all levels."
+        },
+        {
+          "type": "image",
+          "url": "/storage/blogs/uuid-image-1.jpg",
+          "alt": "Red Sea coral reef",
+          "caption": "Vibrant coral formations in the Red Sea"
+        },
+        {
+          "type": "text",
+          "content": "## Marine Life\n\nThe diversity of marine life is incredible. You'll encounter:\n\n- Colorful reef fish\n- Sea turtles\n- Dolphins\n- Manta rays\n\nAnd if you're lucky, you might even spot a whale shark!"
+        },
+        {
+          "type": "image",
+          "url": "/storage/blogs/uuid-image-2.jpg",
+          "alt": "Sea turtle swimming",
+          "caption": "A green sea turtle gliding through the water"
+        },
+        {
+          "type": "text",
+          "content": "## Best Diving Spots\n\n### Ras Mohammed\nThis national park offers some of the best diving in the region.\n\n### The Blue Hole\nA world-famous diving site known for its depth and beauty."
+        },
+        {
+          "type": "image",
+          "url": "/storage/blogs/uuid-image-3.jpg",
+          "alt": "Divers at the Blue Hole"
+        },
+        {
+          "type": "text",
+          "content": "## Conclusion\n\nWhether you're a beginner or an experienced diver, the Red Sea has something special for everyone. Book your diving adventure today!"
+        }
+      ],
+      "tags": ["diving", "red-sea", "marine-life", "coral-reef", "adventure"]
+    }
+  },
+
+  "workflow_steps": {
+    "step_1": {
+      "action": "Upload first image",
+      "endpoint": "POST /blogs/upload-image",
+      "request_type": "multipart/form-data",
+      "request": {
+        "image": "<file>"
+      },
+      "response": {
+        "url": "/storage/blogs/uuid-image-1.jpg",
+        "filename": "coral-reef.jpg"
+      }
+    },
+    "step_2": {
+      "action": "Upload second image",
+      "endpoint": "POST /blogs/upload-image",
+      "request_type": "multipart/form-data",
+      "request": {
+        "image": "<file>"
+      },
+      "response": {
+        "url": "/storage/blogs/uuid-image-2.jpg",
+        "filename": "sea-turtle.jpg"
+      }
+    },
+    "step_3": {
+      "action": "Upload third image",
+      "endpoint": "POST /blogs/upload-image",
+      "request_type": "multipart/form-data",
+      "request": {
+        "image": "<file>"
+      },
+      "response": {
+        "url": "/storage/blogs/uuid-image-3.jpg",
+        "filename": "blue-hole.jpg"
+      }
+    },
+    "step_4": {
+      "action": "Create blog with all content blocks",
+      "endpoint": "POST /blogs/",
+      "note": "Use the URLs from steps 1-3 in the image blocks",
+      "request": "See example_blog_creation above"
+    }
+  },
+
+  "update_example": {
+    "description": "Example of updating a blog post",
+    "endpoint": "PUT /blogs/1",
+    "note": "All fields are optional, only send what you want to update",
+    "request": {
+      "title": "Updated Title",
+      "content": [
+        {
+          "type": "text",
+          "content": "Updated introduction text..."
+        },
+        {
+          "type": "image",
+          "url": "/storage/blogs/new-image.jpg",
+          "alt": "New image"
+        }
+      ]
+    }
+  },
+
+  "content_block_types": {
+    "text_block": {
+      "type": "text",
+      "content": "Your markdown text here. Supports **bold**, *italic*, # headers, lists, etc.",
+      "required_fields": ["type", "content"],
+      "optional_fields": []
+    },
+    "image_block": {
+      "type": "image",
+      "url": "/storage/blogs/image-uuid.jpg",
+      "alt": "Description for accessibility",
+      "caption": "Optional caption shown under the image",
+      "required_fields": ["type", "url"],
+      "optional_fields": ["alt", "caption"]
+    }
+  }
+}

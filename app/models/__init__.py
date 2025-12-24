@@ -3,6 +3,7 @@ from app.core.database import Base
 from .admin import Admin
 from .associations import coupon_user_usage, user_course_subscriptions
 from .best_selling import BestSelling
+from .blog import Blog
 from .coupon import Coupon
 from .course import Course
 from .course_content import CourseContent
@@ -38,6 +39,7 @@ __all__ = [
     "Gallery",
     "DiveCenter",
     "BestSelling",
+    "Blog",
     "Coupon",
     "PublicNotification",
 ]
