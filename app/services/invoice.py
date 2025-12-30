@@ -13,11 +13,17 @@ from app.models.invoice import Invoice
 # --- IMPORT THE NEW SCHEMA ---
 from app.schemas.invoice import UserInvoiceSummaryResponse  # <-- NEW
 from app.schemas.invoice import (
+    InvoiceActivityBreakdown,
     InvoiceCreate,
     InvoiceCreateResponse,
+    InvoiceDetailedSummaryResponse,
+    InvoicePaymentMethodBreakdown,
     InvoiceResponse,
     InvoiceSummaryResponse,
+    InvoiceTypeBreakdown,
     InvoiceUpdate,
+    MonthlyInvoiceAnalytics,
+    TopCustomerResponse,
 )
 from app.services.coupon import CouponServices
 from app.services.price_calculator import PriceCalculator
@@ -783,3 +789,306 @@ class InvoiceService:
                 "status": "success",
                 "message": f"Invoice updated to {incoming_status}.",
             }
+
+    # --- NEW: Enhanced Analytics Methods ---
+
+    @staticmethod
+    def get_detailed_summary_for_admin(db: Session) -> InvoiceDetailedSummaryResponse:
+        """
+        Get comprehensive invoice analytics with breakdowns.
+        """
+        from datetime import datetime
+        from sqlalchemy import case
+
+        # Basic counts
+        total_invoices = db.query(Invoice).count()
+        confirmed_invoices = db.query(Invoice).filter(Invoice.is_confirmed == True).count()
+        unconfirmed_invoices = total_invoices - confirmed_invoices
+
+        # Status breakdown
+        paid_count = db.query(Invoice).filter(Invoice.status == "PAID").count()
+        pending_count = db.query(Invoice).filter(Invoice.status == "PENDING").count()
+        failed_count = db.query(Invoice).filter(Invoice.status == "FAILED").count()
+        cancelled_count = db.query(Invoice).filter(Invoice.status == "CANCELLED").count()
+        expired_count = db.query(Invoice).filter(Invoice.status == "EXPIRED").count()
+
+        # Revenue metrics
+        total_revenue = db.query(func.sum(Invoice.amount)).filter(Invoice.status == "PAID").scalar() or 0.0
+        pending_amount = db.query(func.sum(Invoice.amount)).filter(Invoice.status == "PENDING").scalar() or 0.0
+        failed_amount = db.query(func.sum(Invoice.amount)).filter(
+            Invoice.status.in_(["FAILED", "CANCELLED", "EXPIRED"])
+        ).scalar() or 0.0
+        
+        average_invoice_amount = db.query(func.avg(Invoice.amount)).scalar() or 0.0
+
+        # Conversion metrics
+        conversion_rate = (paid_count / total_invoices * 100) if total_invoices > 0 else 0.0
+        payment_attempts = paid_count + failed_count + cancelled_count + expired_count
+        payment_success_rate = (paid_count / payment_attempts * 100) if payment_attempts > 0 else 0.0
+
+        # Activity breakdown
+        activity_stats = db.query(
+            Invoice.activity,
+            func.count(Invoice.id).label('count'),
+            func.sum(case((Invoice.status == "PAID", Invoice.amount), else_=0)).label('total_revenue'),
+            func.avg(Invoice.amount).label('average_amount'),
+            func.sum(case((Invoice.status == "PAID", 1), else_=0)).label('paid_count'),
+            func.sum(case((Invoice.status == "PENDING", 1), else_=0)).label('pending_count'),
+            func.sum(case((Invoice.status.in_(["FAILED", "CANCELLED", "EXPIRED"]), 1), else_=0)).label('failed_count')
+        ).group_by(Invoice.activity).all()
+
+        activity_breakdown = [
+            InvoiceActivityBreakdown(
+                activity=stat.activity,
+                count=stat.count,
+                total_revenue=float(stat.total_revenue or 0),
+                average_amount=float(stat.average_amount or 0),
+                paid_count=int(stat.paid_count or 0),
+                pending_count=int(stat.pending_count or 0),
+                failed_count=int(stat.failed_count or 0)
+            )
+            for stat in activity_stats
+        ]
+
+        # Payment method breakdown
+        payment_stats = db.query(
+            Invoice.payment_method,
+            func.count(Invoice.id).label('count'),
+            func.sum(case((Invoice.status == "PAID", Invoice.amount), else_=0)).label('total_revenue'),
+            func.sum(case((Invoice.status == "PAID", 1), else_=0)).label('paid_count')
+        ).filter(Invoice.payment_method.isnot(None)).group_by(Invoice.payment_method).all()
+
+        payment_method_breakdown = [
+            InvoicePaymentMethodBreakdown(
+                payment_method=stat.payment_method,
+                count=stat.count,
+                total_revenue=float(stat.total_revenue or 0),
+                success_rate=(stat.paid_count / stat.count * 100) if stat.count > 0 else 0.0
+            )
+            for stat in payment_stats
+        ]
+
+        # Invoice type breakdown
+        type_stats = db.query(
+            Invoice.invoice_type,
+            func.count(Invoice.id).label('count'),
+            func.sum(case((Invoice.status == "PAID", Invoice.amount), else_=0)).label('total_revenue'),
+            func.sum(case((Invoice.status == "PAID", 1), else_=0)).label('paid_count'),
+            func.sum(case((Invoice.status == "PENDING", 1), else_=0)).label('pending_count')
+        ).group_by(Invoice.invoice_type).all()
+
+        invoice_type_breakdown = [
+            InvoiceTypeBreakdown(
+                invoice_type=stat.invoice_type,
+                count=stat.count,
+                total_revenue=float(stat.total_revenue or 0),
+                paid_count=int(stat.paid_count or 0),
+                pending_count=int(stat.pending_count or 0)
+            )
+            for stat in type_stats
+        ]
+
+        # Pickup tracking
+        picked_up_count = db.query(Invoice).filter(Invoice.picked_up == True).count()
+        not_picked_up_count = db.query(Invoice).filter(Invoice.picked_up == False).count()
+
+        return InvoiceDetailedSummaryResponse(
+            total_invoices=total_invoices,
+            confirmed_invoices=confirmed_invoices,
+            unconfirmed_invoices=unconfirmed_invoices,
+            paid_count=paid_count,
+            pending_count=pending_count,
+            failed_count=failed_count,
+            cancelled_count=cancelled_count,
+            expired_count=expired_count,
+            total_revenue=round(total_revenue, 2),
+            pending_amount=round(pending_amount, 2),
+            failed_amount=round(failed_amount, 2),
+            average_invoice_amount=round(average_invoice_amount, 2),
+            conversion_rate=round(conversion_rate, 2),
+            payment_success_rate=round(payment_success_rate, 2),
+            activity_breakdown=activity_breakdown,
+            payment_method_breakdown=payment_method_breakdown,
+            invoice_type_breakdown=invoice_type_breakdown,
+            picked_up_count=picked_up_count,
+            not_picked_up_count=not_picked_up_count
+        )
+
+    @staticmethod
+    def get_monthly_analytics(db: Session, year: int, month: int) -> MonthlyInvoiceAnalytics:
+        """
+        Get invoice analytics for a specific month.
+        
+        Args:
+            db: Database session
+            year: Year (e.g., 2025)
+            month: Month number (1-12)
+        """
+        from datetime import datetime
+        from sqlalchemy import case, extract
+
+        # Filter invoices for the specified month
+        invoices_query = db.query(Invoice).filter(
+            extract('year', Invoice.created_at) == year,
+            extract('month', Invoice.created_at) == month
+        )
+
+        # Basic counts
+        total_invoices = invoices_query.count()
+        confirmed_invoices = invoices_query.filter(Invoice.is_confirmed == True).count()
+        unconfirmed_invoices = total_invoices - confirmed_invoices
+
+        # Status breakdown
+        paid_count = invoices_query.filter(Invoice.status == "PAID").count()
+        pending_count = invoices_query.filter(Invoice.status == "PENDING").count()
+        failed_count = invoices_query.filter(
+            Invoice.status.in_(["FAILED", "CANCELLED", "EXPIRED"])
+        ).count()
+
+        # Revenue
+        total_revenue = invoices_query.filter(Invoice.status == "PAID").with_entities(
+            func.sum(Invoice.amount)
+        ).scalar() or 0.0
+        
+        pending_amount = invoices_query.filter(Invoice.status == "PENDING").with_entities(
+            func.sum(Invoice.amount)
+        ).scalar() or 0.0
+        
+        average_invoice_amount = invoices_query.with_entities(
+            func.avg(Invoice.amount)
+        ).scalar() or 0.0
+
+        # Conversion
+        conversion_rate = (paid_count / total_invoices * 100) if total_invoices > 0 else 0.0
+
+        # Activity breakdown
+        activity_stats = db.query(
+            Invoice.activity,
+            func.count(Invoice.id).label('count'),
+            func.sum(case((Invoice.status == "PAID", Invoice.amount), else_=0)).label('total_revenue'),
+            func.avg(Invoice.amount).label('average_amount'),
+            func.sum(case((Invoice.status == "PAID", 1), else_=0)).label('paid_count'),
+            func.sum(case((Invoice.status == "PENDING", 1), else_=0)).label('pending_count'),
+            func.sum(case((Invoice.status.in_(["FAILED", "CANCELLED", "EXPIRED"]), 1), else_=0)).label('failed_count')
+        ).filter(
+            extract('year', Invoice.created_at) == year,
+            extract('month', Invoice.created_at) == month
+        ).group_by(Invoice.activity).all()
+
+        activity_breakdown = [
+            InvoiceActivityBreakdown(
+                activity=stat.activity,
+                count=stat.count,
+                total_revenue=float(stat.total_revenue or 0),
+                average_amount=float(stat.average_amount or 0),
+                paid_count=int(stat.paid_count or 0),
+                pending_count=int(stat.pending_count or 0),
+                failed_count=int(stat.failed_count or 0)
+            )
+            for stat in activity_stats
+        ]
+
+        # Payment method breakdown
+        payment_stats = db.query(
+            Invoice.payment_method,
+            func.count(Invoice.id).label('count'),
+            func.sum(case((Invoice.status == "PAID", Invoice.amount), else_=0)).label('total_revenue'),
+            func.sum(case((Invoice.status == "PAID", 1), else_=0)).label('paid_count')
+        ).filter(
+            Invoice.payment_method.isnot(None),
+            extract('year', Invoice.created_at) == year,
+            extract('month', Invoice.created_at) == month
+        ).group_by(Invoice.payment_method).all()
+
+        payment_method_breakdown = [
+            InvoicePaymentMethodBreakdown(
+                payment_method=stat.payment_method,
+                count=stat.count,
+                total_revenue=float(stat.total_revenue or 0),
+                success_rate=(stat.paid_count / stat.count * 100) if stat.count > 0 else 0.0
+            )
+            for stat in payment_stats
+        ]
+
+        # Invoice type breakdown
+        type_stats = db.query(
+            Invoice.invoice_type,
+            func.count(Invoice.id).label('count'),
+            func.sum(case((Invoice.status == "PAID", Invoice.amount), else_=0)).label('total_revenue'),
+            func.sum(case((Invoice.status == "PAID", 1), else_=0)).label('paid_count'),
+            func.sum(case((Invoice.status == "PENDING", 1), else_=0)).label('pending_count')
+        ).filter(
+            extract('year', Invoice.created_at) == year,
+            extract('month', Invoice.created_at) == month
+        ).group_by(Invoice.invoice_type).all()
+
+        invoice_type_breakdown = [
+            InvoiceTypeBreakdown(
+                invoice_type=stat.invoice_type,
+                count=stat.count,
+                total_revenue=float(stat.total_revenue or 0),
+                paid_count=int(stat.paid_count or 0),
+                pending_count=int(stat.pending_count or 0)
+            )
+            for stat in type_stats
+        ]
+
+        return MonthlyInvoiceAnalytics(
+            month=f"{year}-{month:02d}",
+            year=year,
+            month_number=month,
+            total_invoices=total_invoices,
+            confirmed_invoices=confirmed_invoices,
+            unconfirmed_invoices=unconfirmed_invoices,
+            paid_count=paid_count,
+            pending_count=pending_count,
+            failed_count=failed_count,
+            total_revenue=round(total_revenue, 2),
+            pending_amount=round(pending_amount, 2),
+            average_invoice_amount=round(average_invoice_amount, 2),
+            conversion_rate=round(conversion_rate, 2),
+            activity_breakdown=activity_breakdown,
+            payment_method_breakdown=payment_method_breakdown,
+            invoice_type_breakdown=invoice_type_breakdown
+        )
+
+    @staticmethod
+    def get_top_customers(db: Session, limit: int = 10) -> List[TopCustomerResponse]:
+        """
+        Get top customers by total spending.
+        
+        Args:
+            db: Database session
+            limit: Number of top customers to return
+        """
+        from sqlalchemy import case
+
+        customer_stats = db.query(
+            Invoice.user_id,
+            Invoice.buyer_name,
+            Invoice.buyer_email,
+            func.count(Invoice.id).label('total_invoices'),
+            func.sum(case((Invoice.status == "PAID", Invoice.amount), else_=0)).label('total_spent'),
+            func.sum(case((Invoice.status == "PAID", 1), else_=0)).label('paid_invoices'),
+            func.sum(case((Invoice.status == "PENDING", 1), else_=0)).label('pending_invoices')
+        ).group_by(
+            Invoice.user_id,
+            Invoice.buyer_name,
+            Invoice.buyer_email
+        ).order_by(
+            func.sum(case((Invoice.status == "PAID", Invoice.amount), else_=0)).desc()
+        ).limit(limit).all()
+
+        return [
+            TopCustomerResponse(
+                user_id=stat.user_id,
+                buyer_name=stat.buyer_name,
+                buyer_email=stat.buyer_email,
+                total_invoices=stat.total_invoices,
+                total_spent=round(float(stat.total_spent or 0), 2),
+                paid_invoices=int(stat.paid_invoices or 0),
+                pending_invoices=int(stat.pending_invoices or 0)
+            )
+            for stat in customer_stats
+        ]
+

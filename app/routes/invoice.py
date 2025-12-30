@@ -14,9 +14,12 @@ from app.schemas.invoice import UserInvoiceSummaryResponse  # <-- NEW
 from app.schemas.invoice import (
     InvoiceCreate,
     InvoiceCreateResponse,
+    InvoiceDetailedSummaryResponse,
     InvoiceResponse,
     InvoiceSummaryResponse,
     InvoiceUpdate,
+    MonthlyInvoiceAnalytics,
+    TopCustomerResponse,
 )
 from app.services.invoice import InvoiceService
 from app.utils.easykash import easykash_client, secret_key
@@ -202,6 +205,91 @@ def get_invoices_summary_for_admin(db: Session = Depends(get_db)):
     and counts by status. Requires super admin privileges.
     """
     return InvoiceService.get_invoices_summary_for_admin(db=db)
+
+
+@router.get(
+    "/admin/detailed-summary",
+    response_model=InvoiceDetailedSummaryResponse,
+    summary="Get detailed invoice analytics with breakdowns (Admin Only)",
+    dependencies=[Depends(get_current_super_admin)],
+)
+def get_detailed_invoices_summary(db: Session = Depends(get_db)):
+    """
+    Provides comprehensive invoice analytics including:
+    - Status breakdown (paid, pending, failed, cancelled, expired)
+    - Revenue metrics (total, pending, failed, average)
+    - Conversion rates
+    - Activity breakdown (trips vs courses)
+    - Payment method breakdown
+    - Invoice type breakdown (online vs cash)
+    - Confirmed vs unconfirmed invoices
+    - Pickup tracking
+    """
+    return InvoiceService.get_detailed_summary_for_admin(db=db)
+
+
+@router.get(
+    "/admin/monthly-analytics",
+    response_model=MonthlyInvoiceAnalytics,
+    summary="Get invoice analytics for a specific month (Admin Only)",
+    dependencies=[Depends(get_current_super_admin)],
+)
+def get_monthly_invoice_analytics(
+    year: int,
+    month: int,
+    db: Session = Depends(get_db)
+):
+    """
+    Get comprehensive invoice analytics for a specific month.
+    
+    Args:
+        year: Year (e.g., 2025)
+        month: Month number (1-12)
+    
+    Returns detailed metrics including:
+    - Total invoices and revenue for the month
+    - Status breakdown
+    - Activity breakdown
+    - Payment method breakdown
+    - Conversion rates
+    """
+    if month < 1 or month > 12:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Month must be between 1 and 12"
+        )
+    
+    return InvoiceService.get_monthly_analytics(db=db, year=year, month=month)
+
+
+@router.get(
+    "/admin/top-customers",
+    response_model=List[TopCustomerResponse],
+    summary="Get top customers by spending (Admin Only)",
+    dependencies=[Depends(get_current_super_admin)],
+)
+def get_top_spending_customers(
+    limit: int = 10,
+    db: Session = Depends(get_db)
+):
+    """
+    Get the top customers ranked by total spending.
+    
+    Args:
+        limit: Number of top customers to return (default: 10, max: 100)
+    
+    Returns customer details with:
+    - Total invoices
+    - Total amount spent
+    - Paid and pending invoice counts
+    """
+    if limit > 100:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Limit cannot exceed 100"
+        )
+    
+    return InvoiceService.get_top_customers(db=db, limit=limit)
 
 
 @router.get(

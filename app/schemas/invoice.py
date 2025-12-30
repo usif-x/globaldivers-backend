@@ -96,6 +96,9 @@ class InvoiceResponse(InvoiceBase):
         None,
         description="Breakdown of all discounts applied",
     )
+    # Admin fields
+    is_confirmed: bool = Field(default=False, description="Admin confirmation status")
+    notes: Optional[str] = Field(None, description="Admin-only notes for this customer")
 
     class Config:
         from_attributes = True
@@ -135,6 +138,8 @@ class InvoiceUpdate(BaseModel):
     picked_up: Optional[bool] = None
     status: Optional[str] = None  # Allow admins to manually change the status
     invoice_type: Optional[str] = None
+    is_confirmed: Optional[bool] = None  # Admin confirmation status
+    notes: Optional[str] = None  # Admin-only notes
 
 
 class EasyKashCallbackPayload(BaseModel):
@@ -158,3 +163,116 @@ class EasyKashCallbackPayload(BaseModel):
     class Config:
         # Allows other fields from EasyKash to be present without causing a validation error
         extra = "allow"
+
+
+# --- NEW: Enhanced Analytics Schemas ---
+
+
+class InvoiceActivityBreakdown(BaseModel):
+    """Breakdown of invoices by activity type"""
+
+    activity: str
+    count: int
+    total_revenue: float
+    average_amount: float
+    paid_count: int
+    pending_count: int
+    failed_count: int
+
+
+class InvoicePaymentMethodBreakdown(BaseModel):
+    """Breakdown of invoices by payment method"""
+
+    payment_method: str
+    count: int
+    total_revenue: float
+    success_rate: float  # Percentage of paid invoices
+
+
+class InvoiceTypeBreakdown(BaseModel):
+    """Breakdown of invoices by type (online/cash)"""
+
+    invoice_type: str
+    count: int
+    total_revenue: float
+    paid_count: int
+    pending_count: int
+
+
+class TopCustomerResponse(BaseModel):
+    """Top customer by spending"""
+
+    user_id: int
+    buyer_name: str
+    buyer_email: str
+    total_invoices: int
+    total_spent: float
+    paid_invoices: int
+    pending_invoices: int
+
+
+class InvoiceDetailedSummaryResponse(BaseModel):
+    """Comprehensive invoice analytics summary"""
+
+    # Basic counts
+    total_invoices: int
+    confirmed_invoices: int
+    unconfirmed_invoices: int
+
+    # Status breakdown
+    paid_count: int
+    pending_count: int
+    failed_count: int
+    cancelled_count: int
+    expired_count: int
+
+    # Revenue metrics
+    total_revenue: float  # Total paid amount
+    pending_amount: float
+    failed_amount: float
+    average_invoice_amount: float
+
+    # Conversion metrics
+    conversion_rate: float  # Percentage of paid invoices
+    payment_success_rate: float  # Paid / (Paid + Failed)
+
+    # Breakdowns
+    activity_breakdown: List[InvoiceActivityBreakdown]
+    payment_method_breakdown: List[InvoicePaymentMethodBreakdown]
+    invoice_type_breakdown: List[InvoiceTypeBreakdown]
+
+    # Pickup tracking
+    picked_up_count: int
+    not_picked_up_count: int
+
+
+class MonthlyInvoiceAnalytics(BaseModel):
+    """Monthly invoice analytics with filtering"""
+
+    month: str  # Format: "YYYY-MM"
+    year: int
+    month_number: int
+
+    # Basic counts
+    total_invoices: int
+    confirmed_invoices: int
+    unconfirmed_invoices: int
+
+    # Status breakdown
+    paid_count: int
+    pending_count: int
+    failed_count: int
+
+    # Revenue
+    total_revenue: float
+    pending_amount: float
+    average_invoice_amount: float
+
+    # Conversion
+    conversion_rate: float
+
+    # Breakdowns
+    activity_breakdown: List[InvoiceActivityBreakdown]
+    payment_method_breakdown: List[InvoicePaymentMethodBreakdown]
+    invoice_type_breakdown: List[InvoiceTypeBreakdown]
+

@@ -47,6 +47,10 @@ class Invoice(Base):
     # --- NEW: Store discount breakdown as JSON ---
     discount_breakdown: Mapped[dict] = mapped_column(JSONB, nullable=True)
 
+    # Admin fields
+    is_confirmed: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    notes: Mapped[str] = mapped_column(Text, nullable=True)
+
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
