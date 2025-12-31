@@ -126,3 +126,15 @@ async def get_pickup_stats(db: Session = Depends(get_db)):
         "pickup_rate": round((picked_up / total * 100), 2) if total > 0 else 0.0
     }
 
+
+@analytics_routes.get("/dashboard")
+async def get_analytics_dashboard(db: Session = Depends(get_db)):
+    """
+    Get comprehensive dashboard analytics including:
+    - Today's stats (Revenue, Sales Count, Trips, Courses)
+    - Sales chart data (Revenue/Count over last 30 days)
+    - Activity distribution (Trip vs Course)
+    - Recent transactions
+    """
+    return AnalyticsServices(db).get_dashboard_summary()
+
