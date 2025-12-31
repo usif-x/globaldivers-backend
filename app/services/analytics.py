@@ -293,18 +293,7 @@ class AnalyticsServices:
 
         # --- 5. Customer Insights (New) ---
         # Top 5 Customers by Spend
-        top_customers_query = (
-            self.db.query(
-                Invoice.buyern_name, # Note: using buyer_name from invoice as we want person who paid
-                func.sum(Invoice.amount).label("total_spent"),
-                func.count(Invoice.id).label("invoice_count")
-            )
-            .filter(Invoice.status == "PAID")
-            .group_by(Invoice.buyer_name)
-            .order_by(func.sum(Invoice.amount).desc())
-            .limit(5)
-            .all()
-        )
+
         # Wait, grouping by buyer_name might be unreliable if names are not unique. 
         # Better to group by user_id then join User? 
         # Let's group by User ID for accuracy, then fetch name.
