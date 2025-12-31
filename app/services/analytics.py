@@ -299,8 +299,7 @@ class AnalyticsServices:
         # Let's group by User ID for accuracy, then fetch name.
         top_users_query = (
             self.db.query(
-                User.first_name,
-                User.last_name,
+                User.full_name,
                 User.email,
                 func.sum(Invoice.amount).label("total_spent"),
                 func.count(Invoice.id).label("invoice_count")
@@ -315,7 +314,7 @@ class AnalyticsServices:
         
         top_customers = [
             {
-                "name": f"{row.first_name} {row.last_name}",
+                "name": row.full_name,
                 "email": row.email,
                 "total_spent": round(row.total_spent, 2),
                 "order_count": row.invoice_count
