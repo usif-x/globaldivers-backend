@@ -128,13 +128,21 @@ async def get_pickup_stats(db: Session = Depends(get_db)):
 
 
 @analytics_routes.get("/dashboard")
-async def get_analytics_dashboard(db: Session = Depends(get_db)):
+async def get_analytics_dashboard(
+    month: int = None, 
+    year: int = None, 
+    db: Session = Depends(get_db)
+):
     """
     Get comprehensive dashboard analytics including:
-    - Today's stats (Revenue, Sales Count, Trips, Courses)
-    - Sales chart data (Revenue/Count over last 30 days)
+    - Today's stats (Revenue, Sales Count, Trips, Courses) OR Monthly stats if filtered
+    - Sales chart data (Revenue/Count over last 30 days OR specific month)
     - Activity distribution (Trip vs Course)
     - Recent transactions
+    
+    Query Params:
+    - month (int, optional): 1-12
+    - year (int, optional): e.g. 2025
     """
-    return AnalyticsServices(db).get_dashboard_summary()
+    return AnalyticsServices(db).get_dashboard_summary(month=month, year=year)
 
