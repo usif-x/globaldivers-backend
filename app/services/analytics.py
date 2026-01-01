@@ -274,36 +274,26 @@ class AnalyticsServices:
         ]
 
         # Activity distribution
-        # First, get count per activity
+        # Extract activity name from JSONB and group by it
+        from sqlalchemy import cast, text
+        from sqlalchemy.dialects.postgresql import JSONB
+
+        activity_name_expr = func.coalesce(
+            Invoice.activity_details[0]["name"].astext,
+            Invoice.activity_details[0]["activity_name"].astext,
+            func.initcap(Invoice.activity),
+        )
+
         activity_counts = self.db.query(
-            Invoice.activity,
+            activity_name_expr.label("activity_name"),
             func.count(Invoice.id).label("count"),
         ).filter(Invoice.status == "PAID")
         activity_counts = apply_general_filter(activity_counts)
-        activity_counts = activity_counts.group_by(Invoice.activity).all()
+        activity_counts = activity_counts.group_by(activity_name_expr).all()
 
-        activity_distribution = []
-        for row in activity_counts:
-            # Get one representative invoice for this activity to extract the name
-            sample_invoice = (
-                self.db.query(Invoice.activity_details)
-                .filter(Invoice.status == "PAID", Invoice.activity == row.activity)
-                .first()
-            )
-            details = (
-                sample_invoice.activity_details[0]
-                if sample_invoice
-                and sample_invoice.activity_details
-                and isinstance(sample_invoice.activity_details, list)
-                and len(sample_invoice.activity_details) > 0
-                else {}
-            )
-            activity_name = (
-                details.get("name")
-                or details.get("activity_name")
-                or row.activity.title()
-            )
-            activity_distribution.append({"name": activity_name, "value": row.count})
+        activity_distribution = [
+            {"name": row.activity_name, "value": row.count} for row in activity_counts
+        ]
 
         # Payment method distribution
         payment_method_query = self.db.query(
@@ -386,9 +376,15 @@ class AnalyticsServices:
                 }
             )
 
-        # Top activities sold (by activity type)
+        # Top activities sold (by activity name)
+        activity_name_expr = func.coalesce(
+            Invoice.activity_details[0]["name"].astext,
+            Invoice.activity_details[0]["activity_name"].astext,
+            func.initcap(Invoice.activity),
+        )
+
         top_activities_query = self.db.query(
-            Invoice.activity,
+            activity_name_expr.label("activity_name"),
             func.sum(Invoice.amount).label("total_revenue"),
             func.count(Invoice.id).label("sales_count"),
         ).filter(Invoice.status == "PAID")
@@ -398,39 +394,19 @@ class AnalyticsServices:
                 func.date(Invoice.updated_at) <= end_date,
             )
         top_activities_query = (
-            top_activities_query.group_by(Invoice.activity)
+            top_activities_query.group_by(activity_name_expr)
             .order_by(func.sum(Invoice.amount).desc())
             .limit(5)
             .all()
         )
-        top_activities = []
-        for row in top_activities_query:
-            # Get one representative invoice for this activity to extract the name
-            sample_invoice = (
-                self.db.query(Invoice.activity_details)
-                .filter(Invoice.status == "PAID", Invoice.activity == row.activity)
-                .first()
-            )
-            details = (
-                sample_invoice.activity_details[0]
-                if sample_invoice
-                and sample_invoice.activity_details
-                and isinstance(sample_invoice.activity_details, list)
-                and len(sample_invoice.activity_details) > 0
-                else {}
-            )
-            activity_name = (
-                details.get("name")
-                or details.get("activity_name")
-                or row.activity.title()
-            )
-            top_activities.append(
-                {
-                    "activity": activity_name,
-                    "total_revenue": round(row.total_revenue, 2),
-                    "sales_count": row.sales_count,
-                }
-            )
+        top_activities = [
+            {
+                "activity": row.activity_name,
+                "total_revenue": round(row.total_revenue, 2),
+                "sales_count": row.sales_count,
+            }
+            for row in top_activities_query
+        ]
 
         # Best selling month (all time)
         best_month_query = self.db.query(
