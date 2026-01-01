@@ -6,7 +6,7 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
-from app.core.dependencies import get_current_admin_user, get_db
+from app.core.dependencies import get_current_admin, get_db
 from app.schemas.activity_availability import (
     ActivityAvailabilityCheckRequest,
     ActivityAvailabilityCheckResponse,
@@ -27,7 +27,7 @@ router = APIRouter(prefix="/activity-availability", tags=["Activity Availability
 def close_activity_date(
     data: ActivityAvailabilityCreate,
     db: Session = Depends(get_db),
-    current_admin=Depends(get_current_admin_user),
+    current_admin=Depends(get_current_admin),
 ):
     """
     Close an activity (trip/course) on a specific date.
@@ -47,7 +47,7 @@ def reopen_activity_date(
     activity_id: int = Query(..., gt=0),
     date: date = Query(...),
     db: Session = Depends(get_db),
-    current_admin=Depends(get_current_admin_user),
+    current_admin=Depends(get_current_admin),
 ):
     """
     Reopen an activity (trip/course) on a specific date.
@@ -69,7 +69,7 @@ def update_closure_date(
     availability_id: int,
     data: ActivityAvailabilityUpdate,
     db: Session = Depends(get_db),
-    current_admin=Depends(get_current_admin_user),
+    current_admin=Depends(get_current_admin),
 ):
     """
     Update an existing closure record (change the date or reason).
@@ -115,7 +115,7 @@ def get_all_closures(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, le=500),
     db: Session = Depends(get_db),
-    current_admin=Depends(get_current_admin_user),
+    current_admin=Depends(get_current_admin),
 ):
     """
     Get all activity closure records.
@@ -134,7 +134,7 @@ def get_all_closures(
 )
 def cleanup_past_closures(
     db: Session = Depends(get_db),
-    current_admin=Depends(get_current_admin_user),
+    current_admin=Depends(get_current_admin),
 ):
     """
     Delete all availability records for past dates.
