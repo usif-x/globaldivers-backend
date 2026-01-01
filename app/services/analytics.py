@@ -275,7 +275,7 @@ class AnalyticsServices:
 
         # Activity distribution
         activity_dist_query = self.db.query(
-            Invoice.activity_details,
+            func.max(Invoice.activity_details).label("activity_details"),
             Invoice.activity,
             func.count(Invoice.id).label("count"),
         ).filter(Invoice.status == "PAID")
@@ -378,7 +378,7 @@ class AnalyticsServices:
 
         # Top activities sold (by activity type)
         top_activities_query = self.db.query(
-            Invoice.activity_details,
+            func.max(Invoice.activity_details).label("activity_details"),
             Invoice.activity,
             func.sum(Invoice.amount).label("total_revenue"),
             func.count(Invoice.id).label("sales_count"),
