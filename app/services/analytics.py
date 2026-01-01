@@ -275,13 +275,25 @@ class AnalyticsServices:
 
         # Activity distribution
         activity_dist_query = self.db.query(
-            Invoice.activity, func.count(Invoice.id)
+            Invoice.activity_details, func.count(Invoice.id)
         ).filter(Invoice.status == "PAID")
         activity_dist_query = apply_general_filter(activity_dist_query)
-        activity_dist_query = activity_dist_query.group_by(Invoice.activity).all()
-        activity_distribution = [
-            {"name": row[0].title(), "value": row[1]} for row in activity_dist_query
-        ]
+        activity_dist_query = activity_dist_query.group_by(
+            Invoice.activity_details
+        ).all()
+        activity_distribution = []
+        for row in activity_dist_query:
+            details = (
+                row.activity_details[0]
+                if row.activity_details
+                and isinstance(row.activity_details, list)
+                and len(row.activity_details) > 0
+                else {}
+            )
+            activity_name = (
+                details.get("name") or details.get("activity_name") or "Unknown"
+            )
+            activity_distribution.append({"name": activity_name, "value": row[1]})
 
         # Payment method distribution
         payment_method_query = self.db.query(
@@ -364,9 +376,9 @@ class AnalyticsServices:
                 }
             )
 
-        # Top activities sold (by activity type)
+        # Top activities sold (by activity_details name)
         top_activities_query = self.db.query(
-            Invoice.activity,
+            Invoice.activity_details,
             func.sum(Invoice.amount).label("total_revenue"),
             func.count(Invoice.id).label("sales_count"),
         ).filter(Invoice.status == "PAID")
@@ -376,19 +388,30 @@ class AnalyticsServices:
                 func.date(Invoice.updated_at) <= end_date,
             )
         top_activities_query = (
-            top_activities_query.group_by(Invoice.activity)
+            top_activities_query.group_by(Invoice.activity_details)
             .order_by(func.sum(Invoice.amount).desc())
             .limit(5)
             .all()
         )
-        top_activities = [
-            {
-                "activity": row.activity,
-                "total_revenue": round(row.total_revenue, 2),
-                "sales_count": row.sales_count,
-            }
-            for row in top_activities_query
-        ]
+        top_activities = []
+        for row in top_activities_query:
+            details = (
+                row.activity_details[0]
+                if row.activity_details
+                and isinstance(row.activity_details, list)
+                and len(row.activity_details) > 0
+                else {}
+            )
+            activity_name = (
+                details.get("name") or details.get("activity_name") or "Unknown"
+            )
+            top_activities.append(
+                {
+                    "activity": activity_name,
+                    "total_revenue": round(row.total_revenue, 2),
+                    "sales_count": row.sales_count,
+                }
+            )
 
         # Best selling month (all time)
         best_month_query = self.db.query(
