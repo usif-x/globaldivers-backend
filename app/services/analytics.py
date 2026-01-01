@@ -275,12 +275,12 @@ class AnalyticsServices:
 
         # Activity distribution
         activity_dist_query = self.db.query(
-            Invoice.activity_details, func.count(Invoice.id)
+            Invoice.activity_details,
+            Invoice.activity,
+            func.count(Invoice.id).label("count"),
         ).filter(Invoice.status == "PAID")
         activity_dist_query = apply_general_filter(activity_dist_query)
-        activity_dist_query = activity_dist_query.group_by(
-            Invoice.activity_details
-        ).all()
+        activity_dist_query = activity_dist_query.group_by(Invoice.activity).all()
         activity_distribution = []
         for row in activity_dist_query:
             details = (
@@ -293,7 +293,7 @@ class AnalyticsServices:
             activity_name = (
                 details.get("name") or details.get("activity_name") or "Unknown"
             )
-            activity_distribution.append({"name": activity_name, "value": row[1]})
+            activity_distribution.append({"name": activity_name, "value": row.count})
 
         # Payment method distribution
         payment_method_query = self.db.query(
@@ -376,9 +376,10 @@ class AnalyticsServices:
                 }
             )
 
-        # Top activities sold (by activity_details name)
+        # Top activities sold (by activity type)
         top_activities_query = self.db.query(
             Invoice.activity_details,
+            Invoice.activity,
             func.sum(Invoice.amount).label("total_revenue"),
             func.count(Invoice.id).label("sales_count"),
         ).filter(Invoice.status == "PAID")
@@ -388,7 +389,7 @@ class AnalyticsServices:
                 func.date(Invoice.updated_at) <= end_date,
             )
         top_activities_query = (
-            top_activities_query.group_by(Invoice.activity_details)
+            top_activities_query.group_by(Invoice.activity)
             .order_by(func.sum(Invoice.amount).desc())
             .limit(5)
             .all()
