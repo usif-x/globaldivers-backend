@@ -1,3 +1,4 @@
+from .activity_availability import router as activity_availability_routes
 from .admin import admin_routes
 from .analytics import analytics_routes
 from .auth import auth_routes
@@ -38,4 +39,5 @@ routes = [
     coupon_routes,
     public_notification_routes,
     blog_routes,
+    activity_availability_routes,  # NEW
 ]

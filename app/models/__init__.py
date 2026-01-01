@@ -1,5 +1,6 @@
 from app.core.database import Base
 
+from .activity_availability import ActivityAvailability
 from .admin import Admin
 from .associations import coupon_user_usage, user_course_subscriptions
 from .best_selling import BestSelling
@@ -24,6 +25,7 @@ __all__ = [
     "user_course_subscriptions",
     "coupon_user_usage",
     # Models
+    "ActivityAvailability",
     "User",
     "Testimonial",
     "Package",

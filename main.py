@@ -93,6 +93,7 @@ async def lifespan(app: FastAPI):
     logger.info("=" * 80)
 
     # Startup
+    scheduler = None
     try:
         # Initialize cache
         logger.info("Initializing cache...")
@@ -103,6 +104,13 @@ async def lifespan(app: FastAPI):
         logger.info("Initializing database...")
         Base.metadata.create_all(bind=engine)
         logger.info("✓ Database tables created successfully")
+
+        # Start background scheduler
+        logger.info("Starting background scheduler...")
+        from app.core.scheduler import start_scheduler
+
+        scheduler = start_scheduler()
+        logger.info("✓ Background scheduler started")
 
         # Test Telegram bot configuration
         logger.info("Testing Telegram bot configuration...")
@@ -141,6 +149,13 @@ async def lifespan(app: FastAPI):
     logger.info("=" * 80)
     logger.info("Shutting down application...")
     logger.info("=" * 80)
+
+    # Shutdown scheduler
+    if scheduler:
+        logger.info("Shutting down scheduler...")
+        scheduler.shutdown()
+        logger.info("✓ Scheduler shutdown completed")
+
     logger.info("✓ Application shutdown completed")
 
 

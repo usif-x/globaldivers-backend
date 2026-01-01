@@ -25,6 +25,7 @@ from app.schemas.invoice import (
     MonthlyInvoiceAnalytics,
     TopCustomerResponse,
 )
+from app.services.activity_availability import ActivityAvailabilityService
 from app.services.coupon import CouponServices
 from app.services.price_calculator import PriceCalculator
 from app.utils.easykash import easykash_client
@@ -85,6 +86,23 @@ class InvoiceService:
                     detail="At least 1 adult is required for trip bookings",
                 )
 
+            # --- AVAILABILITY CHECK ---
+            # Check if trip is available on all requested dates
+            if invoice_data.activity_details:
+                for detail in invoice_data.activity_details:
+                    if hasattr(detail, "activity_date") and detail.activity_date:
+                        availability = ActivityAvailabilityService.check_availability(
+                            db=db,
+                            activity_type="trip",
+                            activity_id=invoice_data.trip_id,
+                            target_date=detail.activity_date,
+                        )
+                        if not availability.is_available:
+                            raise HTTPException(
+                                status_code=status.HTTP_400_BAD_REQUEST,
+                                detail=f"Trip is not available on {detail.activity_date}. Reason: {availability.reason or 'Closed for booking'}",
+                            )
+
             children = invoice_data.children if invoice_data.children else 0
 
             # Calculate price using PriceCalculator
@@ -112,6 +130,23 @@ class InvoiceService:
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="course_id is required when activity type is 'course'",
                 )
+
+            # --- AVAILABILITY CHECK ---
+            # Check if course is available on all requested dates
+            if invoice_data.activity_details:
+                for detail in invoice_data.activity_details:
+                    if hasattr(detail, "activity_date") and detail.activity_date:
+                        availability = ActivityAvailabilityService.check_availability(
+                            db=db,
+                            activity_type="course",
+                            activity_id=invoice_data.course_id,
+                            target_date=detail.activity_date,
+                        )
+                        if not availability.is_available:
+                            raise HTTPException(
+                                status_code=status.HTTP_400_BAD_REQUEST,
+                                detail=f"Course is not available on {detail.activity_date}. Reason: {availability.reason or 'Closed for booking'}",
+                            )
 
             # Calculate price using PriceCalculator
             try:
