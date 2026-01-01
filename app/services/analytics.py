@@ -274,24 +274,34 @@ class AnalyticsServices:
         ]
 
         # Activity distribution
-        activity_dist_query = self.db.query(
-            func.max(Invoice.activity_details).label("activity_details"),
+        # First, get count per activity
+        activity_counts = self.db.query(
             Invoice.activity,
             func.count(Invoice.id).label("count"),
         ).filter(Invoice.status == "PAID")
-        activity_dist_query = apply_general_filter(activity_dist_query)
-        activity_dist_query = activity_dist_query.group_by(Invoice.activity).all()
+        activity_counts = apply_general_filter(activity_counts)
+        activity_counts = activity_counts.group_by(Invoice.activity).all()
+
         activity_distribution = []
-        for row in activity_dist_query:
+        for row in activity_counts:
+            # Get one representative invoice for this activity to extract the name
+            sample_invoice = (
+                self.db.query(Invoice.activity_details)
+                .filter(Invoice.status == "PAID", Invoice.activity == row.activity)
+                .first()
+            )
             details = (
-                row.activity_details[0]
-                if row.activity_details
-                and isinstance(row.activity_details, list)
-                and len(row.activity_details) > 0
+                sample_invoice.activity_details[0]
+                if sample_invoice
+                and sample_invoice.activity_details
+                and isinstance(sample_invoice.activity_details, list)
+                and len(sample_invoice.activity_details) > 0
                 else {}
             )
             activity_name = (
-                details.get("name") or details.get("activity_name") or "Unknown"
+                details.get("name")
+                or details.get("activity_name")
+                or row.activity.title()
             )
             activity_distribution.append({"name": activity_name, "value": row.count})
 
@@ -378,7 +388,6 @@ class AnalyticsServices:
 
         # Top activities sold (by activity type)
         top_activities_query = self.db.query(
-            func.max(Invoice.activity_details).label("activity_details"),
             Invoice.activity,
             func.sum(Invoice.amount).label("total_revenue"),
             func.count(Invoice.id).label("sales_count"),
@@ -396,15 +405,24 @@ class AnalyticsServices:
         )
         top_activities = []
         for row in top_activities_query:
+            # Get one representative invoice for this activity to extract the name
+            sample_invoice = (
+                self.db.query(Invoice.activity_details)
+                .filter(Invoice.status == "PAID", Invoice.activity == row.activity)
+                .first()
+            )
             details = (
-                row.activity_details[0]
-                if row.activity_details
-                and isinstance(row.activity_details, list)
-                and len(row.activity_details) > 0
+                sample_invoice.activity_details[0]
+                if sample_invoice
+                and sample_invoice.activity_details
+                and isinstance(sample_invoice.activity_details, list)
+                and len(sample_invoice.activity_details) > 0
                 else {}
             )
             activity_name = (
-                details.get("name") or details.get("activity_name") or "Unknown"
+                details.get("name")
+                or details.get("activity_name")
+                or row.activity.title()
             )
             top_activities.append(
                 {
