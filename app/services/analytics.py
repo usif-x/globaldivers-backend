@@ -192,12 +192,12 @@ class AnalyticsServices:
                 self.db.query(func.sum(Invoice.amount)).filter(
                     Invoice.status == "PAID"
                 ),
-                Invoice.updated_at,
+                Invoice.created_at,
             ).scalar()
             or 0.0
         )
         sales_count_val = apply_date_filter(
-            self.db.query(Invoice).filter(Invoice.status == "PAID"), Invoice.updated_at
+            self.db.query(Invoice).filter(Invoice.status == "PAID"), Invoice.created_at
         ).count()
         trips_val = apply_date_filter(
             self.db.query(Invoice).filter(Invoice.activity == "trip"),
@@ -249,19 +249,19 @@ class AnalyticsServices:
         )
         chart_end_date = end_date if is_filtered_view else today
         sales_data_query = self.db.query(
-            func.date(Invoice.updated_at).label("date"),
+            func.date(Invoice.created_at).label("date"),
             func.sum(Invoice.amount).label("revenue"),
             func.count(Invoice.id).label("count"),
         ).filter(
-            Invoice.status == "PAID", func.date(Invoice.updated_at) >= chart_start_date
+            Invoice.status == "PAID", func.date(Invoice.created_at) >= chart_start_date
         )
         if is_filtered_view or chart_end_date:
             sales_data_query = sales_data_query.filter(
-                func.date(Invoice.updated_at) <= (chart_end_date or today)
+                func.date(Invoice.created_at) <= (chart_end_date or today)
             )
         sales_data_query = (
-            sales_data_query.group_by(func.date(Invoice.updated_at))
-            .order_by(func.date(Invoice.updated_at))
+            sales_data_query.group_by(func.date(Invoice.created_at))
+            .order_by(func.date(Invoice.created_at))
             .all()
         )
         sales_chart_data = [
@@ -348,8 +348,8 @@ class AnalyticsServices:
         ).filter(Invoice.status == "PAID", Invoice.activity == "course")
         if is_filtered_view:
             top_courses_query = top_courses_query.filter(
-                func.date(Invoice.updated_at) >= start_date,
-                func.date(Invoice.updated_at) <= end_date,
+                func.date(Invoice.created_at) >= start_date,
+                func.date(Invoice.created_at) <= end_date,
             )
         top_courses_query = (
             top_courses_query.group_by(Invoice.activity_details)
@@ -390,8 +390,8 @@ class AnalyticsServices:
         ).filter(Invoice.status == "PAID")
         if is_filtered_view:
             top_activities_query = top_activities_query.filter(
-                func.date(Invoice.updated_at) >= start_date,
-                func.date(Invoice.updated_at) <= end_date,
+                func.date(Invoice.created_at) >= start_date,
+                func.date(Invoice.created_at) <= end_date,
             )
         top_activities_query = (
             top_activities_query.group_by(activity_name_expr)
@@ -410,8 +410,8 @@ class AnalyticsServices:
 
         # Best selling month (all time)
         best_month_query = self.db.query(
-            func.extract("year", Invoice.updated_at).label("year"),
-            func.extract("month", Invoice.updated_at).label("month"),
+            func.extract("year", Invoice.created_at).label("year"),
+            func.extract("month", Invoice.created_at).label("month"),
             func.sum(Invoice.amount).label("revenue"),
         ).filter(Invoice.status == "PAID")
         best_month_query = (
