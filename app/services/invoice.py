@@ -172,12 +172,28 @@ class InvoiceService:
             )
 
         # Step 3: Verify that the submitted amount matches the calculated amount
+        # For non-EGP currencies, convert the calculated EGP amount to target currency for verification
+        verification_amount = calculated_amount
+        if invoice_data.currency != "EGP":
+            converted_for_verification = CurrencyConverter.convert_amount_sync(
+                from_currency="EGP",
+                to_currency=invoice_data.currency,
+                amount=calculated_amount,
+            )
+            if converted_for_verification is not None:
+                verification_amount = converted_for_verification
+            else:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Currency conversion from EGP to {invoice_data.currency} failed during verification",
+                )
+
         if not PriceCalculator.verify_amount_matches_calculation(
-            calculated_amount, invoice_data.amount, tolerance=1.0
+            verification_amount, invoice_data.amount, tolerance=1.0
         ):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Amount mismatch detected. Expected: {calculated_amount}, Got: {invoice_data.amount}. "
+                detail=f"Amount mismatch detected. Expected: {verification_amount}, Got: {invoice_data.amount}. "
                 f"Please recalculate your booking.",
             )
 
