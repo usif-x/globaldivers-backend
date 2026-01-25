@@ -61,6 +61,9 @@ class Settings(BaseSettings):
         default=False, description="Use SSL for SMTP connection"
     )
 
+    # Currency Converter API Key
+    CURRENCY_API_KEY: str = Field(..., description="API key for currency conversion")
+
     @computed_field
     @property
     def TELEGRAM_ADMIN_IDS(self) -> list[int]:

@@ -28,6 +28,7 @@ from app.schemas.invoice import (
 from app.services.activity_availability import ActivityAvailabilityService
 from app.services.coupon import CouponServices
 from app.services.price_calculator import PriceCalculator
+from app.utils.currency_converter import CurrencyConverter
 from app.utils.easykash import easykash_client
 
 
@@ -200,9 +201,28 @@ class InvoiceService:
         final_amount = calculated_amount
 
         if invoice_data.invoice_type == "online":
+            # Convert amount to target currency if not EGP
+            payment_amount = final_amount
+            if invoice_data.currency != "EGP":
+                converted_amount = CurrencyConverter.convert_amount_sync(
+                    from_currency="EGP",
+                    to_currency=invoice_data.currency,
+                    amount=final_amount,
+                )
+                if converted_amount is not None:
+                    payment_amount = converted_amount
+                else:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=f"Currency conversion from EGP to {invoice_data.currency} failed",
+                    )
+            else:
+                # For EGP, maintain full precision
+                payment_amount = final_amount
+
             payment_payload = invoice_data.model_dump()
-            # Update amount in payload to the calculated amount
-            payment_payload["amount"] = final_amount
+            # Update amount in payload to the payment amount in target currency
+            payment_payload["amount"] = payment_amount
 
             easykash_response = easykash_client.create_payment(
                 payment_data=payment_payload, user_id=user_id
@@ -218,7 +238,9 @@ class InvoiceService:
             pay_url = easykash_response.get("pay_url")
             easykash_reference = easykash_response.get("easykash_reference")
         else:
-            # For cash payments, generate a simple customer reference for tracking
+            # For cash payments, use EGP amount
+            payment_amount = final_amount
+            # Generate a simple customer reference for tracking
             import random
 
             customer_reference = (
@@ -234,7 +256,7 @@ class InvoiceService:
             invoice_description=invoice_data.invoice_description,
             activity=invoice_data.activity,
             activity_details=activity_details_dict,
-            amount=final_amount,
+            amount=payment_amount,  # Use payment amount in target currency
             currency=invoice_data.currency,
             invoice_type=invoice_data.invoice_type,
             pay_url=pay_url,
@@ -305,7 +327,6 @@ class InvoiceService:
             "━━━━━━━━━━━━━━━━━━━━━━━\n\n"
             f"{discount_detail_str}"
             f"<b>💰 Amount:</b> <code>{new_invoice.amount} {new_invoice.currency}</code>\n"
-            f"{coupon_str}"
             f"<b>📊 Status:</b> <b>{new_invoice.status}</b>\n\n"
         )
 
