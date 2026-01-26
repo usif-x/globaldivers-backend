@@ -1,17 +1,41 @@
-from fastapi import HTTPException, status
+from fastapi import HTTPException, UploadFile, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.models.dive_center import DiveCenter
 from app.schemas.dive_center import DiveCenterCreate, DiveCenterUpdate
+from app.utils.upload_img import upload_images
+from app.utils.upload_video import upload_single_video
 
 
 class DiveCenterService:
     def __init__(self, db: Session):
         self.db = db
 
-    def create_dive_center(self, data: DiveCenterCreate) -> DiveCenter:
-        new_center = DiveCenter(**data.model_dump())
+    async def create_dive_center(
+        self,
+        data: DiveCenterCreate,
+        image_files: list[UploadFile] = None,
+        video_file: UploadFile = None,
+    ) -> DiveCenter:
+        # Upload images if provided
+        images = []
+        if image_files:
+            images = await upload_images(image_files)
+
+        # Upload video if provided
+        video = None
+        if video_file:
+            video = await upload_single_video(video_file)
+
+        center_data = data.model_dump()
+        if images:
+            center_data["images"] = images
+            center_data["is_image_list"] = True
+        if video:
+            center_data["video"] = video
+
+        new_center = DiveCenter(**center_data)
         self.db.add(new_center)
         self.db.commit()
         self.db.refresh(new_center)

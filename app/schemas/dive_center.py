@@ -15,6 +15,7 @@ class DiveCenterBase(BaseModel):
     description: Optional[str] = Field(None, max_length=10000)
     images: List[str] = Field(default_factory=list)
     is_image_list: bool = False
+    video: Optional[str] = None
     location: str = Field(..., max_length=255)
     hotel_name: Optional[str] = Field(None, max_length=255)
     phone: str = Field(..., max_length=30)
@@ -41,6 +42,7 @@ class DiveCenterUpdate(BaseModel):
     description: Optional[str] = None
     images: Optional[List[str]] = None
     is_image_list: Optional[bool] = None
+    video: Optional[str] = None
     location: Optional[str] = None
     hotel_name: Optional[str] = None
     phone: Optional[str] = None

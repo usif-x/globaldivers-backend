@@ -18,7 +18,11 @@ class DiveCenter(Base):
 
     # Store image URLs as a JSON list of validated URLs
     images: Mapped[List[str]] = mapped_column(JSON, nullable=False, default=list)
-    is_image_list: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default=text("false"))
+    is_image_list: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default=text("false")
+    )
+    # Store video filename (single video per dive center)
+    video: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
 
     phone: Mapped[str] = mapped_column(String(30), nullable=False)
     email: Mapped[str] = mapped_column(String(100), nullable=False)

@@ -1,6 +1,6 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, File, Form, UploadFile, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -21,8 +21,39 @@ dive_center_routes = APIRouter(prefix="/dive-centers", tags=["Dive Centers"])
     status_code=status.HTTP_201_CREATED,
     dependencies=[Depends(get_current_admin)],
 )
-def create_dive_center(data: DiveCenterCreate, db: Session = Depends(get_db)):
-    return DiveCenterService(db).create_dive_center(data)
+async def create_dive_center(
+    name: str = Form(...),
+    description: str = Form(None),
+    location: str = Form(...),
+    hotel_name: str = Form(None),
+    phone: str = Form(...),
+    email: str = Form(...),
+    working_hours: str = Form(None),
+    image_files: list[UploadFile] = File(None),
+    video_file: UploadFile = File(None),
+    db: Session = Depends(get_db),
+):
+    # Parse working_hours JSON if provided
+    import json
+
+    wh = None
+    if working_hours:
+        try:
+            wh = json.loads(working_hours)
+        except Exception:
+            wh = None
+    data = DiveCenterCreate(
+        name=name,
+        description=description,
+        location=location,
+        hotel_name=hotel_name,
+        phone=phone,
+        email=email,
+        working_hours=wh,
+    )
+    return await DiveCenterService(db).create_dive_center(
+        data, image_files=image_files, video_file=video_file
+    )
 
 
 @dive_center_routes.get("/", response_model=List[DiveCenterResponse])
