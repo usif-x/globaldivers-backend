@@ -72,15 +72,15 @@ class AnalyticsServices:
         return self.db.query(Invoice).filter(Invoice.status == "CANCELLED").count()
 
     def get_all(self):
-        # Invoice revenue metrics
+        # Invoice revenue metrics - All converted to EGP
         total_invoice_revenue = (
-            self.db.query(func.sum(Invoice.amount))
+            self.db.query(func.sum(Invoice.amount * Invoice.convert_rate))
             .filter(Invoice.status == "PAID")
             .scalar()
             or 0.0
         )
         pending_invoice_revenue = (
-            self.db.query(func.sum(Invoice.amount))
+            self.db.query(func.sum(Invoice.amount * Invoice.convert_rate))
             .filter(Invoice.status == "PENDING")
             .scalar()
             or 0.0
@@ -186,10 +186,10 @@ class AnalyticsServices:
             else:
                 return query
 
-        # Revenue and sales
+        # Revenue and sales - All converted to EGP
         revenue_val = (
             apply_date_filter(
-                self.db.query(func.sum(Invoice.amount)).filter(
+                self.db.query(func.sum(Invoice.amount * Invoice.convert_rate)).filter(
                     Invoice.status == "PAID"
                 ),
                 Invoice.created_at,
@@ -212,9 +212,9 @@ class AnalyticsServices:
             Invoice.created_at,
         ).count()
 
-        # Financials
+        # Financials - All converted to EGP
         total_paid_query = self.db.query(
-            func.sum(Invoice.amount), func.count(Invoice.id)
+            func.sum(Invoice.amount * Invoice.convert_rate), func.count(Invoice.id)
         ).filter(Invoice.status == "PAID")
         total_paid_query = apply_general_filter(total_paid_query)
         total_paid_res = total_paid_query.first()
@@ -227,13 +227,13 @@ class AnalyticsServices:
         )
         total_discount_given = (
             apply_general_filter(
-                self.db.query(func.sum(Invoice.discount_amount)).filter(
+                self.db.query(func.sum(Invoice.discount_amount * Invoice.convert_rate)).filter(
                     Invoice.status == "PAID"
                 )
             ).scalar()
             or 0.0
         )
-        potential_rev_query = self.db.query(func.sum(Invoice.amount)).filter(
+        potential_rev_query = self.db.query(func.sum(Invoice.amount * Invoice.convert_rate)).filter(
             Invoice.status == "PENDING"
         )
         if is_filtered_view:
@@ -243,14 +243,14 @@ class AnalyticsServices:
             )
         potential_revenue = potential_rev_query.scalar() or 0.0
 
-        # Chart data
+        # Chart data - All amounts converted to EGP
         chart_start_date = (
             start_date if is_filtered_view else (today - timedelta(days=30))
         )
         chart_end_date = end_date if is_filtered_view else today
         sales_data_query = self.db.query(
             func.date(Invoice.created_at).label("date"),
-            func.sum(Invoice.amount).label("revenue"),
+            func.sum(Invoice.amount * Invoice.convert_rate).label("revenue"),
             func.count(Invoice.id).label("count"),
         ).filter(
             Invoice.status == "PAID", func.date(Invoice.created_at) >= chart_start_date
@@ -312,12 +312,12 @@ class AnalyticsServices:
                 pm_name = "Cash"
             payment_method_distribution.append({"name": pm_name, "value": row[1]})
 
-        # Top customers
+        # Top customers - All amounts converted to EGP
         top_users_query = (
             self.db.query(
                 User.full_name,
                 User.email,
-                func.sum(Invoice.amount).label("total_spent"),
+                func.sum(Invoice.amount * Invoice.convert_rate).label("total_spent"),
                 func.count(Invoice.id).label("invoice_count"),
             )
             .join(Invoice, User.id == Invoice.user_id)
@@ -340,10 +340,10 @@ class AnalyticsServices:
             for row in top_users_query
         ]
 
-        # Top courses sold
+        # Top courses sold - All amounts converted to EGP
         top_courses_query = self.db.query(
             Invoice.activity_details,
-            func.sum(Invoice.amount).label("total_revenue"),
+            func.sum(Invoice.amount * Invoice.convert_rate).label("total_revenue"),
             func.count(Invoice.id).label("sales_count"),
         ).filter(Invoice.status == "PAID", Invoice.activity == "course")
         if is_filtered_view:
@@ -376,7 +376,7 @@ class AnalyticsServices:
                 }
             )
 
-        # Top activities sold (by activity name)
+        # Top activities sold (by activity name) - All amounts converted to EGP
         activity_name_expr = func.coalesce(
             Invoice.activity_details[0]["name"].astext,
             Invoice.activity_details[0]["activity_name"].astext,
@@ -385,7 +385,7 @@ class AnalyticsServices:
 
         top_activities_query = self.db.query(
             activity_name_expr.label("activity_name"),
-            func.sum(Invoice.amount).label("total_revenue"),
+            func.sum(Invoice.amount * Invoice.convert_rate).label("total_revenue"),
             func.count(Invoice.id).label("sales_count"),
         ).filter(Invoice.status == "PAID")
         if is_filtered_view:
@@ -408,11 +408,11 @@ class AnalyticsServices:
             for row in top_activities_query
         ]
 
-        # Best selling month (all time)
+        # Best selling month (all time) - All amounts converted to EGP
         best_month_query = self.db.query(
             func.extract("year", Invoice.created_at).label("year"),
             func.extract("month", Invoice.created_at).label("month"),
-            func.sum(Invoice.amount).label("revenue"),
+            func.sum(Invoice.amount * Invoice.convert_rate).label("revenue"),
         ).filter(Invoice.status == "PAID")
         best_month_query = (
             best_month_query.group_by("year", "month")
@@ -519,13 +519,13 @@ class AnalyticsServices:
                 .filter(Invoice.picked_up == False)
                 .count(),
                 "total_invoice_revenue": float(
-                    self.db.query(func.sum(Invoice.amount))
+                    self.db.query(func.sum(Invoice.amount * Invoice.convert_rate))
                     .filter(Invoice.status == "PAID")
                     .scalar()
                     or 0.0
                 ),
                 "pending_invoice_revenue": float(
-                    self.db.query(func.sum(Invoice.amount))
+                    self.db.query(func.sum(Invoice.amount * Invoice.convert_rate))
                     .filter(Invoice.status == "PENDING")
                     .scalar()
                     or 0.0

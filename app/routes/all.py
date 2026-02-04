@@ -4,6 +4,7 @@ from .analytics import analytics_routes
 from .auth import auth_routes
 from .best_selling import best_selling_routes
 from .blog import blog_routes
+from .chatbot import router as chatbot_routes
 from .coupon import coupon_routes
 from .course import course_routes
 from .dive_center import dive_center_routes
@@ -39,5 +40,6 @@ routes = [
     coupon_routes,
     public_notification_routes,
     blog_routes,
-    activity_availability_routes,  # NEW
+    activity_availability_routes,
+    chatbot_routes,
 ]

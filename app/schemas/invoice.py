@@ -32,6 +32,10 @@ class InvoiceBase(BaseModel):
     picked_up: Optional[bool] = False
     amount: float
     currency: str
+    convert_rate: float = Field(
+        default=1.0,
+        description="Conversion rate to EGP. For EGP invoices = 1.0, for others = EGP equivalent rate (e.g., 1 EUR = 47 EGP, so convert_rate = 47)",
+    )
     invoice_type: str = Field(
         default="online", description="Type of invoice: 'online' or 'cash'"
     )
@@ -84,13 +88,14 @@ class InvoiceResponse(InvoiceBase):
     pay_url: Optional[str] = None
     activity: str
     activity_details: Optional[List[Any]] = None
-    picked_up: bool
+    picked_up: Optional[bool] = Field(default=False)
     customer_reference: Optional[str] = None
     easykash_reference: Optional[str] = None
-    invoice_type: str
+    invoice_type: str = Field(default="online")
     payment_method: Optional[str] = None
     created_at: datetime
     updated_at: datetime
+    convert_rate: float = Field(default=1.0)
     # --- NEW: Include discount breakdown ---
     discount_breakdown: Optional[dict] = Field(
         None,

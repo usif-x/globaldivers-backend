@@ -216,6 +216,10 @@ class InvoiceService:
         # Step 4: Handle online payments
         final_amount = calculated_amount
 
+        # Calculate convert_rate to EGP for analytics
+        # This stores how many EGP = 1 unit of invoice currency
+        convert_rate = CurrencyConverter.get_rate_to_egp_sync(invoice_data.currency)
+
         if invoice_data.invoice_type == "online":
             # Convert amount to target currency if not EGP
             payment_amount = final_amount
@@ -274,6 +278,7 @@ class InvoiceService:
             activity_details=activity_details_dict,
             amount=payment_amount,  # Use payment amount in target currency
             currency=invoice_data.currency,
+            convert_rate=convert_rate,  # Store conversion rate to EGP
             invoice_type=invoice_data.invoice_type,
             pay_url=pay_url,
             status=invoice_status,
@@ -481,23 +486,34 @@ class InvoiceService:
     def get_invoices_summary_for_admin(db: Session) -> InvoiceSummaryResponse:
         """
         Calculates and returns a detailed summary of all invoices. (Admin only)
+        All amounts are converted to EGP using the stored convert_rate.
         """
         failed_statuses = ["FAILED", "CANCELLED", "EXPIRED"]
 
+        # Calculate totals in EGP using (amount * convert_rate)
         paid_query = (
-            db.query(func.count(Invoice.id), func.sum(Invoice.amount))
+            db.query(
+                func.count(Invoice.id),
+                func.sum(Invoice.amount * Invoice.convert_rate),
+            )
             .filter(Invoice.status == "PAID")
             .one()
         )
 
         pending_query = (
-            db.query(func.count(Invoice.id), func.sum(Invoice.amount))
+            db.query(
+                func.count(Invoice.id),
+                func.sum(Invoice.amount * Invoice.convert_rate),
+            )
             .filter(Invoice.status == "PENDING")
             .one()
         )
 
         failed_query = (
-            db.query(func.count(Invoice.id), func.sum(Invoice.amount))
+            db.query(
+                func.count(Invoice.id),
+                func.sum(Invoice.amount * Invoice.convert_rate),
+            )
             .filter(Invoice.status.in_(failed_statuses))
             .one()
         )
@@ -523,26 +539,36 @@ class InvoiceService:
     def get_summary_for_user(db: Session, user_id: int) -> UserInvoiceSummaryResponse:
         """
         Calculates and returns a detailed summary of invoices for a specific user.
+        All amounts are converted to EGP using the stored convert_rate.
         """
         failed_statuses = ["FAILED", "CANCELLED", "EXPIRED"]
 
-        # Paid invoices: count and total amount
+        # Paid invoices: count and total amount in EGP
         paid_count, paid_amount = (
-            db.query(func.count(Invoice.id), func.sum(Invoice.amount))
+            db.query(
+                func.count(Invoice.id),
+                func.sum(Invoice.amount * Invoice.convert_rate),
+            )
             .filter(Invoice.user_id == user_id, Invoice.status == "PAID")
             .one()
         )
 
-        # Pending invoices: count and total amount
+        # Pending invoices: count and total amount in EGP
         pending_count, pending_amount = (
-            db.query(func.count(Invoice.id), func.sum(Invoice.amount))
+            db.query(
+                func.count(Invoice.id),
+                func.sum(Invoice.amount * Invoice.convert_rate),
+            )
             .filter(Invoice.user_id == user_id, Invoice.status == "PENDING")
             .one()
         )
 
-        # Failed invoices: count and total amount
+        # Failed invoices: count and total amount in EGP
         failed_count, failed_amount = (
-            db.query(func.count(Invoice.id), func.sum(Invoice.amount))
+            db.query(
+                func.count(Invoice.id),
+                func.sum(Invoice.amount * Invoice.convert_rate),
+            )
             .filter(Invoice.user_id == user_id, Invoice.status.in_(failed_statuses))
             .one()
         )
@@ -889,25 +915,29 @@ class InvoiceService:
         )
         expired_count = db.query(Invoice).filter(Invoice.status == "EXPIRED").count()
 
-        # Revenue metrics
+        # Revenue metrics - All converted to EGP
         total_revenue = (
-            db.query(func.sum(Invoice.amount)).filter(Invoice.status == "PAID").scalar()
+            db.query(func.sum(Invoice.amount * Invoice.convert_rate))
+            .filter(Invoice.status == "PAID")
+            .scalar()
             or 0.0
         )
         pending_amount = (
-            db.query(func.sum(Invoice.amount))
+            db.query(func.sum(Invoice.amount * Invoice.convert_rate))
             .filter(Invoice.status == "PENDING")
             .scalar()
             or 0.0
         )
         failed_amount = (
-            db.query(func.sum(Invoice.amount))
+            db.query(func.sum(Invoice.amount * Invoice.convert_rate))
             .filter(Invoice.status.in_(["FAILED", "CANCELLED", "EXPIRED"]))
             .scalar()
             or 0.0
         )
 
-        average_invoice_amount = db.query(func.avg(Invoice.amount)).scalar() or 0.0
+        average_invoice_amount = (
+            db.query(func.avg(Invoice.amount * Invoice.convert_rate)).scalar() or 0.0
+        )
 
         # Conversion metrics
         conversion_rate = (
@@ -930,9 +960,12 @@ class InvoiceService:
                 activity_name_expr.label("activity"),
                 func.count(Invoice.id).label("count"),
                 func.sum(
-                    case((Invoice.status == "PAID", Invoice.amount), else_=0)
+                    case(
+                        (Invoice.status == "PAID", Invoice.amount * Invoice.convert_rate),
+                        else_=0,
+                    )
                 ).label("total_revenue"),
-                func.avg(Invoice.amount).label("average_amount"),
+                func.avg(Invoice.amount * Invoice.convert_rate).label("average_amount"),
                 func.sum(case((Invoice.status == "PAID", 1), else_=0)).label(
                     "paid_count"
                 ),
@@ -969,7 +1002,10 @@ class InvoiceService:
                 Invoice.payment_method,
                 func.count(Invoice.id).label("count"),
                 func.sum(
-                    case((Invoice.status == "PAID", Invoice.amount), else_=0)
+                    case(
+                        (Invoice.status == "PAID", Invoice.amount * Invoice.convert_rate),
+                        else_=0,
+                    )
                 ).label("total_revenue"),
                 func.sum(case((Invoice.status == "PAID", 1), else_=0)).label(
                     "paid_count"
@@ -998,7 +1034,10 @@ class InvoiceService:
                 Invoice.invoice_type,
                 func.count(Invoice.id).label("count"),
                 func.sum(
-                    case((Invoice.status == "PAID", Invoice.amount), else_=0)
+                    case(
+                        (Invoice.status == "PAID", Invoice.amount * Invoice.convert_rate),
+                        else_=0,
+                    )
                 ).label("total_revenue"),
                 func.sum(case((Invoice.status == "PAID", 1), else_=0)).label(
                     "paid_count"
@@ -1084,23 +1123,24 @@ class InvoiceService:
             Invoice.status.in_(["FAILED", "CANCELLED", "EXPIRED"])
         ).count()
 
-        # Revenue
+        # Revenue - Converted to EGP
         total_revenue = (
             invoices_query.filter(Invoice.status == "PAID")
-            .with_entities(func.sum(Invoice.amount))
+            .with_entities(func.sum(Invoice.amount * Invoice.convert_rate))
             .scalar()
             or 0.0
         )
 
         pending_amount = (
             invoices_query.filter(Invoice.status == "PENDING")
-            .with_entities(func.sum(Invoice.amount))
+            .with_entities(func.sum(Invoice.amount * Invoice.convert_rate))
             .scalar()
             or 0.0
         )
 
         average_invoice_amount = (
-            invoices_query.with_entities(func.avg(Invoice.amount)).scalar() or 0.0
+            invoices_query.with_entities(func.avg(Invoice.amount * Invoice.convert_rate)).scalar()
+            or 0.0
         )
 
         # Conversion
@@ -1120,9 +1160,12 @@ class InvoiceService:
                 activity_name_expr.label("activity"),
                 func.count(Invoice.id).label("count"),
                 func.sum(
-                    case((Invoice.status == "PAID", Invoice.amount), else_=0)
+                    case(
+                        (Invoice.status == "PAID", Invoice.amount * Invoice.convert_rate),
+                        else_=0,
+                    )
                 ).label("total_revenue"),
-                func.avg(Invoice.amount).label("average_amount"),
+                func.avg(Invoice.amount * Invoice.convert_rate).label("average_amount"),
                 func.sum(case((Invoice.status == "PAID", 1), else_=0)).label(
                     "paid_count"
                 ),
@@ -1163,7 +1206,10 @@ class InvoiceService:
                 Invoice.payment_method,
                 func.count(Invoice.id).label("count"),
                 func.sum(
-                    case((Invoice.status == "PAID", Invoice.amount), else_=0)
+                    case(
+                        (Invoice.status == "PAID", Invoice.amount * Invoice.convert_rate),
+                        else_=0,
+                    )
                 ).label("total_revenue"),
                 func.sum(case((Invoice.status == "PAID", 1), else_=0)).label(
                     "paid_count"
@@ -1196,7 +1242,10 @@ class InvoiceService:
                 Invoice.invoice_type,
                 func.count(Invoice.id).label("count"),
                 func.sum(
-                    case((Invoice.status == "PAID", Invoice.amount), else_=0)
+                    case(
+                        (Invoice.status == "PAID", Invoice.amount * Invoice.convert_rate),
+                        else_=0,
+                    )
                 ).label("total_revenue"),
                 func.sum(case((Invoice.status == "PAID", 1), else_=0)).label(
                     "paid_count"
@@ -1261,7 +1310,10 @@ class InvoiceService:
                 Invoice.buyer_email,
                 func.count(Invoice.id).label("total_invoices"),
                 func.sum(
-                    case((Invoice.status == "PAID", Invoice.amount), else_=0)
+                    case(
+                        (Invoice.status == "PAID", Invoice.amount * Invoice.convert_rate),
+                        else_=0,
+                    )
                 ).label("total_spent"),
                 func.sum(case((Invoice.status == "PAID", 1), else_=0)).label(
                     "paid_invoices"
@@ -1273,7 +1325,10 @@ class InvoiceService:
             .group_by(Invoice.user_id, Invoice.buyer_name, Invoice.buyer_email)
             .order_by(
                 func.sum(
-                    case((Invoice.status == "PAID", Invoice.amount), else_=0)
+                    case(
+                        (Invoice.status == "PAID", Invoice.amount * Invoice.convert_rate),
+                        else_=0,
+                    )
                 ).desc()
             )
             .limit(limit)

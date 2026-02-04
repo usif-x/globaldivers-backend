@@ -64,6 +64,20 @@ class Settings(BaseSettings):
     # Currency Converter API Key
     CURRENCY_API_KEY: str = Field(..., description="API key for currency conversion")
 
+    # AI Chatbot Settings
+    AI_PROVIDER: Literal["openai", "deepseek", "openrouter"] = Field(
+        default="openai", description="AI provider: openai, deepseek, or openrouter"
+    )
+    AI_API_KEY: str = Field(default="", description="API key for the AI provider")
+    AI_MODEL: str = Field(default="gpt-3.5-turbo", description="AI model to use")
+    AI_BASE_URL: str = Field(
+        default="", 
+        description="Base URL for AI API (e.g., https://api.deepseek.com or https://openrouter.ai/api/v1)"
+    )
+    
+    # Frontend URL for booking links
+    FRONTEND_URL: str = Field(default="https://your-frontend-url.com", description="Frontend URL for booking links")
+
     @computed_field
     @property
     def TELEGRAM_ADMIN_IDS(self) -> list[int]:

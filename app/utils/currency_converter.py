@@ -89,3 +89,37 @@ class CurrencyConverter:
         except Exception as e:
             print(f"Currency conversion failed: {e}")
             return None
+
+    @staticmethod
+    def get_rate_to_egp_sync(from_currency: str) -> float:
+        """
+        Get conversion rate from a currency to EGP.
+        For EGP, returns 1.0.
+        For others, returns how many EGP = 1 unit of from_currency.
+        
+        Example: If 1 USD = 30 EGP, returns 30.0
+        
+        Args:
+            from_currency: Source currency code (e.g., 'USD', 'EUR')
+            
+        Returns:
+            Conversion rate to EGP, defaults to 1.0 if conversion fails
+        """
+        if from_currency == "EGP":
+            return 1.0
+        
+        try:
+            # Convert 1 unit of from_currency to EGP
+            converted = CurrencyConverter.convert_amount_sync(
+                from_currency=from_currency,
+                to_currency="EGP",
+                amount=1.0
+            )
+            if converted is not None:
+                return round(converted, 2)
+            else:
+                print(f"Failed to get conversion rate for {from_currency} to EGP, defaulting to 1.0")
+                return 1.0
+        except Exception as e:
+            print(f"Error getting conversion rate for {from_currency}: {e}")
+            return 1.0
