@@ -15,7 +15,7 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from slowapi.errors import RateLimitExceeded
-from slowapi.middleware import SlowAPIMiddleware
+from app.core.limiter_middleware import CustomLimiterMiddleware
 from sqlalchemy.exc import SQLAlchemyError
 from starlette.status import HTTP_429_TOO_MANY_REQUESTS
 
@@ -121,26 +121,23 @@ async def lifespan(app: FastAPI):
                 "⚠️  Telegram bot configuration issue - notifications may not work"
             )
 
-        # Verify storage setup
-        logger.info(f"Storage directory: {STORAGE_DIR.absolute()}")
-        logger.info(f"  - Exists: {STORAGE_DIR.exists()}")
-        logger.info(f"  - Is directory: {STORAGE_DIR.is_dir()}")
-        logger.info(f"  - Readable: {os.access(STORAGE_DIR, os.R_OK)}")
-        logger.info(f"  - Writable: {os.access(STORAGE_DIR, os.W_OK)}")
-        logger.info(f"  - Executable: {os.access(STORAGE_DIR, os.X_OK)}")
-        if STORAGE_DIR.exists():
-            try:
-                contents = list(STORAGE_DIR.iterdir())
-                logger.info(f"  - Contents: {len(contents)} items")
-                if contents:
-                    logger.info(f"  - Files: {[f.name for f in contents]}")
-            except PermissionError as e:
-                logger.error(f"  - Permission error reading directory: {e}")
+        # Initialize S3/MinIO storage
+        logger.info("Initializing S3/MinIO storage...")
+        try:
+            from app.utils.storage import get_s3_client
+            get_s3_client()
+            logger.info(
+                f"S3 storage ready: endpoint={settings.S3_ENDPOINT_URL}, "
+                f"bucket={settings.S3_BUCKET_NAME}"
+            )
+        except Exception as e:
+            logger.error(f"S3/MinIO initialization failed: {e}")
+            raise
 
-        logger.info("✓ Application startup completed successfully")
+        logger.info("Application startup completed successfully")
 
     except Exception as e:
-        logger.error(f"✗ Failed during startup: {e}", exc_info=True)
+        logger.error(f"Failed during startup: {e}", exc_info=True)
         raise
 
     yield  # Application is running
@@ -190,7 +187,7 @@ templates = Jinja2Templates(directory="app/templates")
 # Middleware Configuration
 # ============================================================================
 app.state.limiter = limiter
-app.add_middleware(SlowAPIMiddleware)
+app.add_middleware(CustomLimiterMiddleware)
 
 app.add_middleware(
     CORSMiddleware,
@@ -259,15 +256,16 @@ async def sqlalchemy_exception_handler(request: Request, exc: SQLAlchemyError):
 # ============================================================================
 # Static Files & Routes
 # ============================================================================
-# Mount static files
+# Mount static files (for templates/assets only; uploaded media is served from S3/MinIO)
 if STORAGE_DIR.exists() and STORAGE_DIR.is_dir():
     try:
         app.mount("/storage", StaticFiles(directory=str(STORAGE_DIR)), name="storage")
-        logger.info(f"✓ Static files mounted: /storage -> {STORAGE_DIR.absolute()}")
+        logger.info(f"Local static files mounted: /storage -> {STORAGE_DIR.absolute()}")
+        logger.info("NOTE: New uploads go to S3/MinIO. Local mount kept for legacy files only.")
     except Exception as e:
-        logger.error(f"✗ Failed to mount static files: {e}", exc_info=True)
+        logger.warning(f"Could not mount local static files (non-critical): {e}")
 else:
-    logger.warning(f"⚠️  Storage directory not found: {STORAGE_DIR.absolute()}")
+    logger.info("No local storage directory found (uploads use S3/MinIO)")
 
 # Include application routers
 for route in routes:

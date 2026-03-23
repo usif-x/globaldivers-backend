@@ -78,6 +78,14 @@ class Settings(BaseSettings):
     # Frontend URL for booking links
     FRONTEND_URL: str = Field(default="https://your-frontend-url.com", description="Frontend URL for booking links")
 
+    # S3 / MinIO Storage Settings
+    S3_ENDPOINT_URL: str = Field(default="http://localhost:9000", description="S3/MinIO endpoint URL")
+    S3_ACCESS_KEY: str = Field(default="", description="S3/MinIO access key")
+    S3_SECRET_KEY: str = Field(default="", description="S3/MinIO secret key")
+    S3_BUCKET_NAME: str = Field(default="globaldivers", description="S3/MinIO bucket name")
+    S3_REGION: str = Field(default="us-east-1", description="S3 region (use us-east-1 for MinIO)")
+    S3_PUBLIC_URL: str = Field(default="", description="Public URL for accessing S3/MinIO objects (e.g. http://localhost:9000/globaldivers)")
+
     @computed_field
     @property
     def TELEGRAM_ADMIN_IDS(self) -> list[int]:

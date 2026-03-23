@@ -1,13 +1,12 @@
-from pathlib import Path
 from typing import List
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
-from fastapi.responses import FileResponse
+from fastapi.responses import RedirectResponse
 
 from app.core.dependencies import get_current_admin
+from app.utils.storage import get_public_url
 from app.utils.upload_img import (
     delete_uploaded_image,
-    get_uploaded_image_path,
     upload_images,
     upload_single_image,
 )
@@ -18,19 +17,18 @@ upload_routes = APIRouter(prefix="/upload", tags=["Upload Endpoints"])
 @upload_routes.post("/image")
 async def upload_image_endpoint(
     file: UploadFile = File(...),
-    # admin: dict = Depends(get_current_admin)  # Uncomment to require admin auth
 ):
     """
-    Upload a single image file.
-    Returns the unique filename.
+    Upload a single image file to S3.
+    Returns the object key and full URL.
     """
     try:
-        filename = await upload_single_image(file)
+        object_key = await upload_single_image(file)
         return {
             "success": True,
             "message": "Image uploaded successfully",
-            "filename": filename,
-            "url": f"/images/{filename}",
+            "filename": object_key,
+            "url": get_public_url(object_key),
         }
     except HTTPException as e:
         raise e
@@ -41,19 +39,18 @@ async def upload_image_endpoint(
 @upload_routes.post("/images")
 async def upload_images_endpoint(
     files: List[UploadFile] = File(...),
-    # admin: dict = Depends(get_current_admin)  # Uncomment to require admin auth
 ):
     """
-    Upload multiple image files.
-    Returns list of unique filenames.
+    Upload multiple image files to S3.
+    Returns list of object keys and URLs.
     """
     try:
-        filenames = await upload_images(files)
+        keys = await upload_images(files)
         return {
             "success": True,
-            "message": f"Successfully uploaded {len(filenames)} images",
-            "filenames": filenames,
-            "urls": [f"/images/{filename}" for filename in filenames],
+            "message": f"Successfully uploaded {len(keys)} images",
+            "filenames": keys,
+            "urls": [get_public_url(k) for k in keys],
         }
     except HTTPException as e:
         raise e
@@ -61,13 +58,13 @@ async def upload_images_endpoint(
         raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
 
 
-@upload_routes.delete("/image/{filename}")
+@upload_routes.delete("/image/{filename:path}")
 async def delete_image_endpoint(
     filename: str,
-    admin: dict = Depends(get_current_admin),  # Require admin auth for deletion
+    admin: dict = Depends(get_current_admin),
 ):
     """
-    Delete an uploaded image.
+    Delete an uploaded image from S3.
     Admin only.
     """
     success = delete_uploaded_image(filename)
@@ -77,17 +74,13 @@ async def delete_image_endpoint(
             "message": f"Image {filename} deleted successfully",
         }
     else:
-        raise HTTPException(status_code=404, detail="Image not found")
+        raise HTTPException(status_code=404, detail="Image not found or already deleted")
 
 
-@upload_routes.get("/image/{filename}")
+@upload_routes.get("/image/{filename:path}")
 async def get_image_endpoint(filename: str):
     """
-    Serve an uploaded image file.
-    Public endpoint.
+    Redirect to the S3 public URL for the image.
     """
-    file_path = get_uploaded_image_path(filename)
-    if file_path and file_path.exists():
-        return FileResponse(path=file_path, media_type="image/*", filename=filename)
-    else:
-        raise HTTPException(status_code=404, detail="Image not found")
+    url = get_public_url(filename)
+    return RedirectResponse(url=url)

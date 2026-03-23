@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.models.dive_center import DiveCenter
 from app.schemas.dive_center import DiveCenterCreate, DiveCenterUpdate
+from app.utils.storage import get_public_url
 from app.utils.upload_img import upload_images
 from app.utils.upload_video import upload_single_video
 

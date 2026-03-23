@@ -1,6 +1,6 @@
 import json
 
-with open("app/store/dive-sites.json", "r") as f:
+with open("app/static/dive-sites.json", "r") as f:
     data = json.load(f)
 
 

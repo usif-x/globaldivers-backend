@@ -21,7 +21,7 @@ def create_super_admin():
         admin = db.execute(stmt).scalars().first()
 
         if admin:
-            print(f"✅ Super Admin already exists. -> {username}:{default_password}")
+            print(f"✅ Super Admin already exists. -> {username}")
             return
 
         print("🚀 Creating Super Admin...")
@@ -41,7 +41,6 @@ def create_super_admin():
 🧑 Name: {name}
 👤 Username: {username}
 📧 Email: {email}
-🔐 Password: {default_password}
 🔓 Level: {level} (Full Access)
 """
         )

@@ -9,16 +9,17 @@ from app.core.dependencies import get_current_admin
 from app.schemas.trip import CreateTrip, TripResponse, UpdateTrip
 from app.services.trip import TripServices
 
-trip_routes = APIRouter(prefix="/trips", tags=["Trip Endpoints"])
+from fastapi.concurrency import run_in_threadpool
 
+trip_routes = APIRouter(prefix="/trips", tags=["Trip Endpoints"])
 
 @trip_routes.get("/", response_model=list[TripResponse])
 @cache(expire=600)
 async def get_all_trips(db: Session = Depends(get_db)):
-    return TripServices(db).get_all_trips()
+    return await run_in_threadpool(TripServices(db).get_all_trips)
 
 
-@trip_routes.post("/", response_model=TripResponse)
+@trip_routes.post("/", response_model=TripResponse, dependencies=[Depends(get_current_admin)])
 async def create_trip(
     name: str = Form(...),
     description: str = Form(...),
@@ -69,15 +70,15 @@ async def create_trip(
 
 @trip_routes.get("/{id}", response_model=TripResponse)
 async def get_trip_by_id(id: int = Path(..., ge=1), db: Session = Depends(get_db)):
-    return TripServices(db).get_trip_by_id(id)
+    return await run_in_threadpool(TripServices(db).get_trip_by_id, id)
 
 
 @trip_routes.delete("/{id}", dependencies=[Depends(get_current_admin)])
 async def delete_trip(id: int, db: Session = Depends(get_db)):
-    return TripServices(db).delete_trip(id)
+    return await run_in_threadpool(TripServices(db).delete_trip, id)
 
 
-@trip_routes.put("/{id}")
+@trip_routes.put("/{id}", dependencies=[Depends(get_current_admin)])
 async def update_trip(
     id: int,
     name: str = Form(None),
@@ -101,45 +102,9 @@ async def update_trip(
     images: List[UploadFile] = File(None),
     db: Session = Depends(get_db),
 ):
-    # Create update object from form data, excluding None values
-    update_data = {}
-
-    if name is not None:
-        update_data["name"] = name
-    if description is not None:
-        update_data["description"] = description
-    if is_image_list is not None:
-        update_data["is_image_list"] = is_image_list
-    if adult_price is not None:
-        update_data["adult_price"] = adult_price
-    if child_allowed is not None:
-        update_data["child_allowed"] = child_allowed
-    if child_price is not None:
-        update_data["child_price"] = child_price
-    if maxim_person is not None:
-        update_data["maxim_person"] = maxim_person
-    if has_discount is not None:
-        update_data["has_discount"] = has_discount
-    if discount_requires_min_people is not None:
-        update_data["discount_requires_min_people"] = discount_requires_min_people
-    if discount_always_available is not None:
-        update_data["discount_always_available"] = discount_always_available
-    if discount_min_people is not None:
-        update_data["discount_min_people"] = discount_min_people
-    if discount_percentage is not None:
-        update_data["discount_percentage"] = discount_percentage
-    if duration is not None:
-        update_data["duration"] = duration
-    if duration_unit is not None:
-        update_data["duration_unit"] = duration_unit
-    if package_id is not None:
-        update_data["package_id"] = package_id
-    if included is not None:
-        update_data["included"] = included
-    if not_included is not None:
-        update_data["not_included"] = not_included
-    if terms_and_conditions is not None:
-        update_data["terms_and_conditions"] = terms_and_conditions
-
+    params = locals()
+    excluded = {"id", "images", "db"}
+    update_data = {k: v for k, v in params.items() if k not in excluded and v is not None}
+    
     trip_update = UpdateTrip(**update_data)
     return await TripServices(db).update_trip(trip_update, id, images)

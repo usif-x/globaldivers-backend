@@ -1,68 +1,25 @@
 # app/services/blog.py
-import os
-import uuid
 from typing import List, Optional
 
-import aiofiles
 from fastapi import HTTPException, UploadFile, status
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from app.models.blog import Blog
 from app.schemas.blog import BlogCreate, BlogUpdate
+from app.utils.storage import get_public_url, upload_image
 
 
 class BlogService:
     """Service class for handling blog operations"""
 
-    def __init__(self, db: Session, storage_dir: str = None):
+    def __init__(self, db: Session):
         self.db = db
-        if storage_dir is None:
-            storage_dir = os.getenv("STORAGE_PATH", "storage")
-        self.storage_dir = os.path.join(storage_dir, "blogs")
-        os.makedirs(self.storage_dir, exist_ok=True)
-        self.allowed_extensions = {".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp"}
-
-    def _validate_image_file(self, file: UploadFile) -> None:
-        """Validate uploaded image file"""
-        if not file.content_type or not file.content_type.startswith("image/"):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST, detail="File must be an image"
-            )
-
-        file_extension = os.path.splitext(file.filename or "")[1].lower()
-        if file_extension not in self.allowed_extensions:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"File extension {file_extension} not allowed. Allowed: {', '.join(self.allowed_extensions)}",
-            )
 
     async def upload_blog_image(self, file: UploadFile) -> str:
-        """Upload image for blog and return URL"""
-        self._validate_image_file(file)
-
-        # Generate unique filename
-        file_extension = os.path.splitext(file.filename or "image")[1]
-        unique_filename = f"{uuid.uuid4()}{file_extension}"
-        file_path = os.path.join(self.storage_dir, unique_filename)
-
-        try:
-            # Save file to storage
-            async with aiofiles.open(file_path, "wb") as f:
-                content = await file.read()
-                await f.write(content)
-
-            # Return URL path
-            return f"/storage/blogs/{unique_filename}"
-
-        except Exception as e:
-            # Clean up file if upload failed
-            if os.path.exists(file_path):
-                os.remove(file_path)
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to upload image: {str(e)}",
-            )
+        """Upload image for blog to S3 and return its public URL."""
+        object_key = await upload_image(file, prefix="blogs")
+        return get_public_url(object_key)
 
     def get_all_blogs(self, skip: int = 0, limit: int = 100) -> List[Blog]:
         """Get all blog posts with pagination"""

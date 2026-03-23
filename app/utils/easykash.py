@@ -121,38 +121,6 @@ class EasyKash:
         return calculated_signature == signature_hash
 
     # --- 3. Example Verification Function ---
-    def verify_example_callback(self):
-        """
-        Uses the specific example data from the EasyKash documentation to test
-        the verification logic.
-        """
-        print("--- Running EasyKash Example Verification ---")
-
-        payload_json = """{
-"ProductCode":"EDV4471",
-"Amount":"11.00",
-"ProductType":"Direct Pay",
-"PaymentMethod":"Cash Through Fawry",
-"BuyerName":"mee",
-"BuyerEmail":"test@mail.com",
-"BuyerMobile":"0123456789",
-"status":"PAID",
-"voucher":"",
-"easykashRef":"2911105009",
-"VoucherData":"Direct Pay",
-"customerReference":"TEST11111",
-"signatureHash":"0bd9ce502950ffa358314c170dace42e7ba3e0c776f5a32eb15c3d496bc9c294835036dd90d4f287233b800c9bde2f6591b6b8a1f675b6bfe64fd799da29d1d0"
-        }"""
-
-        secret_key = "da9fe30575517d987762a859842b5631"
-
-        payload = json.loads(payload_json)
-
-        if self.verify_callback(payload, secret_key):
-            return True
-        else:
-            return False
-
 
 # Create a single instance to be used throughout the app
 easykash_client = EasyKash(private_key=private_key, secret_key=secret_key)
