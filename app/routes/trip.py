@@ -1,3 +1,4 @@
+import json
 from typing import List
 
 from fastapi import APIRouter, Depends, File, Form, Path, UploadFile
@@ -12,6 +13,20 @@ from app.services.trip import TripServices
 from fastapi.concurrency import run_in_threadpool
 
 trip_routes = APIRouter(prefix="/trips", tags=["Trip Endpoints"])
+
+def parse_list_form_field(data: List[str]) -> List[str]:
+    if not data:
+        return data
+    if len(data) == 1 and isinstance(data[0], str):
+        val = data[0].strip()
+        if val.startswith('[') and val.endswith(']'):
+            try:
+                parsed = json.loads(val)
+                if isinstance(parsed, list):
+                    return [str(item) for item in parsed]
+            except json.JSONDecodeError:
+                pass
+    return data
 
 @trip_routes.get("/", response_model=list[TripResponse])
 @cache(expire=600)
@@ -42,6 +57,10 @@ async def create_trip(
     images: List[UploadFile] = File(None),
     db: Session = Depends(get_db),
 ):
+    included = parse_list_form_field(included)
+    not_included = parse_list_form_field(not_included)
+    terms_and_conditions = parse_list_form_field(terms_and_conditions)
+
     # Create trip object from form data
     trip_data = CreateTrip(
         name=name,
@@ -102,6 +121,10 @@ async def update_trip(
     images: List[UploadFile] = File(None),
     db: Session = Depends(get_db),
 ):
+    included = parse_list_form_field(included) if included is not None else None
+    not_included = parse_list_form_field(not_included) if not_included is not None else None
+    terms_and_conditions = parse_list_form_field(terms_and_conditions) if terms_and_conditions is not None else None
+
     params = locals()
     excluded = {"id", "images", "db"}
     update_data = {k: v for k, v in params.items() if k not in excluded and v is not None}

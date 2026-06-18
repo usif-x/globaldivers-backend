@@ -42,7 +42,10 @@ STORAGE_DIR = Path(STORAGE_PATH)
 for directory in [LOGS_DIR, STORAGE_DIR]:
     if not directory.exists():
         directory.mkdir(parents=True, exist_ok=True)
-    os.chmod(directory, 0o755)
+
+
+def _is_heroku() -> bool:
+    return bool(os.getenv("DYNO"))
 
 
 # ============================================================================
@@ -53,14 +56,16 @@ def setup_logging():
     log_level = logging.DEBUG if settings.DEBUG else logging.INFO
     log_format = "%(asctime)s - %(levelname)s - [%(name)s:%(lineno)d] %(message)s"
 
-    handlers = [
-        logging.StreamHandler(sys.stdout),
-        logging.FileHandler(
-            LOGS_DIR / "app.log",
-            mode="a",
-            encoding="utf-8",
-        ),
-    ]
+    handlers = [logging.StreamHandler(sys.stdout)]
+
+    if not _is_heroku():
+        handlers.append(
+            logging.FileHandler(
+                LOGS_DIR / "app.log",
+                mode="a",
+                encoding="utf-8",
+            )
+        )
 
     logging.basicConfig(
         level=log_level,

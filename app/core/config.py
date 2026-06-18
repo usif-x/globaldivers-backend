@@ -1,4 +1,5 @@
 from functools import lru_cache
+from os import getenv
 from typing import Literal
 
 from pydantic import Field, RedisDsn, computed_field, field_validator
@@ -50,6 +51,9 @@ class Settings(BaseSettings):
     TELEGRAM_ADMIN_IDS_STR: str = Field(default="", alias="TELEGRAM_ADMIN_IDS")
 
     # Email Settings
+    SMTP_STATUS: Literal["on", "off"] = Field(
+        default="off", description="Enable or disable SMTP email sending"
+    )
     SMTP_HOST: str = Field(..., description="SMTP server host")
     SMTP_PORT: int = Field(..., description="SMTP server port")
     SMTP_USERNAME: str = Field(..., description="SMTP server username")
@@ -110,6 +114,10 @@ class Settings(BaseSettings):
     # Construct database URL from components
     @property
     def DATABASE_URL(self) -> str:
+        database_url = getenv("DATABASE_URL")
+        if database_url:
+            return database_url
+
         return f"{self.DB_ENGINE}+psycopg2://{self.DB_USERNAME}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
 
     # Validate that debug is False in production

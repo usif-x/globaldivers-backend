@@ -77,6 +77,10 @@ class EmailSender:
             bool: True if email was sent successfully, False otherwise
         """
         try:
+            if settings.SMTP_STATUS == "off":
+                logger.info("SMTP_STATUS is off, skipping email send to %s", to_email)
+                return False
+
             # Convert single email to list
             if isinstance(to_email, str):
                 recipients = [to_email]
