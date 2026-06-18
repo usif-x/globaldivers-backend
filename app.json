@@ -1,0 +1,144 @@
+{
+  "name": "Hurghada Trips Backend",
+  "description": "FastAPI backend for trips, courses, packages, bookings, and media uploads.",
+  "stack": "heroku-26",
+  "buildpacks": [
+    {
+      "url": "heroku/python"
+    }
+  ],
+  "env": {
+    "APP_NAME": {
+      "value": "Hurghada-trips.online website server"
+    },
+    "APP_DESCRIPTION": {
+      "value": "Hurghada-trips.online website server"
+    },
+    "APP_URL": {
+      "value": "https://your-app.herokuapp.com"
+    },
+    "APP_VERSION": {
+      "value": "1.0.0"
+    },
+    "ENVIRONMENT": {
+      "value": "production"
+    },
+    "DEBUG": {
+      "value": "false"
+    },
+    "PORT": {
+      "value": "8000"
+    },
+    "DB_ENGINE": {
+      "value": "postgresql"
+    },
+    "DB_NAME": {
+      "required": true
+    },
+    "DB_HOST": {
+      "required": true
+    },
+    "DB_PORT": {
+      "value": "5432"
+    },
+    "DB_USERNAME": {
+      "required": true
+    },
+    "DB_PASSWORD": {
+      "required": true
+    },
+    "DB_REDIS_URI": {
+      "required": true
+    },
+    "CORS_ORIGIN": {
+      "value": "*"
+    },
+    "JWT_SECRET_KEY": {
+      "generator": "secret"
+    },
+    "JWT_ALGORITHM": {
+      "value": "HS256"
+    },
+    "JWT_USER_ACCESS_TOKEN_EXPIRE_DAYS": {
+      "value": "7"
+    },
+    "JWT_ADMIN_ACCESS_TOKEN_EXPIRE_DAYS": {
+      "value": "30"
+    },
+    "EASYKASH_PRIVATE_KEY": {
+      "required": true
+    },
+    "EASYKASH_SECRET_KEY": {
+      "required": true
+    },
+    "ADMIN_NAME": {
+      "required": true
+    },
+    "ADMIN_EMAIL": {
+      "required": true
+    },
+    "ADMIN_USERNAME": {
+      "required": true
+    },
+    "ADMIN_PASSWORD": {
+      "required": true
+    },
+    "ADMIN_LEVEL": {
+      "value": "2"
+    },
+    "TELEGRAM_BOT_TOKEN": {
+      "required": true
+    },
+    "TELEGRAM_ADMIN_IDS": {
+      "value": "759547923,5162688598"
+    },
+    "SMTP_STATUS": {
+      "value": "off"
+    },
+    "SMTP_HOST": {
+      "required": true
+    },
+    "SMTP_PORT": {
+      "value": "587"
+    },
+    "SMTP_USERNAME": {
+      "required": true
+    },
+    "SMTP_PASSWORD": {
+      "required": true
+    },
+    "EMAIL_FROM": {
+      "required": true
+    },
+    "EMAIL_FROM_NAME": {
+      "value": "Top Divers Hurghada"
+    },
+    "EMAIL_USE_TLS": {
+      "value": "true"
+    },
+    "EMAIL_USE_SSL": {
+      "value": "false"
+    },
+    "CURRENCY_API_KEY": {
+      "required": true
+    },
+    "S3_ENDPOINT_URL": {
+      "required": true
+    },
+    "S3_ACCESS_KEY": {
+      "required": true
+    },
+    "S3_SECRET_KEY": {
+      "required": true
+    },
+    "S3_BUCKET_NAME": {
+      "required": true
+    },
+    "S3_REGION": {
+      "value": "us-east-1"
+    },
+    "S3_PUBLIC_URL": {
+      "required": true
+    }
+  }
+}
