@@ -3,19 +3,19 @@ Chatbot Service - AI-powered travel & diving sales chatbot
 Fetches data from database - Supports OpenAI, DeepSeek, and OpenRouter
 """
 
-from typing import Dict, List, Optional, Any
 from datetime import datetime, timedelta
-from sqlalchemy.orm import Session
+from typing import Any, Dict, List, Optional
+
 from openai import OpenAI
+from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.core.database import SessionLocal
-from app.models.trip import Trip
-from app.models.course import Course
-from app.models.package import Package
 from app.models.coupon import Coupon
+from app.models.course import Course
 from app.models.dive_center import DiveCenter
-
+from app.models.package import Package
+from app.models.trip import Trip
 
 # =============================================================================
 # In-Memory Data Storage
@@ -29,33 +29,28 @@ sessions: Dict[str, List[Dict[str, Any]]] = {}
 # AI Client Setup - Multi-Provider Support
 # =============================================================================
 
+
 def get_ai_client() -> Optional[OpenAI]:
     """Initialize AI client based on configured provider."""
     if not settings.AI_API_KEY:
         return None
-    
+
     provider = settings.AI_PROVIDER.lower()
-    
+
     if provider == "openai":
         # OpenAI - default base URL
         return OpenAI(api_key=settings.AI_API_KEY)
-    
+
     elif provider == "deepseek":
         # DeepSeek
         base_url = settings.AI_BASE_URL or "https://api.deepseek.com"
-        return OpenAI(
-            api_key=settings.AI_API_KEY,
-            base_url=base_url
-        )
-    
+        return OpenAI(api_key=settings.AI_API_KEY, base_url=base_url)
+
     elif provider == "openrouter":
         # OpenRouter
         base_url = settings.AI_BASE_URL or "https://openrouter.ai/api/v1"
-        return OpenAI(
-            api_key=settings.AI_API_KEY,
-            base_url=base_url
-        )
-    
+        return OpenAI(api_key=settings.AI_API_KEY, base_url=base_url)
+
     else:
         # Default to OpenAI
         return OpenAI(api_key=settings.AI_API_KEY)
@@ -64,11 +59,11 @@ def get_ai_client() -> Optional[OpenAI]:
 def get_default_model() -> str:
     """Get default model based on provider."""
     provider = settings.AI_PROVIDER.lower()
-    
+
     if settings.AI_MODEL and settings.AI_MODEL != "gpt-3.5-turbo":
         # User specified a custom model
         return settings.AI_MODEL
-    
+
     if provider == "openai":
         return "gpt-3.5-turbo"
     elif provider == "deepseek":
@@ -86,6 +81,7 @@ client = get_ai_client()
 # =============================================================================
 # Database Functions
 # =============================================================================
+
 
 def get_db() -> Session:
     """Get database session."""
@@ -160,17 +156,15 @@ def get_all_packages(db: Session, limit: int = 20) -> List[Dict]:
 def get_active_coupons(db: Session) -> List[Dict]:
     """Fetch all active coupons from database."""
     from datetime import datetime
-    
-    coupons = db.query(Coupon).filter(
-        Coupon.is_active == True
-    ).all()
-    
+
+    coupons = db.query(Coupon).filter(Coupon.is_active == True).all()
+
     # Filter for valid coupons (not expired, has remaining uses)
     valid_coupons = []
     for coupon in coupons:
         if coupon.can_used:  # Uses the property from the model
             valid_coupons.append(coupon)
-    
+
     return [
         {
             "id": coupon.id,
@@ -190,7 +184,7 @@ def get_dive_center_info(db: Session) -> Optional[Dict]:
     dive_center = db.query(DiveCenter).first()
     if not dive_center:
         return None
-    
+
     return {
         "name": dive_center.name,
         "description": dive_center.description,
@@ -232,11 +226,10 @@ def get_course_by_id_from_db(db: Session, course_id: int) -> Optional[Dict]:
 def validate_promo_code_from_db(db: Session, code: str) -> Optional[Dict]:
     """Validate a promo code from database."""
     code = code.upper().strip()
-    coupon = db.query(Coupon).filter(
-        Coupon.code == code,
-        Coupon.is_active == True
-    ).first()
-    
+    coupon = (
+        db.query(Coupon).filter(Coupon.code == code, Coupon.is_active == True).first()
+    )
+
     if coupon and coupon.can_used:
         return {
             "id": coupon.id,
@@ -253,6 +246,7 @@ def validate_promo_code_from_db(db: Session, code: str) -> Optional[Dict]:
 # Session Management
 # =============================================================================
 
+
 def get_or_create_session(session_id: str) -> List[Dict[str, Any]]:
     """Get existing session or create new one."""
     if session_id not in sessions:
@@ -263,11 +257,7 @@ def get_or_create_session(session_id: str) -> List[Dict[str, Any]]:
 def add_message_to_session(session_id: str, role: str, content: str):
     """Add a message to the session history."""
     session = get_or_create_session(session_id)
-    session.append({
-        "role": role,
-        "content": content,
-        "timestamp": datetime.now()
-    })
+    session.append({"role": role, "content": content, "timestamp": datetime.now()})
     # Keep only last 50 messages to prevent memory issues
     if len(session) > 50:
         sessions[session_id] = session[-50:]
@@ -287,6 +277,7 @@ def clear_session(session_id: str):
 # =============================================================================
 # Booking Link Generation
 # =============================================================================
+
 
 def generate_trip_link(trip_id: int) -> str:
     """Generate booking link for a trip."""
@@ -366,7 +357,7 @@ def build_system_prompt() -> str:
         packages = get_all_packages(db)
         promo_codes = get_active_coupons(db)
         dive_center = get_dive_center_info(db)
-        
+
         # Build dive center info string
         if dive_center:
             dive_center_name = dive_center["name"]
@@ -380,34 +371,58 @@ Location: {dive_center["location"]}
 Hotel: {dive_center["hotel_name"] or 'N/A'}
 """
         else:
-            dive_center_name = "Top Divers"
+            dive_center_name = "hurghada-trips"
             location = "Hurghada, Egypt"
             dive_center_info = "Premier diving center in Hurghada, Egypt."
-        
+
         # Build trips info
-        trips_info = "\n".join([
-            f"- ID {t['id']}: {t['title']} (${t['price']}) - {t['description'][:100] if t['description'] else 'No description'} {'[Discount: ' + str(t['discount_percentage']) + '% off]' if t['has_discount'] else ''}"
-            for t in trips[:10]  # Limit to 10 trips
-        ]) if trips else "No trips available."
-        
+        trips_info = (
+            "\n".join(
+                [
+                    f"- ID {t['id']}: {t['title']} (${t['price']}) - {t['description'][:100] if t['description'] else 'No description'} {'[Discount: ' + str(t['discount_percentage']) + '% off]' if t['has_discount'] else ''}"
+                    for t in trips[:10]  # Limit to 10 trips
+                ]
+            )
+            if trips
+            else "No trips available."
+        )
+
         # Build courses info
-        courses_info = "\n".join([
-            f"- ID {c['id']}: {c['title']} ({'$' + str(c['price']) if c['price'] else 'Contact for price'}) - Level: {c['level']}, Duration: {c['duration']} {c['duration_unit']} - {c['description'][:80] if c['description'] else 'No description'} {'[Discount: ' + str(c['discount_percentage']) + '% off]' if c['has_discount'] else ''}"
-            for c in courses[:10]  # Limit to 10 courses
-        ]) if courses else "No courses available."
-        
+        courses_info = (
+            "\n".join(
+                [
+                    f"- ID {c['id']}: {c['title']} ({'$' + str(c['price']) if c['price'] else 'Contact for price'}) - Level: {c['level']}, Duration: {c['duration']} {c['duration_unit']} - {c['description'][:80] if c['description'] else 'No description'} {'[Discount: ' + str(c['discount_percentage']) + '% off]' if c['has_discount'] else ''}"
+                    for c in courses[:10]  # Limit to 10 courses
+                ]
+            )
+            if courses
+            else "No courses available."
+        )
+
         # Build packages info
-        packages_info = "\n".join([
-            f"- ID {p['id']}: {p['title']} - {p['description'][:100] if p['description'] else 'No description'} (Includes {p['trip_count']} trips)"
-            for p in packages[:10]  # Limit to 10 packages
-        ]) if packages else "No packages available."
-        
+        packages_info = (
+            "\n".join(
+                [
+                    f"- ID {p['id']}: {p['title']} - {p['description'][:100] if p['description'] else 'No description'} (Includes {p['trip_count']} trips)"
+                    for p in packages[:10]  # Limit to 10 packages
+                ]
+            )
+            if packages
+            else "No packages available."
+        )
+
         # Build promo codes info
-        promo_codes_info = "\n".join([
-            f"- {p['code']}: {p['discount_percent']}% off {p['activity']} - {p['description']} (Remaining: {p['remaining']} uses)"
-            for p in promo_codes[:5]  # Limit to 5 promo codes
-        ]) if promo_codes else "No active promo codes at the moment."
-        
+        promo_codes_info = (
+            "\n".join(
+                [
+                    f"- {p['code']}: {p['discount_percent']}% off {p['activity']} - {p['description']} (Remaining: {p['remaining']} uses)"
+                    for p in promo_codes[:5]  # Limit to 5 promo codes
+                ]
+            )
+            if promo_codes
+            else "No active promo codes at the moment."
+        )
+
         return SYSTEM_PROMPT.format(
             dive_center_name=dive_center_name,
             location=location,
@@ -416,7 +431,7 @@ Hotel: {dive_center["hotel_name"] or 'N/A'}
             courses_info=courses_info,
             packages_info=packages_info,
             promo_codes_info=promo_codes_info,
-            frontend_url=settings.FRONTEND_URL
+            frontend_url=settings.FRONTEND_URL,
         )
     finally:
         db.close()
@@ -426,38 +441,34 @@ Hotel: {dive_center["hotel_name"] or 'N/A'}
 # AI Integration - Multi-Provider
 # =============================================================================
 
+
 async def generate_ai_response(session_id: str, user_message: str) -> str:
     """Generate AI response using configured provider."""
     ai_client = get_ai_client()
-    
+
     if not ai_client or not settings.AI_API_KEY:
         return "I apologize, but our AI service is currently unavailable. Please contact our sales team directly."
-    
+
     try:
         # Get conversation history
         history = get_conversation_history(session_id)
-        
+
         # Build messages for AI
-        messages = [
-            {"role": "system", "content": build_system_prompt()}
-        ]
-        
+        messages = [{"role": "system", "content": build_system_prompt()}]
+
         # Add conversation history (last 10 messages for context)
         for msg in history[-10:]:
-            messages.append({
-                "role": msg["role"],
-                "content": msg["content"]
-            })
-        
+            messages.append({"role": msg["role"], "content": msg["content"]})
+
         # Add current user message
         messages.append({"role": "user", "content": user_message})
-        
+
         # Get the appropriate model
         model = get_default_model()
-        
+
         # Call AI API based on provider
         provider = settings.AI_PROVIDER.lower()
-        
+
         if provider in ["openai", "deepseek", "openrouter"]:
             # All three providers use OpenAI-compatible API
             response = ai_client.chat.completions.create(
@@ -469,13 +480,13 @@ async def generate_ai_response(session_id: str, user_message: str) -> str:
             ai_reply = response.choices[0].message.content
         else:
             return "I apologize, but the AI provider is not configured correctly."
-        
+
         # Store the conversation
         add_message_to_session(session_id, "user", user_message)
         add_message_to_session(session_id, "assistant", ai_reply)
-        
+
         return ai_reply
-        
+
     except Exception as e:
         return f"I apologize, but I'm having trouble processing your request right now. Please try again or contact our team directly."
 
@@ -483,29 +494,31 @@ async def generate_ai_response(session_id: str, user_message: str) -> str:
 async def generate_final_response(session_id: str) -> str:
     """Generate final persuasive response to encourage booking."""
     ai_client = get_ai_client()
-    
+
     if not ai_client or not settings.AI_API_KEY:
         return "Please contact our sales team to complete your booking."
-    
+
     db = get_db()
     try:
         history = get_conversation_history(session_id)
-        
+
         if not history:
             return "It looks like we haven't chatted yet! How can I help you today?"
-        
+
         # Build context from conversation
-        conversation_summary = "\n".join([
-            f"{'Customer' if msg['role'] == 'user' else 'Assistant'}: {msg['content'][:100]}..."
-            for msg in history[-10:]
-        ])
-        
+        conversation_summary = "\n".join(
+            [
+                f"{'Customer' if msg['role'] == 'user' else 'Assistant'}: {msg['content'][:100]}..."
+                for msg in history[-10:]
+            ]
+        )
+
         # Fetch current data
         trips = get_all_trips(db)
         courses = get_all_courses(db)
         packages = get_all_packages(db)
         promo_codes = get_active_coupons(db)
-        
+
         final_prompt = f"""Based on this conversation history, provide a final persuasive response that:
 1. Summarizes what the customer is looking for
 2. Recommends the BEST matching product from our inventory
@@ -528,13 +541,16 @@ Respond in a friendly, persuasive sales tone. Be specific about which product yo
         # Get the appropriate model
         model = get_default_model()
         provider = settings.AI_PROVIDER.lower()
-        
+
         if provider in ["openai", "deepseek", "openrouter"]:
             response = ai_client.chat.completions.create(
                 model=model,
                 messages=[
-                    {"role": "system", "content": "You are a persuasive sales closer. Your goal is to convert the conversation into a booking."},
-                    {"role": "user", "content": final_prompt}
+                    {
+                        "role": "system",
+                        "content": "You are a persuasive sales closer. Your goal is to convert the conversation into a booking.",
+                    },
+                    {"role": "user", "content": final_prompt},
                 ],
                 max_tokens=400,
                 temperature=0.8,
@@ -542,7 +558,7 @@ Respond in a friendly, persuasive sales tone. Be specific about which product yo
             return response.choices[0].message.content
         else:
             return "I'd love to help you complete your booking! Please visit our website or contact us directly."
-        
+
     except Exception as e:
         return "I'd love to help you complete your booking! Please visit our website or contact us directly."
     finally:
@@ -553,27 +569,89 @@ Respond in a friendly, persuasive sales tone. Be specific about which product yo
 # Intent Detection (Simple keyword-based)
 # =============================================================================
 
+
 def detect_intent(message: str) -> Dict[str, Any]:
     """Detect user intent from message."""
     message_lower = message.lower()
-    
+
     intents = {
-        "diving": any(word in message_lower for word in ["diving", "dive", "scuba", "underwater", "reef", "snorkel"]),
-        "trip": any(word in message_lower for word in ["trip", "tour", "visit", "excursion", "safari"]),
-        "course": any(word in message_lower for word in ["course", "learn", "certification", "padi", "class", "training", "lesson"]),
-        "package": any(word in message_lower for word in ["package", "deal", "bundle", "all-inclusive", "vacation"]),
-        "discount": any(word in message_lower for word in ["discount", "promo", "code", "coupon", "deal", "offer", "sale", "%", "percent", "off"]),
-        "price": any(word in message_lower for word in ["price", "cost", "how much", "cheap", "expensive", "$", "dollar"]),
-        "booking": any(word in message_lower for word in ["book", "reserve", "schedule", "appointment"]),
-        "contact": any(word in message_lower for word in ["phone", "email", "call", "contact", "reach", "location", "address", "where"]),
+        "diving": any(
+            word in message_lower
+            for word in ["diving", "dive", "scuba", "underwater", "reef", "snorkel"]
+        ),
+        "trip": any(
+            word in message_lower
+            for word in ["trip", "tour", "visit", "excursion", "safari"]
+        ),
+        "course": any(
+            word in message_lower
+            for word in [
+                "course",
+                "learn",
+                "certification",
+                "padi",
+                "class",
+                "training",
+                "lesson",
+            ]
+        ),
+        "package": any(
+            word in message_lower
+            for word in ["package", "deal", "bundle", "all-inclusive", "vacation"]
+        ),
+        "discount": any(
+            word in message_lower
+            for word in [
+                "discount",
+                "promo",
+                "code",
+                "coupon",
+                "deal",
+                "offer",
+                "sale",
+                "%",
+                "percent",
+                "off",
+            ]
+        ),
+        "price": any(
+            word in message_lower
+            for word in [
+                "price",
+                "cost",
+                "how much",
+                "cheap",
+                "expensive",
+                "$",
+                "dollar",
+            ]
+        ),
+        "booking": any(
+            word in message_lower
+            for word in ["book", "reserve", "schedule", "appointment"]
+        ),
+        "contact": any(
+            word in message_lower
+            for word in [
+                "phone",
+                "email",
+                "call",
+                "contact",
+                "reach",
+                "location",
+                "address",
+                "where",
+            ]
+        ),
     }
-    
+
     return intents
 
 
 # =============================================================================
 # Promo Code Validation (Public API)
 # =============================================================================
+
 
 def validate_promo_code(code: str) -> Optional[Dict]:
     """Validate a promo code."""

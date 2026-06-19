@@ -1,6 +1,6 @@
-# Top Divers Backend API
+# hurghada-trips Backend API
 
-A FastAPI-based backend service for Top Divers, providing RESTful APIs for dive center management, course booking, trip reservations, and payment processing.
+A FastAPI-based backend service for hurghada-trips, providing RESTful APIs for dive center management, course booking, trip reservations, and payment processing.
 
 ## Features
 
@@ -27,7 +27,7 @@ A FastAPI-based backend service for Top Divers, providing RESTful APIs for dive 
 
    ```bash
    git clone <your-repo-url>
-   cd Topdivers-backend
+   cd hurghada-trips-backend
    ```
 
 2. **Set up environment variables**

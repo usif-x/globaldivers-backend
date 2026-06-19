@@ -1,4 +1,4 @@
-# AGENTS.md - Coding Guidelines for Top Divers Backend
+# AGENTS.md - Coding Guidelines for hurghada-trips Backend
 
 ## Build & Development Commands
 

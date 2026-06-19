@@ -16,7 +16,7 @@ DB_USER = os.getenv("DB_USERNAME", "postgres")
 DB_PASS = os.getenv("DB_PASSWORD", "")
 DB_HOST = os.getenv("DB_HOST", "localhost")
 DB_PORT = os.getenv("DB_PORT", "5432")
-DB_NAME = os.getenv("DB_NAME", "topdivers")
+DB_NAME = os.getenv("DB_NAME", "hurghada-trips")
 
 DATABASE_URL = (
     f"{DB_ENGINE}+psycopg2://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"

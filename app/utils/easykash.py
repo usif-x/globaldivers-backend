@@ -3,13 +3,11 @@
 import hashlib  # <-- NEW IMPORT
 import hmac  # <-- NEW IMPORT
 import json
-
 import random
 
 import requests
 
 from app.core.config import settings
-
 
 private_key = settings.EASYKASH_PRIVATE_KEY
 secret_key = settings.EASYKASH_SECRET_KEY
@@ -44,7 +42,7 @@ class EasyKash:
             "name": payment_data["buyer_name"],
             "email": payment_data["buyer_email"],
             "mobile": payment_data["buyer_phone"],
-            "redirectUrl": "https://topdivers.online/pay",
+            "redirectUrl": "https://hurghada-trips.online/pay",
             "customerReference": customer_ref,
         }
 
@@ -121,6 +119,7 @@ class EasyKash:
         return calculated_signature == signature_hash
 
     # --- 3. Example Verification Function ---
+
 
 # Create a single instance to be used throughout the app
 easykash_client = EasyKash(private_key=private_key, secret_key=secret_key)

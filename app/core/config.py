@@ -8,9 +8,9 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     # Application Settings
-    APP_NAME: str = "Top Divers Hurghada website server"
+    APP_NAME: str = "hurghada-trips Hurghada website server"
     APP_URL: str = "http://localhost:8000"
-    APP_DESCRIPTION: str = "Top Divers Hurghada website server"
+    APP_DESCRIPTION: str = "hurghada-trips Hurghada website server"
     APP_VERSION: str = "1.0.0"
     ENVIRONMENT: Literal["development", "staging", "production"] = "development"
     DEBUG: bool = True
@@ -75,20 +75,32 @@ class Settings(BaseSettings):
     AI_API_KEY: str = Field(default="", description="API key for the AI provider")
     AI_MODEL: str = Field(default="gpt-3.5-turbo", description="AI model to use")
     AI_BASE_URL: str = Field(
-        default="", 
-        description="Base URL for AI API (e.g., https://api.deepseek.com or https://openrouter.ai/api/v1)"
+        default="",
+        description="Base URL for AI API (e.g., https://api.deepseek.com or https://openrouter.ai/api/v1)",
     )
-    
+
     # Frontend URL for booking links
-    FRONTEND_URL: str = Field(default="https://your-frontend-url.com", description="Frontend URL for booking links")
+    FRONTEND_URL: str = Field(
+        default="https://your-frontend-url.com",
+        description="Frontend URL for booking links",
+    )
 
     # S3 / MinIO Storage Settings
-    S3_ENDPOINT_URL: str = Field(default="http://localhost:9000", description="S3/MinIO endpoint URL")
+    S3_ENDPOINT_URL: str = Field(
+        default="http://localhost:9000", description="S3/MinIO endpoint URL"
+    )
     S3_ACCESS_KEY: str = Field(default="", description="S3/MinIO access key")
     S3_SECRET_KEY: str = Field(default="", description="S3/MinIO secret key")
-    S3_BUCKET_NAME: str = Field(default="globaldivers", description="S3/MinIO bucket name")
-    S3_REGION: str = Field(default="us-east-1", description="S3 region (use us-east-1 for MinIO)")
-    S3_PUBLIC_URL: str = Field(default="", description="Public URL for accessing S3/MinIO objects (e.g. http://localhost:9000/globaldivers)")
+    S3_BUCKET_NAME: str = Field(
+        default="globaldivers", description="S3/MinIO bucket name"
+    )
+    S3_REGION: str = Field(
+        default="us-east-1", description="S3 region (use us-east-1 for MinIO)"
+    )
+    S3_PUBLIC_URL: str = Field(
+        default="",
+        description="Public URL for accessing S3/MinIO objects (e.g. http://localhost:9000/globaldivers)",
+    )
 
     @computed_field
     @property

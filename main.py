@@ -15,7 +15,6 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from slowapi.errors import RateLimitExceeded
-from app.core.limiter_middleware import CustomLimiterMiddleware
 from sqlalchemy.exc import SQLAlchemyError
 from starlette.status import HTTP_429_TOO_MANY_REQUESTS
 
@@ -24,6 +23,7 @@ from app.core.config import settings
 from app.core.database import Base, SessionLocal, engine
 from app.core.init_superadmin import create_super_admin
 from app.core.limiter import limiter
+from app.core.limiter_middleware import CustomLimiterMiddleware
 from app.core.telegram import test_telegram_connection
 from app.models import *
 from app.routes.all import routes
@@ -94,7 +94,7 @@ logger = setup_logging()
 async def lifespan(app: FastAPI):
     """Manage application startup and shutdown."""
     logger.info("=" * 80)
-    logger.info("Starting Top Divers Backend Application...")
+    logger.info("Starting hurghada-trips Backend Application...")
     logger.info("=" * 80)
 
     # Startup
@@ -130,6 +130,7 @@ async def lifespan(app: FastAPI):
         logger.info("Initializing S3/MinIO storage...")
         try:
             from app.utils.storage import get_s3_client
+
             get_s3_client()
             logger.info(
                 f"S3 storage ready: endpoint={settings.S3_ENDPOINT_URL}, "
@@ -266,7 +267,9 @@ if STORAGE_DIR.exists() and STORAGE_DIR.is_dir():
     try:
         app.mount("/storage", StaticFiles(directory=str(STORAGE_DIR)), name="storage")
         logger.info(f"Local static files mounted: /storage -> {STORAGE_DIR.absolute()}")
-        logger.info("NOTE: New uploads go to S3/MinIO. Local mount kept for legacy files only.")
+        logger.info(
+            "NOTE: New uploads go to S3/MinIO. Local mount kept for legacy files only."
+        )
     except Exception as e:
         logger.warning(f"Could not mount local static files (non-critical): {e}")
 else:
@@ -345,7 +348,7 @@ async def health():
 # ============================================================================
 @click.group()
 def cli():
-    """Top Divers Backend - FastAPI application management CLI."""
+    """hurghada-trips Backend - FastAPI application management CLI."""
     pass
 
 
@@ -378,7 +381,7 @@ def dev(host: str, port: int, reload: bool):
 @cli.command()
 @click.option("--host", default="0.0.0.0", help="Host to bind the server to")
 @click.option("--port", default=8000, help="Port to run the server on")
-@click.option("--workers", default=4, help="Number of worker processes")
+@click.option("--workers", default=2, help="Number of worker processes")
 def prod(host: str, port: int, workers: int):
     """Run production server with Gunicorn."""
     import subprocess
