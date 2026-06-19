@@ -383,6 +383,7 @@ def dev(host: str, port: int, reload: bool):
 @click.option("--port", default=8000, help="Port to run the server on")
 @click.option("--workers", default=2, help="Number of worker processes")
 def prod(host: str, port: int, workers: int):
+    port = int(os.getenv("PORT", 8000))
     """Run production server with Gunicorn."""
     import subprocess
 
