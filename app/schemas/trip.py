@@ -7,6 +7,7 @@ class CreateTrip(BaseModel):
     name: str
     description: str
     images: List[str]
+    videos: List[str] = []
     is_image_list: bool = False
     adult_price: float
     child_allowed: bool
@@ -30,6 +31,7 @@ class TripResponse(BaseModel):
     name: str
     description: Optional[str] = None
     images: List[str]
+    videos: Optional[List[str]] = None
     is_image_list: bool = False
     adult_price: float
     child_allowed: bool
@@ -55,6 +57,7 @@ class UpdateTrip(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
     images: Optional[List[str]] = None
+    videos: Optional[List[str]] = None
     is_image_list: Optional[bool] = None
     adult_price: Optional[float] = None
     child_allowed: Optional[bool] = None

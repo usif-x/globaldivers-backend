@@ -14,6 +14,7 @@ class Trip(Base):
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     description: Mapped[str] = mapped_column(String(10000), nullable=True)
     images: Mapped[list[str]] = mapped_column(JSON, nullable=False)
+    videos: Mapped[list[str]] = mapped_column(JSON, nullable=True, default=list)
     is_image_list: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=False, server_default=text("false")
     )

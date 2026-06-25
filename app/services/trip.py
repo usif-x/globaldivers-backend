@@ -10,6 +10,7 @@ from app.models.trip import Trip
 from app.schemas.trip import CreateTrip, TripResponse, UpdateTrip
 from app.utils.storage import delete_file, get_public_url
 from app.utils.upload_img import upload_images
+from app.utils.upload_video import upload_videos
 
 
 class TripServices:
@@ -23,8 +24,12 @@ class TripServices:
         return [get_public_url(key) for key in keys]
 
     @db_exception_handler
-    async def create_trip(self, trip: CreateTrip, images: List[UploadFile] = None):
-        # Upload images if provided
+    async def create_trip(
+        self,
+        trip: CreateTrip,
+        images: List[UploadFile] = None,
+        videos: List[UploadFile] = None,
+    ):
         image_keys = []
         if images:
             try:
@@ -34,8 +39,18 @@ class TripServices:
                     status_code=400, detail=f"Failed to upload images: {str(e)}"
                 )
 
+        video_keys = []
+        if videos:
+            try:
+                video_keys = await upload_videos(videos)
+            except Exception as e:
+                raise HTTPException(
+                    status_code=400, detail=f"Failed to upload videos: {str(e)}"
+                )
+
         trip_data = trip.model_dump()
         trip_data["images"] = image_keys
+        trip_data["videos"] = video_keys
 
         new_trip = Trip(**trip_data)
         self.db.add(new_trip)
@@ -43,6 +58,7 @@ class TripServices:
         self.db.refresh(new_trip)
 
         new_trip.images = self._convert_keys_to_urls(new_trip.images)
+        new_trip.videos = self._convert_keys_to_urls(new_trip.videos)
         return new_trip
 
     @db_exception_handler
@@ -52,6 +68,7 @@ class TripServices:
 
         for trip in trips:
             trip.images = self._convert_keys_to_urls(trip.images)
+            trip.videos = self._convert_keys_to_urls(trip.videos)
 
         return trips
 
@@ -61,6 +78,7 @@ class TripServices:
         trip = self.db.execute(stmt).scalars().first()
         if trip:
             trip.images = self._convert_keys_to_urls(trip.images)
+            trip.videos = self._convert_keys_to_urls(trip.videos)
             return TripResponse.model_validate(trip, from_attributes=True)
         else:
             raise HTTPException(404, detail="Trip not found")
@@ -78,6 +96,13 @@ class TripServices:
                         except Exception as e:
                             print(f"Failed to delete image {key}: {e}")
 
+                if trip.videos:
+                    for key in trip.videos:
+                        try:
+                            delete_file(key)
+                        except Exception as e:
+                            print(f"Failed to delete video {key}: {e}")
+
                 self.db.delete(trip)
                 self.db.commit()
                 return {"success": True, "message": "Trip deleted successfully"}
@@ -89,14 +114,19 @@ class TripServices:
 
     @db_exception_handler
     async def update_trip(
-        self, trip: UpdateTrip, id: int, images: List[UploadFile] = None
+        self,
+        trip: UpdateTrip,
+        id: int,
+        images: List[UploadFile] = None,
+        videos: List[UploadFile] = None,
     ):
         stmt = select(Trip).where(Trip.id == id)
         updated_trip = self.db.execute(stmt).scalars().first()
         if updated_trip:
+            data = trip.model_dump(exclude_unset=True)
+
             if images:
                 try:
-                    # Delete old images from S3
                     if updated_trip.images:
                         for old_key in updated_trip.images:
                             try:
@@ -104,18 +134,26 @@ class TripServices:
                             except Exception as e:
                                 print(f"Failed to delete old image {old_key}: {e}")
 
-                    # Upload new images
-                    new_image_keys = await upload_images(images)
-
-                    data = trip.model_dump(exclude_unset=True)
-                    data["images"] = new_image_keys
-
+                    data["images"] = await upload_images(images)
                 except Exception as e:
                     raise HTTPException(
                         status_code=400, detail=f"Failed to upload new images: {str(e)}"
                     )
-            else:
-                data = trip.model_dump(exclude_unset=True)
+
+            if videos:
+                try:
+                    if updated_trip.videos:
+                        for old_key in updated_trip.videos:
+                            try:
+                                delete_file(old_key)
+                            except Exception as e:
+                                print(f"Failed to delete old video {old_key}: {e}")
+
+                    data["videos"] = await upload_videos(videos)
+                except Exception as e:
+                    raise HTTPException(
+                        status_code=400, detail=f"Failed to upload new videos: {str(e)}"
+                    )
 
             for field, value in data.items():
                 setattr(updated_trip, field, value)
@@ -124,6 +162,7 @@ class TripServices:
             self.db.refresh(updated_trip)
 
             updated_trip.images = self._convert_keys_to_urls(updated_trip.images)
+            updated_trip.videos = self._convert_keys_to_urls(updated_trip.videos)
 
             return {
                 "success": True,
@@ -145,6 +184,13 @@ class TripServices:
                             delete_file(key)
                         except Exception as e:
                             print(f"Failed to delete image {key}: {e}")
+
+                if trip.videos:
+                    for key in trip.videos:
+                        try:
+                            delete_file(key)
+                        except Exception as e:
+                            print(f"Failed to delete video {key}: {e}")
 
             self.db.execute(delete(Trip))
             self.db.commit()

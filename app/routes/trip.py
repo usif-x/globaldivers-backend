@@ -2,6 +2,7 @@ import json
 from typing import List
 
 from fastapi import APIRouter, Depends, File, Form, Path, UploadFile
+from fastapi.concurrency import run_in_threadpool
 from fastapi_cache.decorator import cache
 from sqlalchemy.orm import Session
 
@@ -10,16 +11,15 @@ from app.core.dependencies import get_current_admin
 from app.schemas.trip import CreateTrip, TripResponse, UpdateTrip
 from app.services.trip import TripServices
 
-from fastapi.concurrency import run_in_threadpool
-
 trip_routes = APIRouter(prefix="/trips", tags=["Trip Endpoints"])
+
 
 def parse_list_form_field(data: List[str]) -> List[str]:
     if not data:
         return data
     if len(data) == 1 and isinstance(data[0], str):
         val = data[0].strip()
-        if val.startswith('[') and val.endswith(']'):
+        if val.startswith("[") and val.endswith("]"):
             try:
                 parsed = json.loads(val)
                 if isinstance(parsed, list):
@@ -28,13 +28,16 @@ def parse_list_form_field(data: List[str]) -> List[str]:
                 pass
     return data
 
+
 @trip_routes.get("/", response_model=list[TripResponse])
 @cache(expire=600)
 async def get_all_trips(db: Session = Depends(get_db)):
     return await run_in_threadpool(TripServices(db).get_all_trips)
 
 
-@trip_routes.post("/", response_model=TripResponse, dependencies=[Depends(get_current_admin)])
+@trip_routes.post(
+    "/", response_model=TripResponse, dependencies=[Depends(get_current_admin)]
+)
 async def create_trip(
     name: str = Form(...),
     description: str = Form(...),
@@ -55,17 +58,18 @@ async def create_trip(
     not_included: List[str] = Form(...),
     terms_and_conditions: List[str] = Form(...),
     images: List[UploadFile] = File(None),
+    videos: List[UploadFile] = File(None),
     db: Session = Depends(get_db),
 ):
     included = parse_list_form_field(included)
     not_included = parse_list_form_field(not_included)
     terms_and_conditions = parse_list_form_field(terms_and_conditions)
 
-    # Create trip object from form data
     trip_data = CreateTrip(
         name=name,
         description=description,
-        images=[],  # Will be filled by the service
+        images=[],
+        videos=[],
         is_image_list=is_image_list,
         adult_price=adult_price,
         child_allowed=child_allowed,
@@ -84,7 +88,7 @@ async def create_trip(
         terms_and_conditions=terms_and_conditions,
     )
 
-    return await TripServices(db).create_trip(trip_data, images)
+    return await TripServices(db).create_trip(trip_data, images, videos)
 
 
 @trip_routes.get("/{id}", response_model=TripResponse)
@@ -119,15 +123,24 @@ async def update_trip(
     not_included: List[str] = Form(None),
     terms_and_conditions: List[str] = Form(None),
     images: List[UploadFile] = File(None),
+    videos: List[UploadFile] = File(None),
     db: Session = Depends(get_db),
 ):
     included = parse_list_form_field(included) if included is not None else None
-    not_included = parse_list_form_field(not_included) if not_included is not None else None
-    terms_and_conditions = parse_list_form_field(terms_and_conditions) if terms_and_conditions is not None else None
+    not_included = (
+        parse_list_form_field(not_included) if not_included is not None else None
+    )
+    terms_and_conditions = (
+        parse_list_form_field(terms_and_conditions)
+        if terms_and_conditions is not None
+        else None
+    )
 
     params = locals()
-    excluded = {"id", "images", "db"}
-    update_data = {k: v for k, v in params.items() if k not in excluded and v is not None}
-    
+    excluded = {"id", "images", "videos", "db"}
+    update_data = {
+        k: v for k, v in params.items() if k not in excluded and v is not None
+    }
+
     trip_update = UpdateTrip(**update_data)
-    return await TripServices(db).update_trip(trip_update, id, images)
+    return await TripServices(db).update_trip(trip_update, id, images, videos)
