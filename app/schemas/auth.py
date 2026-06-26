@@ -3,13 +3,13 @@ from pydantic import BaseModel
 
 class UserCreate(BaseModel):
     full_name: str
-    email: EmailStr
+    email: str
     password: str
     recaptcha_token: str
 
 
 class UserLogin(BaseModel):
-    email: EmailStr
+    email: str
     password: str
     recaptcha_token: str
 
