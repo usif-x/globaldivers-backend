@@ -79,6 +79,7 @@ class InvoiceCreateResponse(BaseModel):
         None,
         description="Breakdown of all discounts applied (group discount, promo code, etc.)",
     )
+    final_amount: str
 
 
 class InvoiceResponse(InvoiceBase):
@@ -280,4 +281,3 @@ class MonthlyInvoiceAnalytics(BaseModel):
     activity_breakdown: List[InvoiceActivityBreakdown]
     payment_method_breakdown: List[InvoicePaymentMethodBreakdown]
     invoice_type_breakdown: List[InvoiceTypeBreakdown]
-

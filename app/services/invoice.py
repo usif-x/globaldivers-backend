@@ -197,6 +197,12 @@ class InvoiceService:
                 f"Please recalculate your booking.",
             )
 
+        # --- FIX: verification_amount IS the correctly converted payment amount.
+        # Reuse it instead of converting EGP -> currency a second time. This also
+        # guarantees cash invoices get the conversion applied (previously they
+        # stored the raw EGP value mislabeled under the invoice's currency).
+        payment_amount = verification_amount
+
         # Convert activity_details to a list of dicts for database storage
         activity_details_dict = (
             [
@@ -213,35 +219,14 @@ class InvoiceService:
         easykash_reference = None
         invoice_status = "PENDING"
 
-        # Step 4: Handle online payments
-        final_amount = calculated_amount
-
         # Calculate convert_rate to EGP for analytics
         # This stores how many EGP = 1 unit of invoice currency
         convert_rate = CurrencyConverter.get_rate_to_egp_sync(invoice_data.currency)
 
+        # Step 4: Handle online vs cash payment setup
         if invoice_data.invoice_type == "online":
-            # Convert amount to target currency if not EGP
-            payment_amount = final_amount
-            if invoice_data.currency != "EGP":
-                converted_amount = CurrencyConverter.convert_amount_sync(
-                    from_currency="EGP",
-                    to_currency=invoice_data.currency,
-                    amount=final_amount,
-                )
-                if converted_amount is not None:
-                    payment_amount = converted_amount
-                else:
-                    raise HTTPException(
-                        status_code=status.HTTP_400_BAD_REQUEST,
-                        detail=f"Currency conversion from EGP to {invoice_data.currency} failed",
-                    )
-            else:
-                # For EGP, maintain full precision
-                payment_amount = final_amount
-
             payment_payload = invoice_data.model_dump()
-            # Update amount in payload to the payment amount in target currency
+            # Update amount in payload to the verified payment amount in target currency
             payment_payload["amount"] = payment_amount
 
             easykash_response = easykash_client.create_payment(
@@ -258,9 +243,7 @@ class InvoiceService:
             pay_url = easykash_response.get("pay_url")
             easykash_reference = easykash_response.get("easykash_reference")
         else:
-            # For cash payments, use EGP amount
-            payment_amount = final_amount
-            # Generate a simple customer reference for tracking
+            # For cash payments, generate a simple customer reference for tracking
             import random
 
             customer_reference = (
@@ -370,6 +353,8 @@ class InvoiceService:
 
         notify_admins(message)
 
+        final_amount_str = f"{round(payment_amount, 2)} {new_invoice.currency}"
+
         response_data = InvoiceCreateResponse(
             id=new_invoice.id,
             user_id=new_invoice.user_id,
@@ -379,6 +364,7 @@ class InvoiceService:
             invoice_type=new_invoice.invoice_type,
             created_at=new_invoice.created_at,
             discount_breakdown=discount_breakdown,
+            final_amount=final_amount_str,  # <-- NEW
         )
         return response_data
 
@@ -961,7 +947,10 @@ class InvoiceService:
                 func.count(Invoice.id).label("count"),
                 func.sum(
                     case(
-                        (Invoice.status == "PAID", Invoice.amount * Invoice.convert_rate),
+                        (
+                            Invoice.status == "PAID",
+                            Invoice.amount * Invoice.convert_rate,
+                        ),
                         else_=0,
                     )
                 ).label("total_revenue"),
@@ -1003,7 +992,10 @@ class InvoiceService:
                 func.count(Invoice.id).label("count"),
                 func.sum(
                     case(
-                        (Invoice.status == "PAID", Invoice.amount * Invoice.convert_rate),
+                        (
+                            Invoice.status == "PAID",
+                            Invoice.amount * Invoice.convert_rate,
+                        ),
                         else_=0,
                     )
                 ).label("total_revenue"),
@@ -1035,7 +1027,10 @@ class InvoiceService:
                 func.count(Invoice.id).label("count"),
                 func.sum(
                     case(
-                        (Invoice.status == "PAID", Invoice.amount * Invoice.convert_rate),
+                        (
+                            Invoice.status == "PAID",
+                            Invoice.amount * Invoice.convert_rate,
+                        ),
                         else_=0,
                     )
                 ).label("total_revenue"),
@@ -1139,7 +1134,9 @@ class InvoiceService:
         )
 
         average_invoice_amount = (
-            invoices_query.with_entities(func.avg(Invoice.amount * Invoice.convert_rate)).scalar()
+            invoices_query.with_entities(
+                func.avg(Invoice.amount * Invoice.convert_rate)
+            ).scalar()
             or 0.0
         )
 
@@ -1161,7 +1158,10 @@ class InvoiceService:
                 func.count(Invoice.id).label("count"),
                 func.sum(
                     case(
-                        (Invoice.status == "PAID", Invoice.amount * Invoice.convert_rate),
+                        (
+                            Invoice.status == "PAID",
+                            Invoice.amount * Invoice.convert_rate,
+                        ),
                         else_=0,
                     )
                 ).label("total_revenue"),
@@ -1207,7 +1207,10 @@ class InvoiceService:
                 func.count(Invoice.id).label("count"),
                 func.sum(
                     case(
-                        (Invoice.status == "PAID", Invoice.amount * Invoice.convert_rate),
+                        (
+                            Invoice.status == "PAID",
+                            Invoice.amount * Invoice.convert_rate,
+                        ),
                         else_=0,
                     )
                 ).label("total_revenue"),
@@ -1243,7 +1246,10 @@ class InvoiceService:
                 func.count(Invoice.id).label("count"),
                 func.sum(
                     case(
-                        (Invoice.status == "PAID", Invoice.amount * Invoice.convert_rate),
+                        (
+                            Invoice.status == "PAID",
+                            Invoice.amount * Invoice.convert_rate,
+                        ),
                         else_=0,
                     )
                 ).label("total_revenue"),
@@ -1311,7 +1317,10 @@ class InvoiceService:
                 func.count(Invoice.id).label("total_invoices"),
                 func.sum(
                     case(
-                        (Invoice.status == "PAID", Invoice.amount * Invoice.convert_rate),
+                        (
+                            Invoice.status == "PAID",
+                            Invoice.amount * Invoice.convert_rate,
+                        ),
                         else_=0,
                     )
                 ).label("total_spent"),
@@ -1326,7 +1335,10 @@ class InvoiceService:
             .order_by(
                 func.sum(
                     case(
-                        (Invoice.status == "PAID", Invoice.amount * Invoice.convert_rate),
+                        (
+                            Invoice.status == "PAID",
+                            Invoice.amount * Invoice.convert_rate,
+                        ),
                         else_=0,
                     )
                 ).desc()
