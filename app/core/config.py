@@ -102,6 +102,10 @@ class Settings(BaseSettings):
         description="Public URL for accessing S3/MinIO objects (e.g. http://localhost:9000/globaldivers)",
     )
 
+    RECAPTCHA_SECRET_KEY: str = Field(
+        default="", description="Secret key for Google reCAPTCHA verification"
+    )
+
     @computed_field
     @property
     def TELEGRAM_ADMIN_IDS(self) -> list[int]:

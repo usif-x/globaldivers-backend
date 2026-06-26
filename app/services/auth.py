@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from app.core.exception_handler import db_exception_handler
 from app.core.hashing import hash_password, verify_password
 from app.core.mailer import send_email
+from app.core.recaptcha import verify_recaptcha
 from app.core.security import (
     create_admin_access_token,
     create_user_access_token,
@@ -26,6 +27,8 @@ class AuthServices:
 
     @db_exception_handler
     def create_new_user(self, user: UserCreate):
+        verify_recaptcha(user.recaptcha_token, expected_action="register")
+
         creation_date = datetime.now(timezone.utc)
         new_user = User(
             full_name=user.full_name,
@@ -68,6 +71,8 @@ class AuthServices:
 
     @db_exception_handler
     def user_login(self, user: UserLogin):
+        verify_recaptcha(user.recaptcha_token, expected_action="login")
+
         stmt = select(User).where(User.email == user.email)
         logged_user = self.db.execute(stmt).scalars().first()
 
