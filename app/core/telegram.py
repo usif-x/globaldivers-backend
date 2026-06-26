@@ -99,7 +99,7 @@ def notify_admins(
         from datetime import datetime
 
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        message = f"🔔 <b>Global Divers Notification</b>\n\n{message}\n\n<i>📅 {timestamp}</i>"
+        message = f"🔔 <b>HurghadaTrips Notification</b>\n\n{message}\n\n<i>📅 {timestamp}</i>"
 
     results = {}
     success_count = 0
