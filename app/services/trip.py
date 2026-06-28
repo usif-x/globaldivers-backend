@@ -100,6 +100,11 @@ class TripServices:
 
         return trips
 
+    def _attach_zone_names(self, trip):
+        """zone_name isn't a real column — populate it from the related zone for the response schema."""
+        for tf in trip.transfer_fees:
+            tf.zone_name = tf.zone.name if tf.zone else None
+
     @db_exception_handler
     def get_trip_by_id(self, id: int):
         stmt = select(Trip).where(Trip.id == id)
@@ -107,6 +112,7 @@ class TripServices:
         if trip:
             trip.images = self._convert_keys_to_urls(trip.images)
             trip.videos = self._convert_keys_to_urls(trip.videos)
+            self._attach_zone_names(trip)  # NEW
             return TripResponse.model_validate(trip, from_attributes=True)
         else:
             raise HTTPException(404, detail="Trip not found")

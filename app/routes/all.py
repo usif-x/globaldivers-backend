@@ -16,6 +16,7 @@ from .package import package_routes
 from .public_notification import public_notification_routes
 from .setting import setting_routes
 from .testimonial import testimonial_routes
+from .transfer_zone import transfer_zone_routes
 from .trip import trip_routes
 from .upload import upload_routes
 from .user import user_routes
@@ -26,6 +27,7 @@ routes = [
     admin_routes,
     package_routes,
     trip_routes,
+    transfer_zone_routes,
     testimonial_routes,
     course_routes,
     divesites_routes,

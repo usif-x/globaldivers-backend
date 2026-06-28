@@ -14,6 +14,17 @@ from app.services.trip import TripServices
 trip_routes = APIRouter(prefix="/trips", tags=["Trip Endpoints"])
 
 
+def parse_json_list_field(value: str) -> list:
+    """Parses a JSON-encoded list of dicts sent as a form field (fees, transfer_fees)."""
+    if not value:
+        return []
+    try:
+        parsed = json.loads(value)
+        return parsed if isinstance(parsed, list) else []
+    except json.JSONDecodeError:
+        return []
+
+
 def parse_list_form_field(data: List[str]) -> List[str]:
     if not data:
         return data
@@ -57,6 +68,8 @@ async def create_trip(
     included: List[str] = Form(...),
     not_included: List[str] = Form(...),
     terms_and_conditions: List[str] = Form(...),
+    fees: str = Form("[]"),  # NEW
+    transfer_fees: str = Form("[]"),  # NEW
     images: List[UploadFile] = File(None),
     videos: List[UploadFile] = File(None),
     db: Session = Depends(get_db),
@@ -64,6 +77,8 @@ async def create_trip(
     included = parse_list_form_field(included)
     not_included = parse_list_form_field(not_included)
     terms_and_conditions = parse_list_form_field(terms_and_conditions)
+    parsed_fees = parse_json_list_field(fees)  # NEW
+    parsed_transfer_fees = parse_json_list_field(transfer_fees)  # NEW
 
     trip_data = CreateTrip(
         name=name,
@@ -86,6 +101,8 @@ async def create_trip(
         included=included,
         not_included=not_included,
         terms_and_conditions=terms_and_conditions,
+        fees=parsed_fees,  # NEW
+        transfer_fees=parsed_transfer_fees,  # NEW
     )
 
     return await TripServices(db).create_trip(trip_data, images, videos)
@@ -122,6 +139,8 @@ async def update_trip(
     included: List[str] = Form(None),
     not_included: List[str] = Form(None),
     terms_and_conditions: List[str] = Form(None),
+    fees: str = Form(None),  # NEW
+    transfer_fees: str = Form(None),  # NEW
     images: List[UploadFile] = File(None),
     videos: List[UploadFile] = File(None),
     db: Session = Depends(get_db),
@@ -135,6 +154,10 @@ async def update_trip(
         if terms_and_conditions is not None
         else None
     )
+    fees = parse_json_list_field(fees) if fees is not None else None  # NEW
+    transfer_fees = (
+        parse_json_list_field(transfer_fees) if transfer_fees is not None else None
+    )  # NEW
 
     params = locals()
     excluded = {"id", "images", "videos", "db"}
