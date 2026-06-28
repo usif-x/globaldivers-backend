@@ -2,7 +2,7 @@ from typing import List, Optional
 
 from pydantic import BaseModel
 
-from app.schemas.fee import TripFeeBase, TripFeeResponse
+from app.schemas.fees import TripFeeBase, TripFeeResponse
 from app.schemas.transfer import TripTransferFeeBase, TripTransferFeeResponse
 
 
