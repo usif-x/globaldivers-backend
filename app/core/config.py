@@ -132,6 +132,8 @@ class Settings(BaseSettings):
     def DATABASE_URL(self) -> str:
         database_url = getenv("DATABASE_URL")
         if database_url:
+            if database_url.startswith("postgres://"):
+                database_url = database_url.replace("postgres://", "postgresql://", 1)
             return database_url
 
         return f"{self.DB_ENGINE}+psycopg2://{self.DB_USERNAME}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
@@ -161,6 +163,7 @@ class Settings(BaseSettings):
         env_file = ".env"
         case_sensitive = True
         env_file_encoding = "utf-8"
+        extra = "ignore"
 
 
 @lru_cache()

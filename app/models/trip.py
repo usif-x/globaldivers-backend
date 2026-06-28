@@ -43,6 +43,10 @@ class Trip(Base):
         back_populates="trips", passive_deletes=True
     )
     included: Mapped[list[str]] = mapped_column(JSON, nullable=False)
+    fees = relationship("TripFee", back_populates="trip", cascade="all, delete-orphan")
+    transfer_fees = relationship(
+        "TripTransferFee", back_populates="trip", cascade="all, delete-orphan"
+    )
     duration: Mapped[int] = mapped_column(Integer, nullable=True)
     duration_unit: Mapped[str] = mapped_column(String(20), nullable=True)
     not_included: Mapped[list[str]] = mapped_column(JSON, nullable=False)

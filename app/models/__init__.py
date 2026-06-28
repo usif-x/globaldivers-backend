@@ -9,6 +9,7 @@ from .coupon import Coupon
 from .course import Course
 from .course_content import CourseContent
 from .dive_center import DiveCenter
+from .fee import FeeAppliesTo, FeeType, TripFee
 from .gallery import Gallery
 from .invoice import Invoice
 from .notification import Notification
@@ -16,6 +17,7 @@ from .package import Package
 from .public_notification import PublicNotification
 from .setting import WebsiteSettings
 from .testimonial import Testimonial
+from .transfer import TransferZone, TripTransferFee
 from .trip import Trip
 from .user import User
 
@@ -36,12 +38,16 @@ __all__ = [
     "CourseContent",
     "Admin",
     "WebsiteSettings",
-    "Invoice",
-    "Notification",
     "Gallery",
     "DiveCenter",
     "BestSelling",
     "Blog",
     "Coupon",
     "PublicNotification",
+    # Fee / transfer models
+    "TripFee",
+    "FeeType",
+    "FeeAppliesTo",
+    "TransferZone",
+    "TripTransferFee",
 ]

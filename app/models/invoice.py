@@ -49,6 +49,7 @@ class Invoice(Base):
     discount_amount: Mapped[float] = mapped_column(Float, nullable=True, default=0.0)
     # --- NEW: Store discount breakdown as JSON ---
     discount_breakdown: Mapped[dict] = mapped_column(JSONB, nullable=True)
+    price_breakdown: Mapped[dict] = mapped_column(JSONB, nullable=True)
 
     # Admin fields
     is_confirmed: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)

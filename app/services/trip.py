@@ -6,6 +6,8 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.core.exception_handler import db_exception_handler
+from app.models.fee import TripFee
+from app.models.transfer import TripTransferFee
 from app.models.trip import Trip
 from app.schemas.trip import CreateTrip, TripResponse, UpdateTrip
 from app.utils.storage import delete_file, get_public_url
@@ -22,6 +24,20 @@ class TripServices:
         if not keys:
             return []
         return [get_public_url(key) for key in keys]
+
+    def _sync_fees(self, trip_id: int, fees: list):
+        """Replace all fee rows for a trip with the given list."""
+        self.db.execute(delete(TripFee).where(TripFee.trip_id == trip_id))
+        for fee in fees:
+            self.db.add(TripFee(trip_id=trip_id, **fee))
+
+    def _sync_transfer_fees(self, trip_id: int, transfer_fees: list):
+        """Replace all transfer fee rows for a trip with the given list."""
+        self.db.execute(
+            delete(TripTransferFee).where(TripTransferFee.trip_id == trip_id)
+        )
+        for tf in transfer_fees:
+            self.db.add(TripTransferFee(trip_id=trip_id, **tf))
 
     @db_exception_handler
     async def create_trip(
@@ -52,8 +68,20 @@ class TripServices:
         trip_data["images"] = image_keys
         trip_data["videos"] = video_keys
 
+        # fees/transfer_fees are nested relationships, not columns on Trip
+        fees = trip_data.pop("fees", [])
+        transfer_fees = trip_data.pop("transfer_fees", [])
+
         new_trip = Trip(**trip_data)
         self.db.add(new_trip)
+        self.db.flush()  # assigns new_trip.id without committing yet
+
+        for fee in fees:
+            self.db.add(TripFee(trip_id=new_trip.id, **fee))
+
+        for tf in transfer_fees:
+            self.db.add(TripTransferFee(trip_id=new_trip.id, **tf))
+
         self.db.commit()
         self.db.refresh(new_trip)
 
@@ -103,6 +131,8 @@ class TripServices:
                         except Exception as e:
                             print(f"Failed to delete video {key}: {e}")
 
+                # fees/transfer_fees rely on ondelete="CASCADE" on the FK,
+                # so deleting the trip cleans them up automatically.
                 self.db.delete(trip)
                 self.db.commit()
                 return {"success": True, "message": "Trip deleted successfully"}
@@ -124,6 +154,10 @@ class TripServices:
         updated_trip = self.db.execute(stmt).scalars().first()
         if updated_trip:
             data = trip.model_dump(exclude_unset=True)
+
+            # fees/transfer_fees need separate handling — they're relationships
+            fees = data.pop("fees", None)
+            transfer_fees = data.pop("transfer_fees", None)
 
             if images:
                 try:
@@ -157,6 +191,13 @@ class TripServices:
 
             for field, value in data.items():
                 setattr(updated_trip, field, value)
+
+            # only touch fees if the client actually sent them
+            if fees is not None:
+                self._sync_fees(updated_trip.id, fees)
+
+            if transfer_fees is not None:
+                self._sync_transfer_fees(updated_trip.id, transfer_fees)
 
             self.db.commit()
             self.db.refresh(updated_trip)

@@ -19,6 +19,14 @@ class ActivityDetail(BaseModel):
     special_requests: Optional[str] = Field(
         None, description="Any special requests from the customer"
     )
+    transfer_zone_id: Optional[int] = Field(
+        None,
+        description="Zone the customer is being picked up from (for transfer fee pricing)",
+    )
+    selected_optional_fee_ids: List[int] = Field(
+        default=[],
+        description="IDs of optional TripFee rows the customer opted into (e.g. camera rental)",
+    )
 
 
 # --- Existing schemas ---
@@ -80,6 +88,10 @@ class InvoiceCreateResponse(BaseModel):
         description="Breakdown of all discounts applied (group discount, promo code, etc.)",
     )
     final_amount: str
+    price_breakdown: Optional[dict] = Field(
+        None,
+        description="Breakdown of base price, mandatory fees, optional fees, and transfer fee",
+    )
 
 
 class InvoiceResponse(InvoiceBase):
@@ -102,6 +114,11 @@ class InvoiceResponse(InvoiceBase):
         None,
         description="Breakdown of all discounts applied",
     )
+
+    price_breakdown: Optional[dict] = Field(
+        None, description="Breakdown of base price + fees"
+    )
+
     # Admin fields
     is_confirmed: bool = Field(default=False, description="Admin confirmation status")
     notes: Optional[str] = Field(None, description="Admin-only notes for this customer")

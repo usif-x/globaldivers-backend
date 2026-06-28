@@ -2,6 +2,9 @@ from typing import List, Optional
 
 from pydantic import BaseModel
 
+from app.schemas.fee import TripFeeBase, TripFeeResponse
+from app.schemas.transfer import TripTransferFeeBase, TripTransferFeeResponse
+
 
 class CreateTrip(BaseModel):
     name: str
@@ -24,6 +27,10 @@ class CreateTrip(BaseModel):
     included: List[str]
     not_included: List[str]
     terms_and_conditions: List[str]
+
+    # new
+    fees: List[TripFeeBase] = []
+    transfer_fees: List[TripTransferFeeBase] = []
 
 
 class TripResponse(BaseModel):
@@ -48,6 +55,10 @@ class TripResponse(BaseModel):
     duration_unit: Optional[str]
     not_included: Optional[List[str]] = None
     terms_and_conditions: Optional[List[str]]
+
+    # new
+    fees: List[TripFeeResponse] = []
+    transfer_fees: List[TripTransferFeeResponse] = []
 
     class Config:
         from_attributes = True
@@ -74,3 +85,7 @@ class UpdateTrip(BaseModel):
     included: Optional[List[str]] = None
     not_included: Optional[List[str]] = None
     terms_and_conditions: Optional[List[str]] = None
+
+    # new
+    fees: Optional[List[TripFeeBase]] = None
+    transfer_fees: Optional[List[TripTransferFeeBase]] = None

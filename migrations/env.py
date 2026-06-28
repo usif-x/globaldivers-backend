@@ -11,16 +11,17 @@ from sqlalchemy import engine_from_config, pool
 load_dotenv()
 
 # Build database URL dynamically
-DB_ENGINE = os.getenv("DB_ENGINE", "postgresql")
-DB_USER = os.getenv("DB_USERNAME", "postgres")
-DB_PASS = os.getenv("DB_PASSWORD", "")
-DB_HOST = os.getenv("DB_HOST", "localhost")
-DB_PORT = os.getenv("DB_PORT", "5432")
-DB_NAME = os.getenv("DB_NAME", "hurghada-trips")
 
-DATABASE_URL = (
-    f"{DB_ENGINE}+psycopg2://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-)
+DATABASE_URL = os.getenv("DATABASE_URI")
+
+if not DATABASE_URL:
+    raise RuntimeError(
+        "DATABASE_URI is not set. Check your .env file or environment variables."
+    )
+
+# SQLAlchemy 1.4+ requires postgresql:// instead of postgres://
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
 # ------------------------------
 # Alembic Config setup

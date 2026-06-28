@@ -121,6 +121,26 @@ class InvoiceService:
                     coupon_code=invoice_data.coupon_code,
                     user_id=user_id,
                 )
+                transfer_zone_id = None
+                selected_optional_fee_ids = []
+                if invoice_data.activity_details:
+                    first_detail = invoice_data.activity_details[0]
+                    transfer_zone_id = getattr(first_detail, "transfer_zone_id", None)
+                    selected_optional_fee_ids = (
+                        getattr(first_detail, "selected_optional_fee_ids", []) or []
+                    )
+
+                addon_total, price_breakdown = FeeCalculator.calculate_addons(
+                    db=db,
+                    trip_id=invoice_data.trip_id,
+                    adults=invoice_data.adults,
+                    children=children,
+                    base_price=calculated_amount,
+                    transfer_zone_id=transfer_zone_id,
+                    selected_optional_fee_ids=selected_optional_fee_ids,
+                )
+
+                calculated_amount = round(calculated_amount + addon_total, 2)
             except HTTPException:
                 raise
 
@@ -271,6 +291,7 @@ class InvoiceService:
             coupon_code=invoice_data.coupon_code,
             discount_amount=discount_amount,
             discount_breakdown=discount_breakdown,
+            price_breakdown=price_breakdown,
         )
 
         db.add(new_invoice)
@@ -313,6 +334,21 @@ class InvoiceService:
             discount_detail_str += (
                 f"<b>💰 Final Price:</b> {discount_breakdown.get('final_price', 0)}\n\n"
             )
+        fee_detail_str = ""
+        if price_breakdown:
+            if price_breakdown.get("mandatory_fees"):
+                for f in price_breakdown["mandatory_fees"]:
+                    fee_detail_str += f"<b>➕ {f['name']}:</b> {f['amount']}\n"
+            if price_breakdown.get("optional_fees"):
+                for f in price_breakdown["optional_fees"]:
+                    fee_detail_str += (
+                        f"<b>✅ {f['name']} (optional):</b> {f['amount']}\n"
+                    )
+            if price_breakdown.get("transfer_fee"):
+                tf = price_breakdown["transfer_fee"]
+                fee_detail_str += f"<b>🚐 Transfer Fee:</b> {tf['amount']}\n"
+            if fee_detail_str:
+                fee_detail_str += "\n"
 
         message = (
             "<b>🧾 New Invoice Created</b>\n"
@@ -330,6 +366,7 @@ class InvoiceService:
             f"<b>📋 Activity Details:</b>\n{activity_details_str if activity_details_str else '  None provided.'}\n"
             "━━━━━━━━━━━━━━━━━━━━━━━\n\n"
             f"{discount_detail_str}"
+            f"{fee_detail_str}"
             f"<b>💰 Amount:</b> <code>{new_invoice.amount} {new_invoice.currency}</code>\n"
             f"<b>📊 Status:</b> <b>{new_invoice.status}</b>\n\n"
         )
@@ -364,7 +401,8 @@ class InvoiceService:
             invoice_type=new_invoice.invoice_type,
             created_at=new_invoice.created_at,
             discount_breakdown=discount_breakdown,
-            final_amount=final_amount_str,  # <-- NEW
+            final_amount=final_amount_str,
+            price_breakdown=price_breakdown,
         )
         return response_data
 
