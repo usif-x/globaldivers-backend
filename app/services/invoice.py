@@ -27,6 +27,7 @@ from app.schemas.invoice import (
 )
 from app.services.activity_availability import ActivityAvailabilityService
 from app.services.coupon import CouponServices
+from app.services.fee_calculator import FeeCalculator
 from app.services.price_calculator import PriceCalculator
 from app.utils.currency_converter import CurrencyConverter
 from app.utils.easykash import easykash_client
@@ -72,6 +73,7 @@ class InvoiceService:
         discount_amount = 0.0
         discount_breakdown = None
         coupon_obj = None
+        price_breakdown = None
 
         if activity == "trip":
             # Trip activity requires trip_id and participant details
