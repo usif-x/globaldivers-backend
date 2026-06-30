@@ -7,12 +7,10 @@ from sqlalchemy.orm import Session
 from app.models.fee import TripFee
 from app.models.transfer import TripTransferFee
 
+# app/services/fee_calculator.py
+
 
 class FeeCalculator:
-    """
-    Calculates mandatory + optional fees and transfer fees for a trip booking.
-    Does NOT touch base price or discounts — that stays in PriceCalculator.
-    """
 
     @staticmethod
     def _fee_amount(fee, adults: int, children: int, base_price: float) -> float:
@@ -27,13 +25,17 @@ class FeeCalculator:
         else:  # per_person
             units = people
 
-        if fee.fee_type.value == "fixed":
-            return round(fee.value * units, 2)
+        # TripFee uses .value, TripTransferFee uses .price — handle both
+        amount = (
+            getattr(fee, "value", None)
+            if getattr(fee, "value", None) is not None
+            else getattr(fee, "price", 0)
+        )
 
-        # percentage fees are calculated against the base price, not multiplied
-        # by units again — e.g. "5% service fee" means 5% of the booking total,
-        # regardless of how many people are on it.
-        return round(base_price * (fee.value / 100), 2)
+        if fee.fee_type.value == "percentage":
+            return round(base_price * (amount / 100), 2)
+
+        return round(amount * units, 2)
 
     @staticmethod
     def calculate_addons(
