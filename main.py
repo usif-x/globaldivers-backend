@@ -197,7 +197,11 @@ app.add_middleware(CustomLimiterMiddleware)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure this properly in production
+    allow_origins=[
+        "https://hurghada-trips.online",
+        "https://admin.hurghada-trips.online",
+        "http://localhost:3000",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
