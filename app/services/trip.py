@@ -91,6 +91,10 @@ class TripServices:
         fees = trip_data.pop("fees", [])
         transfer_fees = trip_data.pop("transfer_fees", [])
 
+        # package_ids/related_trip_ids are also relationships, not columns
+        package_ids = trip_data.pop("package_ids", [])  # NEW
+        related_trip_ids = trip_data.pop("related_trip_ids", [])  # NEW
+
         new_trip = Trip(**trip_data)
         self.db.add(new_trip)
         self.db.flush()  # assigns new_trip.id without committing yet
@@ -100,6 +104,10 @@ class TripServices:
 
         for tf in transfer_fees:
             self.db.add(TripTransferFee(trip_id=new_trip.id, **tf))
+
+        # NEW: wire up many-to-many relationships now that new_trip.id exists
+        self._sync_packages(new_trip, package_ids)
+        self._sync_related_trips(new_trip, related_trip_ids)
 
         self.db.commit()
         self.db.refresh(new_trip)
@@ -184,6 +192,9 @@ class TripServices:
             fees = data.pop("fees", None)
             transfer_fees = data.pop("transfer_fees", None)
 
+            package_ids = data.pop("package_ids", None)
+            related_trip_ids = data.pop("related_trip_ids", None)
+
             if images:
                 try:
                     if updated_trip.images:
@@ -223,6 +234,12 @@ class TripServices:
 
             if transfer_fees is not None:
                 self._sync_transfer_fees(updated_trip.id, transfer_fees)
+
+            if package_ids is not None:
+                self._sync_packages(updated_trip, package_ids)
+
+            if related_trip_ids is not None:
+                self._sync_related_trips(updated_trip, related_trip_ids)
 
             self.db.commit()
             self.db.refresh(updated_trip)
