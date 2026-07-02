@@ -3,7 +3,7 @@
 from typing import Any, Dict, List
 
 from fastapi import HTTPException, status
-from sqlalchemy import func, or_
+from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
 
 from app.core.mailer import send_email
