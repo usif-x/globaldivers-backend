@@ -143,6 +143,41 @@ class InvoiceService:
                 )
 
                 calculated_amount = round(calculated_amount + addon_total, 2)
+
+                # NEW: bundle offer check
+                bundle_offer = BundleServices(db).get_unlocked_offer_for_trip(
+                    db=db, user_id=user_id, trip_id=invoice_data.trip_id
+                )
+                if bundle_offer:
+                    if bundle_offer.discount_type == DiscountType.free:
+                        bundle_discount_amount = calculated_amount
+                    elif bundle_offer.discount_type == DiscountType.percentage:
+                        bundle_discount_amount = round(
+                            calculated_amount * (bundle_offer.discount_value / 100), 2
+                        )
+                    else:  # fixed
+                        bundle_discount_amount = min(
+                            bundle_offer.discount_value, calculated_amount
+                        )
+
+                    calculated_amount = round(
+                        calculated_amount - bundle_discount_amount, 2
+                    )
+                    discount_amount += bundle_discount_amount
+
+                    # fold into discount_breakdown so it shows on invoice + Telegram msg
+                    if discount_breakdown is None:
+                        discount_breakdown = {
+                            "base_price": calculated_amount + bundle_discount_amount,
+                            "final_price": calculated_amount,
+                        }
+                    discount_breakdown["bundle_offer"] = {
+                        "bundle_id": bundle_offer.id,
+                        "name": bundle_offer.name,
+                        "amount": bundle_discount_amount,
+                        "type": bundle_offer.discount_type.value,
+                    }
+
             except HTTPException:
                 raise
 

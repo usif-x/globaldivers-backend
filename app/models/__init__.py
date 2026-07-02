@@ -5,6 +5,7 @@ from .admin import Admin
 from .associations import coupon_user_usage, user_course_subscriptions
 from .best_selling import BestSelling
 from .blog import Blog
+from .bundle import TripBundleOffer
 from .coupon import Coupon
 from .course import Course
 from .course_content import CourseContent
@@ -50,4 +51,6 @@ __all__ = [
     "FeeAppliesTo",
     "TransferZone",
     "TripTransferFee",
+    # Bundle models
+    "TripBundleOffer",
 ]

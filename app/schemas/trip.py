@@ -23,12 +23,13 @@ class CreateTrip(BaseModel):
     discount_percentage: float
     duration: int
     duration_unit: str
-    package_id: int
+
+    package_ids: List[int]  # CHANGED from package_id: int
+    related_trip_ids: List[int] = []  # NEW
+
     included: List[str]
     not_included: List[str]
     terms_and_conditions: List[str]
-
-    # new
     fees: List[TripFeeBase] = []
     transfer_fees: List[TripTransferFeeBase] = []
 
@@ -44,7 +45,10 @@ class TripResponse(BaseModel):
     child_allowed: bool
     child_price: float
     maxim_person: int
-    package_id: int
+
+    package_ids: List[int] = []  # CHANGED
+    related_trip_ids: List[int] = []  # NEW
+
     has_discount: bool = False
     discount_requires_min_people: bool = False
     discount_always_available: bool = False
@@ -55,13 +59,21 @@ class TripResponse(BaseModel):
     duration_unit: Optional[str]
     not_included: Optional[List[str]] = None
     terms_and_conditions: Optional[List[str]]
-
-    # new
     fees: List[TripFeeResponse] = []
     transfer_fees: List[TripTransferFeeResponse] = []
 
     class Config:
         from_attributes = True
+
+    @classmethod
+    def model_validate(cls, obj, **kwargs):
+        # trip.packages / trip.related_trips are ORM relationship objects —
+        # flatten to id lists before validation
+        if hasattr(obj, "packages"):
+            obj.package_ids = [p.id for p in obj.packages]
+        if hasattr(obj, "related_trips"):
+            obj.related_trip_ids = [t.id for t in obj.related_trips]
+        return super().model_validate(obj, **kwargs)
 
 
 class UpdateTrip(BaseModel):
@@ -81,7 +93,8 @@ class UpdateTrip(BaseModel):
     discount_min_people: Optional[int] = None
     duration: Optional[int] = None
     duration_unit: Optional[str]
-    package_id: Optional[int] = None
+    package_ids: Optional[List[int]] = None  # CHANGED
+    related_trip_ids: Optional[List[int]] = None  # NEW
     included: Optional[List[str]] = None
     not_included: Optional[List[str]] = None
     terms_and_conditions: Optional[List[str]] = None

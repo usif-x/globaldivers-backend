@@ -6,6 +6,7 @@ from sqlalchemy.dialects.mysql import JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
+from app.models.associations import trip_packages
 
 
 class Package(Base):
@@ -26,6 +27,6 @@ class Package(Base):
         default=datetime.now(timezone.utc),
         onupdate=datetime.now(timezone.utc),
     )
-    trips: Mapped[List["Trip"]] = relationship(
-        back_populates="package", cascade="all, delete"
+    trips: Mapped[list["Trip"]] = relationship(
+        "Trip", secondary=trip_packages, back_populates="packages"
     )

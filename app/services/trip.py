@@ -39,6 +39,25 @@ class TripServices:
         for tf in transfer_fees:
             self.db.add(TripTransferFee(trip_id=trip_id, **tf))
 
+    def _sync_packages(self, trip: Trip, package_ids: list):
+        from app.models.package import Package
+
+        trip.packages = (
+            self.db.execute(select(Package).where(Package.id.in_(package_ids)))
+            .scalars()
+            .all()
+        )
+
+    def _sync_related_trips(self, trip: Trip, related_trip_ids: list):
+        others = (
+            self.db.execute(
+                select(Trip).where(Trip.id.in_(related_trip_ids), Trip.id != trip.id)
+            )
+            .scalars()
+            .all()
+        )
+        trip.related_trips = others
+
     @db_exception_handler
     async def create_trip(
         self,

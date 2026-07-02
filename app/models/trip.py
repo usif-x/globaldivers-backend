@@ -4,6 +4,11 @@ from sqlalchemy import JSON, Boolean, DateTime, Float, ForeignKey, Integer, Stri
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
+from app.models.associations import (
+    trip_bundle_requirements,
+    trip_packages,
+    trip_relations,
+)
 
 from .package import Package
 
@@ -35,13 +40,13 @@ class Trip(Base):
     )
     discount_min_people: Mapped[int] = mapped_column(Integer, nullable=True)
     discount_percentage: Mapped[int] = mapped_column(Integer, nullable=True)
-    package_id: Mapped[int] = mapped_column(
-        ForeignKey("packages.id"),
-        nullable=False,
+
+    # REMOVED: package_id single FK + package relationship
+    # NEW: many-to-many
+    packages: Mapped[list["Package"]] = relationship(
+        "Package", secondary=trip_packages, back_populates="trips"
     )
-    package: Mapped["Package"] = relationship(
-        back_populates="trips", passive_deletes=True
-    )
+
     included: Mapped[list[str]] = mapped_column(JSON, nullable=False)
     fees = relationship("TripFee", back_populates="trip", cascade="all, delete-orphan")
     transfer_fees = relationship(
@@ -51,6 +56,22 @@ class Trip(Base):
     duration_unit: Mapped[str] = mapped_column(String(20), nullable=True)
     not_included: Mapped[list[str]] = mapped_column(JSON, nullable=False)
     terms_and_conditions: Mapped[list[str]] = mapped_column(JSON, nullable=False)
+
+    # NEW: self-referential many-to-many, symmetric (kept symmetric in the service layer)
+    related_trips: Mapped[list["Trip"]] = relationship(
+        "Trip",
+        secondary=trip_relations,
+        primaryjoin="Trip.id == trip_relations.c.trip_id",
+        secondaryjoin="Trip.id == trip_relations.c.related_trip_id",
+    )
+
+    # NEW: bundle offers this trip is a *requirement* for
+    bundle_offers: Mapped[list["TripBundleOffer"]] = relationship(
+        "TripBundleOffer",
+        secondary=trip_bundle_requirements,
+        back_populates="required_trips",
+    )
+
     created_at: Mapped[datetime] = mapped_column(
         DateTime(), nullable=False, default=datetime.now(timezone.utc)
     )
