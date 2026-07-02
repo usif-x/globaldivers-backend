@@ -66,9 +66,11 @@ class BundleServices:
 
     @db_exception_handler
     def get_unlocked_offer_for_trip(self, db, user_id: int, trip_id: int):
-        from app.models.invoice import Invoice  # adjust import path if different
+        from app.models.invoice import Invoice
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(timezone.utc).replace(
+            tzinfo=None
+        )  # CHANGED: make naive to match DB columns
 
         offers = (
             db.execute(
@@ -84,8 +86,6 @@ class BundleServices:
         if not offers:
             return None
 
-        # Pull the user's past trip invoices, then extract trip_id from
-        # activity_details JSON in Python (no real trip_id column exists yet).
         invoices = (
             db.execute(
                 select(Invoice.activity_details).where(
@@ -102,10 +102,6 @@ class BundleServices:
         for details in invoices:
             if not details:
                 continue
-            # activity_details is a list of dicts (one per activity_detail entry);
-            # trip_id itself isn't stored per-detail — it's on invoice_data.trip_id
-            # at creation time, so this only works if you add trip_id to the
-            # invoice record or to each activity_details entry. See note below.
             for entry in details:
                 tid = entry.get("trip_id")
                 if tid is not None:

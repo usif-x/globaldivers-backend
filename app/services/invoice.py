@@ -26,6 +26,7 @@ from app.schemas.invoice import (
     TopCustomerResponse,
 )
 from app.services.activity_availability import ActivityAvailabilityService
+from app.services.bundle import BundleServices
 from app.services.coupon import CouponServices
 from app.services.fee_calculator import FeeCalculator
 from app.services.price_calculator import PriceCalculator
@@ -329,14 +330,16 @@ class InvoiceService:
             discount_amount=discount_amount,
             discount_breakdown=discount_breakdown,
             price_breakdown=price_breakdown,
-            booked_trip_ids = set(
+            booked_trip_ids=set(
                 db.execute(
                     select(Invoice.trip_id).where(
                         Invoice.user_id == user_id,
                         Invoice.trip_id.isnot(None),
                         Invoice.status.in_(["PAID", "PENDING"]),
                     )
-                ).scalars().all()
+                )
+                .scalars()
+                .all()
             ),
         )
 
