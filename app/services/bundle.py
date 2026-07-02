@@ -66,13 +66,8 @@ class BundleServices:
 
     @db_exception_handler
     def get_unlocked_offer_for_trip(self, db, user_id: int, trip_id: int):
-        """
-        Called when a user is booking `trip_id`. Checks whether this trip is the
-        `offer_trip` of any active bundle, and whether the user has already booked
-        (PAID or PENDING, not cancelled) enough of that bundle's required trips.
+        from app.models.invoice import Invoice  # adjust import path if different
 
-        Returns the matching TripBundleOffer, or None.
-        """
         now = datetime.now(timezone.utc)
 
         offers = (
@@ -89,12 +84,11 @@ class BundleServices:
         if not offers:
             return None
 
-        # trip_ids the user has already booked (adjust status filter to your invoice statuses)
-        booked_trip_ids = set(
+        # Pull the user's past trip invoices, then extract trip_id from
+        # activity_details JSON in Python (no real trip_id column exists yet).
+        invoices = (
             db.execute(
-                select(
-                    Invoice.activity_details
-                ).where(  # or a dedicated trip_id column if you have one
+                select(Invoice.activity_details).where(
                     Invoice.user_id == user_id,
                     Invoice.activity == "trip",
                     Invoice.status.in_(["PAID", "PENDING"]),
@@ -103,8 +97,19 @@ class BundleServices:
             .scalars()
             .all()
         )
-        # NOTE: if trip_id isn't a direct column on Invoice, extract it from
-        # activity_details JSON instead — see note below.
+
+        booked_trip_ids = set()
+        for details in invoices:
+            if not details:
+                continue
+            # activity_details is a list of dicts (one per activity_detail entry);
+            # trip_id itself isn't stored per-detail — it's on invoice_data.trip_id
+            # at creation time, so this only works if you add trip_id to the
+            # invoice record or to each activity_details entry. See note below.
+            for entry in details:
+                tid = entry.get("trip_id")
+                if tid is not None:
+                    booked_trip_ids.add(tid)
 
         for offer in offers:
             if offer.valid_from and now < offer.valid_from:
