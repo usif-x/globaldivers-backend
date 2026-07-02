@@ -46,6 +46,8 @@ class Invoice(Base):
 
     # Coupon info
     coupon_code: Mapped[str] = mapped_column(String(50), nullable=True)
+    trip_id: Mapped[int] = mapped_column(ForeignKey("trips.id"), nullable=True)
+
     discount_amount: Mapped[float] = mapped_column(Float, nullable=True, default=0.0)
     # --- NEW: Store discount breakdown as JSON ---
     discount_breakdown: Mapped[dict] = mapped_column(JSONB, nullable=True)
