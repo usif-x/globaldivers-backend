@@ -330,17 +330,7 @@ class InvoiceService:
             discount_amount=discount_amount,
             discount_breakdown=discount_breakdown,
             price_breakdown=price_breakdown,
-            booked_trip_ids=set(
-                db.execute(
-                    select(Invoice.trip_id).where(
-                        Invoice.user_id == user_id,
-                        Invoice.trip_id.isnot(None),
-                        Invoice.status.in_(["PAID", "PENDING"]),
-                    )
-                )
-                .scalars()
-                .all()
-            ),
+            trip_id=invoice_data.trip_id if activity == "trip" else None,
         )
 
         db.add(new_invoice)
