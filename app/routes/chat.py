@@ -19,7 +19,7 @@ from app.schemas.chat import (
     ChatResponse,
     ChatSessionResponse,
 )
-from app.services.anthropic_client import run_chat_turn
+from app.services.ai_client import run_chat_turn
 
 logger = logging.getLogger(__name__)
 
