@@ -174,8 +174,10 @@ async def chat_message_stream(
     )
     db.commit()
 
+    session_id_val = session.id
+
     async def event_stream():
-        yield f"data: {json.dumps({'type': 'session_id', 'session_id': session.id})}\n\n"
+        yield f"data: {json.dumps({'type': 'session_id', 'session_id': session_id_val})}\n\n"
         words = reply.split(" ")
         for i, word in enumerate(words):
             chunk = word + (" " if i < len(words) - 1 else "")
