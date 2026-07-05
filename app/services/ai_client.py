@@ -59,13 +59,17 @@ TRIPS & ACTIVITIES:
 - Trip fees: mandatory and optional add-on fees
 - Transfer fees & zones: transportation from hotels to trip locations
 
+PACKAGES:
+- Travel packages bundling multiple trips together. 
+- NOTE FOR YOU: its category for trips its collect trips that matching in somethings not a deal or discount or bundle offer. its just a package for trips that matching in some things like same day or same location or same type of trip. so if customer ask about package you can show them the package and tell them its a package for trips that matching in some things but not a deal or discount or bundle offer.
+
 COURSES & EDUCATION:
 - All diving courses: prices, levels, providers (PADI/SSI), durations, types
 - Course search: filter by keyword, level, type, or provider
 - Course details: full description, certification, online content
 - Course curriculum: modules, lessons, content types per course
 
-PACKAGES, BUNDLES & DEALS:
+BUNDLES & DEALS:
 - Travel packages bundling multiple trips
 - Package details with full trip listings and prices
 - Bundle offers: cross-trip discounts when booking together
