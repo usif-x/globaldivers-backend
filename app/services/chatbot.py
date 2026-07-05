@@ -74,8 +74,15 @@ def get_default_model() -> str:
         return "gpt-3.5-turbo"
 
 
-# Initialize client
-client = get_ai_client()
+# Lazy client initialization
+_client: Optional[OpenAI] = None
+
+
+def get_client() -> Optional[OpenAI]:
+    global _client
+    if _client is None:
+        _client = get_ai_client()
+    return _client
 
 
 # =============================================================================
