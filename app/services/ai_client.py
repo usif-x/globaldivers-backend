@@ -25,10 +25,10 @@ from .chat_tools import (
     get_packages,
     get_public_notifications,
     get_testimonials,
+    get_transfer_zones,
     get_trip_by_id,
     get_trip_fees,
     get_trip_transfer_fees,
-    get_transfer_zones,
     get_user_invoices,
     get_user_notifications,
     get_user_profile,
@@ -80,6 +80,9 @@ CONTENT & SOCIAL PROOF:
 - Blog posts: latest articles, filterable by tag
 - Testimonials: customer reviews with ratings and names
 - Public notifications: current announcements and offers
+
+PAY METHODS:
+- All payments are processed securely through the website for online after booking trip auto forword to payment gateway. We accept credit cards, debit cards, Apple Pay, Meeza Prepaid Card (Egypt), Mobile Wallet (Egypt) and cash money (select pay at diving center while booking) .
 
 AVAILABILITY:
 - Date availability checks for any trip or course
@@ -142,7 +145,6 @@ Account & Booking:
 - {frontend_url}/fast-invoice-checker — Quick invoice lookup
 - {frontend_url}/login — Login page
 - {frontend_url}/register — Create an account
-- {frontend_url}/pay — Make a payment
 - {frontend_url}/privacy-policy — Privacy policy
 - {frontend_url}/terms-and-conditions — Terms & conditions
 
@@ -696,7 +698,9 @@ async def _run_tool(
 
     # Content & Social Proof tools
     elif name == "get_blog_posts":
-        return get_blog_posts(db, limit=min(args.get("limit", 5), 20), tag=args.get("tag"))
+        return get_blog_posts(
+            db, limit=min(args.get("limit", 5), 20), tag=args.get("tag")
+        )
     elif name == "get_testimonials":
         return get_testimonials(db, limit=min(args.get("limit", 10), 50))
     elif name == "get_public_notifications":
@@ -727,7 +731,9 @@ async def _run_tool(
     elif name == "get_user_notifications":
         if auth_user_id is None:
             return {"_error": "Authentication required. Ask the user to log in first."}
-        return get_user_notifications(db, auth_user_id, limit=min(args.get("limit", 20), 50))
+        return get_user_notifications(
+            db, auth_user_id, limit=min(args.get("limit", 20), 50)
+        )
 
     # Coupon tools
     elif name == "get_active_coupons":
@@ -771,6 +777,7 @@ async def run_chat_turn(
     model = settings.AI_MODEL
 
     from app.core.config import settings as app_settings
+
     system_prompt = SYSTEM_PROMPT.replace("{frontend_url}", app_settings.FRONTEND_URL)
 
     openai_messages = [{"role": "system", "content": system_prompt}]
@@ -820,17 +827,21 @@ async def run_chat_turn(
             if not tool_calls or finish_reason != "tool_calls":
                 return content or ""
 
-            openai_messages.append({"role": "assistant", "content": content, "tool_calls": tool_calls})
+            openai_messages.append(
+                {"role": "assistant", "content": content, "tool_calls": tool_calls}
+            )
 
             for tc in tool_calls:
                 tool_name = tc["function"]["name"]
                 tool_args = json.loads(tc["function"]["arguments"])
                 result = await _run_tool(tool_name, tool_args, auth_user_id, db)
                 result_json = json.dumps(result, default=str)
-                openai_messages.append({
-                    "role": "tool",
-                    "tool_call_id": tc["id"],
-                    "content": result_json,
-                })
+                openai_messages.append(
+                    {
+                        "role": "tool",
+                        "tool_call_id": tc["id"],
+                        "content": result_json,
+                    }
+                )
 
     return "I've gathered all the information I need. How else can I help you?"
