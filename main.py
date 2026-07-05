@@ -94,7 +94,7 @@ logger = setup_logging()
 async def lifespan(app: FastAPI):
     """Manage application startup and shutdown."""
     logger.info("=" * 80)
-    logger.info("Starting hurghada-trips Backend Application...")
+    logger.info("Starting topdivers Backend Application...")
     logger.info("=" * 80)
 
     # Startup
@@ -198,8 +198,8 @@ app.add_middleware(CustomLimiterMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "https://hurghada-trips.online",
-        "https://admin.hurghada-trips.online",
+        "https://topdivers.online",
+        "https://admin.topdivers.online",
         "http://localhost:3000",
     ],
     allow_credentials=True,
@@ -352,7 +352,7 @@ async def health():
 # ============================================================================
 @click.group()
 def cli():
-    """hurghada-trips Backend - FastAPI application management CLI."""
+    """topdivers Backend - FastAPI application management CLI."""
     pass
 
 

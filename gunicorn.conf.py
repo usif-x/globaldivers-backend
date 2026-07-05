@@ -36,7 +36,7 @@ loglevel = os.getenv("LOG_LEVEL", "info")
 access_log_format = '%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s" %(D)s'
 
 # Process naming
-proc_name = "hurghada-trips-backend"
+proc_name = "topdivers-backend"
 
 # Server mechanics
 daemon = False
@@ -97,7 +97,7 @@ logconfig_dict = {
 def on_starting(server):
     """Called just before the master process is initialized."""
     server.log.info("=" * 80)
-    server.log.info("Starting Gunicorn server for hurghada-trips Backend...")
+    server.log.info("Starting Gunicorn server for topdivers Backend...")
     server.log.info(f"Workers: {workers}")
     server.log.info(f"Worker class: {worker_class}")
     server.log.info(f"Binding to: {bind}")

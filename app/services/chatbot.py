@@ -371,7 +371,7 @@ Location: {dive_center["location"]}
 Hotel: {dive_center["hotel_name"] or 'N/A'}
 """
         else:
-            dive_center_name = "hurghada-trips"
+            dive_center_name = "topdivers"
             location = "Hurghada, Egypt"
             dive_center_info = "Premier diving center in Hurghada, Egypt."
 

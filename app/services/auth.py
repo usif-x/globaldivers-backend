@@ -52,7 +52,7 @@ class AuthServices:
         # try:
         #     send_email(
         #         to_email=new_user.email,
-        #         subject="Welcome to hurghada-trips Hurghada!",
+        #         subject="Welcome to topdivers Hurghada!",
         #         template_name="welcome_email.html",
         #         context={"full_name": new_user.full_name},
         #     )

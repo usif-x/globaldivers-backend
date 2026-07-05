@@ -8,9 +8,9 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     # Application Settings
-    APP_NAME: str = "hurghada-trips Hurghada website server"
+    APP_NAME: str = "topdivers Hurghada website server"
     APP_URL: str = "http://localhost:8000"
-    APP_DESCRIPTION: str = "hurghada-trips Hurghada website server"
+    APP_DESCRIPTION: str = "topdivers Hurghada website server"
     APP_VERSION: str = "1.0.0"
     ENVIRONMENT: Literal["development", "staging", "production"] = "development"
     DEBUG: bool = True
