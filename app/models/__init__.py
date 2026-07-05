@@ -1,5 +1,6 @@
 from app.core.database import Base
 
+from .chat import ChatMessage, ChatSession
 from .activity_availability import ActivityAvailability
 from .admin import Admin
 from .associations import coupon_user_usage, user_course_subscriptions
@@ -28,6 +29,8 @@ __all__ = [
     "user_course_subscriptions",
     "coupon_user_usage",
     # Models
+    "ChatSession",
+    "ChatMessage",
     "ActivityAvailability",
     "User",
     "Testimonial",

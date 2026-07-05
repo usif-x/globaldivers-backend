@@ -79,6 +79,15 @@ class Settings(BaseSettings):
         description="Base URL for AI API (e.g., https://api.deepseek.com or https://openrouter.ai/api/v1)",
     )
 
+    # Anthropic AI Chatbot
+    ANTHROPIC_API_KEY: str = Field(
+        default="", description="API key for Anthropic Claude"
+    )
+    ANTHROPIC_MODEL: str = Field(
+        default="claude-sonnet-4-20250514",
+        description="Anthropic model name (e.g. claude-sonnet-4-20250514)",
+    )
+
     # Frontend URL for booking links
     FRONTEND_URL: str = Field(
         default="https://your-frontend-url.com",
