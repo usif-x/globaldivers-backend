@@ -65,16 +65,6 @@ class TripResponse(BaseModel):
     class Config:
         from_attributes = True
 
-    @classmethod
-    def model_validate(cls, obj, **kwargs):
-        # trip.packages / trip.related_trips are ORM relationship objects —
-        # flatten to id lists before validation
-        if hasattr(obj, "packages"):
-            obj.package_ids = [p.id for p in obj.packages]
-        if hasattr(obj, "related_trips"):
-            obj.related_trip_ids = [t.id for t in obj.related_trips]
-        return super().model_validate(obj, **kwargs)
-
 
 class UpdateTrip(BaseModel):
     name: Optional[str] = None
