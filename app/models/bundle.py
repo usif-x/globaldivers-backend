@@ -37,6 +37,12 @@ class TripBundleOffer(Base):
     required_trips = relationship(
         "Trip", secondary=trip_bundle_requirements, back_populates="bundle_offers"
     )
+
+    # app/models/bundle.py, inside class TripBundleOffer
+    @property
+    def required_trip_ids(self) -> list[int]:
+        return [t.id for t in self.required_trips]
+
     # 0 (or null) = ALL required_trips must be booked together.
     # N>0 = ANY N of the required_trips are enough to trigger the offer.
     min_required_trips: Mapped[int] = mapped_column(Integer, nullable=False, default=0)

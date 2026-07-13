@@ -52,12 +52,6 @@ class TripBundleOfferResponse(BaseModel):
     class Config:
         from_attributes = True
 
-    @classmethod
-    def model_validate(cls, obj, **kwargs):
-        if hasattr(obj, "required_trips"):
-            obj.required_trip_ids = [t.id for t in obj.required_trips]
-        return super().model_validate(obj, **kwargs)
-
 
 class ApplicableOffersRequest(BaseModel):
     """Sent from checkout with the trip_ids in the cart."""
