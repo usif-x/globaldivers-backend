@@ -46,8 +46,8 @@ class TripResponse(BaseModel):
     child_price: float
     maxim_person: int
 
-    package_ids: List[int] = []  # CHANGED
-    related_trip_ids: List[int] = []  # NEW
+    package_ids: List[int] = []
+    related_trip_ids: List[int] = []
 
     has_discount: bool = False
     discount_requires_min_people: bool = False

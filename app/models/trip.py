@@ -47,6 +47,14 @@ class Trip(Base):
         "Package", secondary=trip_packages, back_populates="trips"
     )
 
+    @property
+    def package_ids(self) -> list[int]:
+        return [p.id for p in self.packages]
+
+    @property
+    def related_trip_ids(self) -> list[int]:
+        return [t.id for t in self.related_trips]
+
     included: Mapped[list[str]] = mapped_column(JSON, nullable=False)
     fees = relationship("TripFee", back_populates="trip", cascade="all, delete-orphan")
     transfer_fees = relationship(
