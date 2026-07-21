@@ -10,11 +10,6 @@ class Coordinates(BaseModel):
     latitude: float = 0.0
     longitude: float = 0.0
 
-    # add to DiveCenterBase (so Create/Update/Response all inherit it):
-    coordinates: Optional[Coordinates] = Field(
-        default_factory=lambda: Coordinates(latitude=0.0, longitude=0.0)
-    )
-
 
 class DayWorkingHours(BaseModel):
     start: str
@@ -32,6 +27,7 @@ class DiveCenterBase(BaseModel):
     hotel_name: Optional[str] = Field(None, max_length=255)
     phone: str = Field(..., max_length=30)
     email: EmailStr
+    coordinates: Optional[Coordinates] = Field(default_factory=Coordinates)
     working_hours: Optional[Dict[str, DayWorkingHours]] = Field(
         default_factory=lambda: {
             "monday": {"start": "09:00", "end": "17:00", "is_open": True},
@@ -57,6 +53,7 @@ class DiveCenterUpdate(BaseModel):
     hotel_name: Optional[str] = None
     phone: Optional[str] = None
     email: Optional[EmailStr] = None
+    coordinates: Optional[Coordinates] = None
     working_hours: Optional[Dict[str, DayWorkingHours]] = None
     # images/video are handled separately via file uploads in the route,
     # not through this schema — keeps update semantics (append/replace) explicit.
