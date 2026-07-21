@@ -1,7 +1,9 @@
 from datetime import datetime
 from typing import Dict, List, Optional
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, model_validator
+
+from app.utils.storage import get_public_url
 
 
 class DayWorkingHours(BaseModel):
@@ -40,14 +42,14 @@ class DiveCenterCreate(DiveCenterBase):
 class DiveCenterUpdate(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
-    images: Optional[List[str]] = None
     is_image_list: Optional[bool] = None
-    video: Optional[str] = None
     location: Optional[str] = None
     hotel_name: Optional[str] = None
     phone: Optional[str] = None
     email: Optional[EmailStr] = None
     working_hours: Optional[Dict[str, DayWorkingHours]] = None
+    # images/video are handled separately via file uploads in the route,
+    # not through this schema — keeps update semantics (append/replace) explicit.
 
 
 class DiveCenterResponse(DiveCenterBase):
@@ -57,3 +59,12 @@ class DiveCenterResponse(DiveCenterBase):
 
     class Config:
         from_attributes = True
+
+    @model_validator(mode="after")
+    def _resolve_media_urls(self):
+        # DB stores raw S3 keys; convert to usable public URLs on the way out.
+        if self.images:
+            self.images = [get_public_url(key) for key in self.images]
+        if self.video:
+            self.video = get_public_url(self.video)
+        return self

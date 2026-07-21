@@ -1,3 +1,4 @@
+import json
 from typing import List
 
 from fastapi import APIRouter, Depends, File, Form, UploadFile, status
@@ -33,15 +34,13 @@ async def create_dive_center(
     video_file: UploadFile = File(None),
     db: Session = Depends(get_db),
 ):
-    # Parse working_hours JSON if provided
-    import json
-
     wh = None
     if working_hours:
         try:
             wh = json.loads(working_hours)
         except Exception:
             wh = None
+
     data = DiveCenterCreate(
         name=name,
         description=description,
@@ -71,10 +70,49 @@ def get_dive_center(dive_center_id: int, db: Session = Depends(get_db)):
     response_model=DiveCenterResponse,
     dependencies=[Depends(get_current_admin)],
 )
-def update_dive_center(
-    dive_center_id: int, data: DiveCenterUpdate, db: Session = Depends(get_db)
+async def update_dive_center(
+    dive_center_id: int,
+    name: str = Form(None),
+    description: str = Form(None),
+    location: str = Form(None),
+    hotel_name: str = Form(None),
+    phone: str = Form(None),
+    email: str = Form(None),
+    working_hours: str = Form(None),
+    is_image_list: bool = Form(None),
+    replace_images: bool = Form(False),
+    image_files: list[UploadFile] = File(None),
+    video_file: UploadFile = File(None),
+    db: Session = Depends(get_db),
 ):
-    return DiveCenterService(db).update_dive_center(dive_center_id, data)
+    wh = None
+    if working_hours:
+        try:
+            wh = json.loads(working_hours)
+        except Exception:
+            wh = None
+
+    raw = {
+        "name": name,
+        "description": description,
+        "location": location,
+        "hotel_name": hotel_name,
+        "phone": phone,
+        "email": email,
+        "working_hours": wh,
+        "is_image_list": is_image_list,
+    }
+    # only keep fields actually sent, so we don't null out untouched columns
+    provided = {k: v for k, v in raw.items() if v is not None}
+    data = DiveCenterUpdate(**provided)
+
+    return await DiveCenterService(db).update_dive_center(
+        dive_center_id,
+        data,
+        image_files=image_files,
+        video_file=video_file,
+        replace_images=replace_images,
+    )
 
 
 @dive_center_routes.delete(
@@ -84,4 +122,3 @@ def update_dive_center(
 )
 def delete_dive_center(dive_center_id: int, db: Session = Depends(get_db)):
     DiveCenterService(db).delete_dive_center(dive_center_id)
-    return {"detail": "Deleted successfully"}
