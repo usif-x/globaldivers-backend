@@ -30,8 +30,9 @@ async def create_dive_center(
     phone: str = Form(...),
     email: str = Form(...),
     working_hours: str = Form(None),
-    image_files: list[UploadFile] = File(None),
-    video_file: UploadFile = File(None),
+    coordinates: str = Form(None),
+    images: list[UploadFile] = File(None),  # was image_files
+    video: UploadFile = File(None),  # was video_file
     db: Session = Depends(get_db),
 ):
     wh = None
@@ -41,6 +42,13 @@ async def create_dive_center(
         except Exception:
             wh = None
 
+    coords = None
+    if coordinates:
+        try:
+            coords = json.loads(coordinates)
+        except Exception:
+            coords = None
+
     data = DiveCenterCreate(
         name=name,
         description=description,
@@ -49,9 +57,10 @@ async def create_dive_center(
         phone=phone,
         email=email,
         working_hours=wh,
+        coordinates=coords,
     )
     return await DiveCenterService(db).create_dive_center(
-        data, image_files=image_files, video_file=video_file
+        data, image_files=images, video_file=video
     )
 
 
@@ -81,8 +90,8 @@ async def update_dive_center(
     working_hours: str = Form(None),
     is_image_list: bool = Form(None),
     replace_images: bool = Form(False),
-    image_files: list[UploadFile] = File(None),
-    video_file: UploadFile = File(None),
+    images: list[UploadFile] = File(None),  # was image_files
+    video: UploadFile = File(None),  # confirm this is the wire name too
     db: Session = Depends(get_db),
 ):
     wh = None
@@ -109,8 +118,8 @@ async def update_dive_center(
     return await DiveCenterService(db).update_dive_center(
         dive_center_id,
         data,
-        image_files=image_files,
-        video_file=video_file,
+        image_files=images,  # map to whatever service expects
+        video_file=video,
         replace_images=replace_images,
     )
 
