@@ -6,6 +6,16 @@ from pydantic import BaseModel, EmailStr, Field, model_validator
 from app.utils.storage import get_public_url
 
 
+class Coordinates(BaseModel):
+    latitude: float = 0.0
+    longitude: float = 0.0
+
+    # add to DiveCenterBase (so Create/Update/Response all inherit it):
+    coordinates: Optional[Coordinates] = Field(
+        default_factory=lambda: Coordinates(latitude=0.0, longitude=0.0)
+    )
+
+
 class DayWorkingHours(BaseModel):
     start: str
     end: str
