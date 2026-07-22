@@ -1,3 +1,5 @@
+from experience import experience_routes
+
 from .activity_availability import router as activity_availability_routes
 from .admin import admin_routes
 from .analytics import analytics_routes
@@ -48,7 +50,5 @@ routes = [
     chat_routes,
     chatbot_routes,
     bundle_routes,
+    experience_routes,
 ]
-
-
-# f
