@@ -1,5 +1,3 @@
-from experience import experience_routes
-
 from .activity_availability import router as activity_availability_routes
 from .admin import admin_routes
 from .analytics import analytics_routes
@@ -13,6 +11,7 @@ from .coupon import coupon_routes
 from .course import course_routes
 from .dive_center import dive_center_routes
 from .divesites import divesites_routes
+from .experience import experience_routes
 from .gallery import gallery_routes
 from .invoice import router as invoice_routes
 from .order import router as order_routes
